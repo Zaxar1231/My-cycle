@@ -12,11 +12,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.zaxar1231.mycycle.ui.HomeScreen
-import io.github.zaxar1231.mycycle.ui.theme.MyCycleTheme
-import io.github.zaxar1231.mycycle.update.UpdateInstaller
-import io.github.zaxar1231.mycycle.update.UpdateViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import io.github.zaxar1231.mycycle.core.ui.theme.TwilightTheme
+import io.github.zaxar1231.mycycle.core.update.UpdateInstaller
+import io.github.zaxar1231.mycycle.core.update.UpdateViewModel
+import io.github.zaxar1231.mycycle.core.update.UpdateWorker
+import io.github.zaxar1231.mycycle.core.update.ui.UpdateDialog
+import io.github.zaxar1231.mycycle.core.update.ui.UpdatesCard
+import io.github.zaxar1231.mycycle.navigation.TwilightAppRoot
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val updates: UpdateViewModel by viewModels()
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -25,15 +30,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
-        if (intent.getBooleanExtra(EXTRA_CHECK_UPDATE, false)) updates.check() else updates.autoCheckOnce()
+        if (intent.getBooleanExtra(UpdateWorker.EXTRA_CHECK_UPDATE, false)) updates.check() else updates.autoCheckOnce()
 
         setContent {
-            MyCycleTheme {
-                HomeScreen(
-                    state = updates.state.collectAsStateWithLifecycle().value,
-                    autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value,
-                    onCheck = { updates.check() },
-                    onAutoCheckChange = updates::setAutoCheck,
+            TwilightTheme {
+                val updateState = updates.state.collectAsStateWithLifecycle().value
+                val autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value
+                TwilightAppRoot(
+                    updatesSection = {
+                        UpdatesCard(
+                            state = updateState,
+                            currentVersion = updates.currentVersion,
+                            autoCheck = autoCheck,
+                            onCheck = { updates.check() },
+                            onAutoCheckChange = updates::setAutoCheck,
+                        )
+                    },
+                )
+                UpdateDialog(
+                    state = updateState,
                     onDownload = updates::download,
                     onOpenInstallSettings = { startActivity(UpdateInstaller.installPermissionIntent(this)) },
                     onDismiss = updates::dismiss,
@@ -44,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.getBooleanExtra(EXTRA_CHECK_UPDATE, false)) updates.check()
+        if (intent.getBooleanExtra(UpdateWorker.EXTRA_CHECK_UPDATE, false)) updates.check()
     }
 
     override fun onResume() {
@@ -59,9 +74,5 @@ class MainActivity : ComponentActivity() {
         ) {
             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
-    }
-
-    companion object {
-        const val EXTRA_CHECK_UPDATE = "check_update"
     }
 }

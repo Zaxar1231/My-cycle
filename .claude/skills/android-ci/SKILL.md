@@ -7,7 +7,7 @@ description: Сборка и CI Android-проекта «Мой цикл» — �
 
 ## Локально в облачной сессии сборки нет
 
-Android SDK не установлен, `dl.google.com` и `maven.google.com` заблокированы. Единственная настоящая проверка — CI на PR (`.github/workflows/ci.yml`): `testDebugUnitTest lintDebug assembleDebug assembleRelease`. Release собирается без подписи, но с R8.
+Android SDK не установлен, `dl.google.com` и `maven.google.com` заблокированы. Единственная настоящая проверка — CI на PR (`.github/workflows/ci.yml`): `test lintDebug assembleDebug assembleRelease`. Release собирается без подписи, но с R8.
 
 Порядок работы: push → PR → дождаться CI. Статус без авторизации можно смотреть через публичный API:
 

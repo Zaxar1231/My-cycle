@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_placeholder">Today is %1$s. The cycle calendar with phases and predictions arrives in stage 3.</string>
+</resources>

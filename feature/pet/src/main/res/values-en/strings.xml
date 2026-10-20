@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pet_title">Pet</string>
+    <string name="pet_placeholder">Your pet mascot will live here (stage 10).</string>
+</resources>

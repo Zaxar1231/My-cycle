@@ -3,6 +3,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 // Version: CI passes -PappVersionName=X.Y.Z, local builds use version.properties.
@@ -23,15 +25,14 @@ val keystorePath: String? = System.getenv("SIGNING_KEYSTORE_PATH")
 
 android {
     namespace = "io.github.zaxar1231.mycycle"
-    compileSdk = 37
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "io.github.zaxar1231.mycycle"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = versionCodeOf(appVersionName)
         versionName = appVersionName
-        buildConfigField("String", "GITHUB_REPO", "\"Zaxar1231/Twilight-cycle\"")
     }
 
     signingConfigs {
@@ -61,8 +62,9 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
+
+    testOptions.unitTests.all { it.useJUnitPlatform() }
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -76,18 +78,21 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:update"))
+    implementation(project(":feature:calendar"))
+    implementation(project(":feature:stats"))
+    implementation(project(":feature:daylog"))
+    implementation(project(":feature:pet"))
+    implementation(project(":feature:settings"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    testImplementation(libs.junit)
 }

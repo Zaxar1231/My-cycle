@@ -14,5 +14,14 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MyCycle"
+rootProject.name = "TwilightCycle"
+
 include(":app")
+include(":core:domain")
+include(":core:ui")
+include(":core:update")
+include(":feature:calendar")
+include(":feature:stats")
+include(":feature:daylog")
+include(":feature:pet")
+include(":feature:settings")

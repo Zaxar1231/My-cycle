@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daylog_title">Log today</string>
+    <string name="daylog_placeholder">Here you will log your period, mood, symptoms and more (stage 4).</string>
+    <string name="daylog_back">Back</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pet_title">Питомец</string>
+    <string name="pet_placeholder">Здесь будет ваш питомец-маскот (этап 10).</string>
+</resources>
