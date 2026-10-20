@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calendar_title">Календарь</string>
+    <string name="calendar_placeholder">Сегодня %1$s. Календарь цикла с фазами и прогнозами появится на этапе 3.</string>
+</resources>

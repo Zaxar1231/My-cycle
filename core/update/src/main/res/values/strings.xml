@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="version_label">Версия %1$s</string>
+    <string name="updates_title">Обновления</string>
+    <string name="update_check">Проверить обновления</string>
+    <string name="update_checking">Проверяем…</string>
+    <string name="update_up_to_date">У вас последняя версия</string>
+    <string name="update_no_releases">Релизов пока нет</string>
+    <string name="update_error">Не удалось проверить обновления: %1$s</string>
+    <string name="update_auto">Проверять автоматически</string>
+    <string name="update_auto_hint">При запуске и в фоне раз в 12 часов</string>
+    <string name="update_available_title">Доступна версия %1$s</string>
+    <string name="update_install">Обновить</string>
+    <string name="update_later">Позже</string>
+    <string name="update_downloading">Загрузка… %1$d%%</string>
+    <string name="update_download_failed">Не удалось загрузить обновление: %1$s</string>
+    <string name="update_permission">Разрешите установку из этого источника, чтобы обновить приложение</string>
+    <string name="update_open_settings">Открыть настройки</string>
+    <string name="update_release_page">Страница релиза</string>
+    <string name="update_no_apk">В релизе нет APK-файла</string>
+    <string name="notification_channel_updates">Обновления приложения</string>
+    <string name="notification_update_text">Нажмите, чтобы установить</string>
+</resources>

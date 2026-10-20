@@ -27,7 +27,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Build (debug + unsigned release, so R8 problems show up before merge)
-        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleRelease
+        run: ./gradlew --no-daemon test lintDebug assembleDebug assembleRelease
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v7

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daylog_title">Запись дня</string>
+    <string name="daylog_placeholder">Здесь можно будет отметить месячные, настроение, симптомы и другое (этап 4).</string>
+    <string name="daylog_back">Назад</string>
+</resources>
