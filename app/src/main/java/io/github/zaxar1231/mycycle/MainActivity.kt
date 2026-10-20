@@ -10,9 +10,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
+import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
 import io.github.zaxar1231.mycycle.core.ui.theme.TwilightTheme
 import io.github.zaxar1231.mycycle.core.update.UpdateInstaller
 import io.github.zaxar1231.mycycle.core.update.UpdateViewModel
@@ -24,6 +29,7 @@ import io.github.zaxar1231.mycycle.navigation.TwilightAppRoot
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val updates: UpdateViewModel by viewModels()
+    private val main: MainViewModel by viewModels()
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,26 +41,33 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            TwilightTheme {
-                val updateState = updates.state.collectAsStateWithLifecycle().value
-                val autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value
-                TwilightAppRoot(
-                    updatesSection = {
-                        UpdatesCard(
-                            state = updateState,
-                            currentVersion = updates.currentVersion,
-                            autoCheck = autoCheck,
-                            onCheck = { updates.check() },
-                            onAutoCheckChange = updates::setAutoCheck,
+            val settings = main.settings.collectAsStateWithLifecycle().value
+            TwilightTheme(settings?.theme ?: ThemeSettings()) {
+                Surface(Modifier.fillMaxSize()) {
+                    if (settings != null) {
+                        val updateState = updates.state.collectAsStateWithLifecycle().value
+                        val autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value
+                        TwilightAppRoot(
+                            startWithOnboarding = !settings.onboardingCompleted,
+                            appearanceSection = { ThemePicker(settings.theme, main::setTheme) },
+                            updatesSection = {
+                                UpdatesCard(
+                                    state = updateState,
+                                    currentVersion = updates.currentVersion,
+                                    autoCheck = autoCheck,
+                                    onCheck = { updates.check() },
+                                    onAutoCheckChange = updates::setAutoCheck,
+                                )
+                            },
                         )
-                    },
-                )
-                UpdateDialog(
-                    state = updateState,
-                    onDownload = updates::download,
-                    onOpenInstallSettings = { startActivity(UpdateInstaller.installPermissionIntent(this)) },
-                    onDismiss = updates::dismiss,
-                )
+                        UpdateDialog(
+                            state = updateState,
+                            onDownload = updates::download,
+                            onOpenInstallSettings = { startActivity(UpdateInstaller.installPermissionIntent(this)) },
+                            onDismiss = updates::dismiss,
+                        )
+                    }
+                }
             }
         }
     }

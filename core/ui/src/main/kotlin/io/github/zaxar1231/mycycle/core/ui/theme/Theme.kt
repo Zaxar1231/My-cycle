@@ -9,6 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 
 /**
  * App theme. Material You (colors from the wallpaper) is the default on Android 12+,
@@ -31,6 +34,17 @@ fun TwilightTheme(
     CompositionLocalProvider(LocalCycleColors provides colorScheme.toCycleColors()) {
         MaterialTheme(colorScheme = colorScheme, content = content)
     }
+}
+
+/** Applies the user's saved theme choice. */
+@Composable
+fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
+    val dark = when (settings.mode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+    TwilightTheme(darkTheme = dark, dynamicColor = settings.style == ThemeStyle.MATERIAL_YOU, content = content)
 }
 
 object TwilightThemeExtras {

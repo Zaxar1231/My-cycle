@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
-    <string name="settings_placeholder">Themes, PIN lock, notifications and partner mode arrive in later stages.</string>
+    <string name="settings_placeholder">PIN lock, notifications, Liquid Glass styles and partner mode arrive in later stages.</string>
+    <string name="settings_appearance">Appearance</string>
 </resources>

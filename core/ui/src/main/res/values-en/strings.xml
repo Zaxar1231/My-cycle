@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_style">Style</string>
+    <string name="theme_style_material_you">Material You</string>
+    <string name="theme_style_twilight">Twilight</string>
+    <string name="theme_material_you_unsupported">Wallpaper colors need Android 12 or newer, this device will use the Twilight palette.</string>
+    <string name="theme_mode">Mode</string>
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+</resources>

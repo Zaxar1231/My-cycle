@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Настройки</string>
-    <string name="settings_placeholder">Темы, PIN-код, уведомления и партнёрский режим появятся на следующих этапах.</string>
+    <string name="settings_placeholder">PIN-код, уведомления, стили Liquid Glass и партнёрский режим появятся на следующих этапах.</string>
+    <string name="settings_appearance">Оформление</string>
 </resources>

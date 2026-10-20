@@ -1,0 +1,63 @@
+package io.github.zaxar1231.mycycle.core.data.db
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
+
+@Dao
+interface CycleDao {
+    @Query("SELECT * FROM cycles ORDER BY start_date")
+    fun observeAll(): Flow<List<CycleEntity>>
+
+    @Upsert
+    suspend fun upsert(cycle: CycleEntity): Long
+
+    @Delete
+    suspend fun delete(cycle: CycleEntity)
+}
+
+@Dao
+interface DayLogDao {
+    @Query("SELECT * FROM day_logs WHERE date = :date")
+    fun observe(date: LocalDate): Flow<DayLogEntity?>
+
+    @Query("SELECT * FROM day_logs WHERE date BETWEEN :from AND :to ORDER BY date")
+    fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLogEntity>>
+
+    @Upsert
+    suspend fun upsert(log: DayLogEntity)
+
+    @Query("DELETE FROM day_logs WHERE date = :date")
+    suspend fun delete(date: LocalDate)
+}
+
+@Dao
+interface MedicationDao {
+    @Query("SELECT * FROM medications ORDER BY name")
+    fun observeAll(): Flow<List<MedicationEntity>>
+
+    @Upsert
+    suspend fun upsert(medication: MedicationEntity): Long
+
+    @Delete
+    suspend fun delete(medication: MedicationEntity)
+}
+
+@Dao
+interface PetDao {
+    @Query("SELECT * FROM pet WHERE id = ${PetEntity.SINGLE_PET_ID}")
+    fun observe(): Flow<PetEntity?>
+
+    /** ABORT: a second pet can never replace the first one. */
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(pet: PetEntity)
+
+    @Update
+    suspend fun update(pet: PetEntity)
+}
