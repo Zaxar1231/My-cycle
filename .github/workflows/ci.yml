@@ -43,3 +43,28 @@ jobs:
           name: lint-report
           path: app/build/reports/lint-results-debug.html
           if-no-files-found: ignore
+
+  # Dependabot PRs are merged automatically once the build above is green.
+  # A merge made with GITHUB_TOKEN does not trigger push workflows, so the
+  # release is started explicitly afterwards.
+  dependabot-automerge:
+    name: Auto-merge Dependabot PR
+    needs: build
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Merge
+        run: gh pr merge "$PR_URL" --merge --match-head-commit "$HEAD_SHA"
+
+      - name: Start release
+        run: gh workflow run release.yml --ref main -f bump=patch
