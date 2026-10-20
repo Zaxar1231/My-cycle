@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A drop inside the 66dp safe zone of a 108dp adaptive icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/brand"
+        android:pathData="M54,28C62,38 70,47.5 70,57A16,16 0,0 1,38 57C38,47.5 46,38 54,28Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillAlpha="0.55"
+        android:pathData="M46,56A8,8 0,0 0,52 64L52,67A11,11 0,0 1,43 56Z" />
+</vector>

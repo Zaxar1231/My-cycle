@@ -1,0 +1,27 @@
+name: Ошибка
+description: Сообщить об ошибке в приложении
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия приложения
+      description: Указана в приложении в блоке «Обновления»
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Устройство и версия Android
+      placeholder: Pixel 7, Android 14
+  - type: textarea
+    id: steps
+    attributes:
+      label: Что произошло и как повторить
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось
