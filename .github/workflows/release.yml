@@ -95,7 +95,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         if: steps.version.outputs.skip != 'true'
 
       - name: Prepare signing key
