@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -15,8 +16,21 @@ interface CycleDao {
     @Query("SELECT * FROM cycles ORDER BY start_date")
     fun observeAll(): Flow<List<CycleEntity>>
 
-    @Upsert
-    suspend fun upsert(cycle: CycleEntity): Long
+    @Query("SELECT id FROM cycles WHERE start_date = :startDate")
+    suspend fun idForStartDate(startDate: LocalDate): Long?
+
+    @Insert
+    suspend fun insert(cycle: CycleEntity): Long
+
+    @Update
+    suspend fun update(cycle: CycleEntity)
+
+    /** A cycle is identified by its start date: saving the same start again updates that cycle. */
+    @Transaction
+    suspend fun save(cycle: CycleEntity): Long {
+        val id = if (cycle.id != 0L) cycle.id else idForStartDate(cycle.startDate)
+        return if (id == null) insert(cycle) else id.also { update(cycle.copy(id = it)) }
+    }
 
     @Delete
     suspend fun delete(cycle: CycleEntity)

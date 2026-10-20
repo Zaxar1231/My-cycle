@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.feature.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,7 @@ fun NavGraphBuilder.onboardingScreen(onFinished: () -> Unit) {
 fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.finished) { if (state.finished) onFinished() }
+    BackHandler(enabled = state.stepIndex > 0, onBack = viewModel::back)
 
     Column(
         Modifier
@@ -244,8 +247,9 @@ private fun LengthPicker(
     onValue: (Int) -> Unit,
     onUnknown: (Boolean) -> Unit,
 ) {
+    val label = stringResource(title)
     Text(
-        stringResource(title) + if (unknown) "" else ": " + stringResource(R.string.onb_days, value),
+        if (unknown) label else stringResource(R.string.onb_length_value, label, pluralStringResource(R.plurals.onb_days, value, value)),
         style = MaterialTheme.typography.titleSmall,
     )
     Slider(

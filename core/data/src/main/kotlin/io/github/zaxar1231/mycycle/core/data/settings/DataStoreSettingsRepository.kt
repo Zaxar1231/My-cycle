@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.Lazy
 import io.github.zaxar1231.mycycle.core.data.db.Converters.Companion.enumOrNull
@@ -17,12 +18,14 @@ import io.github.zaxar1231.mycycle.core.domain.model.UserRole
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,7 +43,8 @@ class DataStoreSettingsRepository @Inject constructor(
     private val writeLock = Mutex()
 
     override val settings: Flow<UserSettings> = flow {
-        emitAll(combine(store.data, profileDao.get().observe()) { prefs, profile -> merge(prefs, profile) })
+        val prefs = store.data.catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        emitAll(combine(prefs, profileDao.get().observe()) { p, profile -> merge(p, profile) })
     }
 
     override suspend fun update(transform: (UserSettings) -> UserSettings) = writeLock.withLock {

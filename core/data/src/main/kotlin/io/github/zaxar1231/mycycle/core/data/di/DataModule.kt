@@ -2,8 +2,10 @@ package io.github.zaxar1231.mycycle.core.data.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import dagger.Binds
@@ -60,7 +62,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideSettingsStore(@ApplicationContext context: Context): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create { context.preferencesDataStoreFile(SETTINGS_FILE) }
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+        ) { context.preferencesDataStoreFile(SETTINGS_FILE) }
 }
 
 @Module

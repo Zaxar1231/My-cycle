@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 class RoomCycleRepository @Inject constructor(private val dao: CycleDao) : CycleRepository {
     override fun observeCycles(): Flow<List<Cycle>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
-    override suspend fun upsert(cycle: Cycle): Long = dao.upsert(cycle.toEntity())
+    override suspend fun upsert(cycle: Cycle): Long = dao.save(cycle.toEntity())
     override suspend fun delete(cycle: Cycle) = dao.delete(cycle.toEntity())
 }
 

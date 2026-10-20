@@ -25,7 +25,13 @@
     <string name="onb_last_period_unknown">Можно пропустить и отметить начало месячных позже.</string>
     <string name="onb_cycle_length">Длина цикла</string>
     <string name="onb_period_length">Длина месячных</string>
-    <string name="onb_days">%1$d дн.</string>
+    <string name="onb_length_value">%1$s: %2$s</string>
+    <plurals name="onb_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
     <string name="onb_dont_know">Не знаю</string>
     <string name="onb_pet_title">Выберите питомца</string>
     <string name="onb_pet_text">Он будет жить на главном экране, реагировать на ваше самочувствие и расти за ваши записи.</string>

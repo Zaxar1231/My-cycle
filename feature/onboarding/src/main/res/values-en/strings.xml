@@ -25,7 +25,11 @@
     <string name="onb_last_period_unknown">You can skip this and mark the start of your period later.</string>
     <string name="onb_cycle_length">Cycle length</string>
     <string name="onb_period_length">Period length</string>
-    <string name="onb_days">%1$d d</string>
+    <string name="onb_length_value">%1$s: %2$s</string>
+    <plurals name="onb_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
     <string name="onb_dont_know">I don\'t know</string>
     <string name="onb_pet_title">Choose your pet</string>
     <string name="onb_pet_text">It lives on the home screen, reacts to how you feel and grows as you log.</string>

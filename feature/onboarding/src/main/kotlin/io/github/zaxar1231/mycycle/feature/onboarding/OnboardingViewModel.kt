@@ -9,9 +9,11 @@ import io.github.zaxar1231.mycycle.core.domain.model.UserRole
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.usecase.CompleteOnboardingUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.OnboardingInput
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -24,6 +26,14 @@ class OnboardingViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
+
+    init {
+        // The theme is saved as soon as it is picked; start from it so finishing never overwrites it.
+        viewModelScope.launch {
+            val saved = settings.settings.first().theme
+            _state.update { it.copy(theme = saved) }
+        }
+    }
 
     fun next() {
         val s = _state.value
@@ -74,9 +84,14 @@ class OnboardingViewModel @Inject constructor(
                 pet = s.pet,
                 theme = s.theme,
             )
-            runCatching { completeOnboarding(input) }
-                .onSuccess { _state.update { it.copy(saving = false, finished = true) } }
-                .onFailure { _state.update { it.copy(saving = false, error = true) } }
+            try {
+                completeOnboarding(input)
+                _state.update { it.copy(saving = false, finished = true) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(saving = false, error = true) }
+            }
         }
     }
 }

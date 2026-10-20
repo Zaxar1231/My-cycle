@@ -81,10 +81,27 @@ class CompleteOnboardingUseCaseTest {
         assertTrue(!settings.current.value.onboardingCompleted)
     }
 
+    @Test
+    fun `retry after a failed save completes and keeps the first pet`() = runTest {
+        val input = OnboardingInput(role = UserRole.TRACKER, lastPeriodStart = today, pet = PetType.CAT)
+        settings.failNextUpdate = true
+        assertTrue(runCatching { useCase(input) }.isFailure)
+
+        useCase(input.copy(pet = PetType.PENGUIN))
+
+        assertTrue(settings.current.value.onboardingCompleted)
+        assertEquals(PetType.CAT, pets.pet?.type)
+    }
+
     private class FakeSettings : SettingsRepository {
         val current = MutableStateFlow(UserSettings())
+        var failNextUpdate = false
         override val settings: Flow<UserSettings> = current
         override suspend fun update(transform: (UserSettings) -> UserSettings) {
+            if (failNextUpdate) {
+                failNextUpdate = false
+                throw java.io.IOException("disk full")
+            }
             current.value = transform(current.value)
         }
     }
@@ -105,8 +122,7 @@ class CompleteOnboardingUseCaseTest {
         var pet: Pet? = null
         override fun observePet(): Flow<Pet?> = MutableStateFlow(pet)
         override suspend fun adopt(pet: Pet) {
-            check(this.pet == null)
-            this.pet = pet
+            if (this.pet == null) this.pet = pet
         }
         override suspend fun update(pet: Pet) {
             this.pet = pet

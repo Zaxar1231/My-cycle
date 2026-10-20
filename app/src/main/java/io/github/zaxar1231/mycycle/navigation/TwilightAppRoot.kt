@@ -20,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -99,7 +98,8 @@ private fun RowScope.TabItem(tab: TopLevelDestination, destination: NavDestinati
         selected = destination.isOn(tab),
         onClick = {
             navController.navigate(tab.route) {
-                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                // Not graph.findStartDestination(): after onboarding the start route is no longer on the stack.
+                popUpTo(CalendarRoute) { saveState = true }
                 launchSingleTop = true
                 restoreState = true
             }

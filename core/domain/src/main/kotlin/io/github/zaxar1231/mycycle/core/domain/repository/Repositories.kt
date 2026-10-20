@@ -11,6 +11,7 @@ import java.time.LocalDate
 
 interface CycleRepository {
     fun observeCycles(): Flow<List<Cycle>>
+    /** Inserts or updates the cycle with the same start date and returns its id. */
     suspend fun upsert(cycle: Cycle): Long
     suspend fun delete(cycle: Cycle)
 }
