@@ -31,7 +31,7 @@ android {
         targetSdk = 35
         versionCode = versionCodeOf(appVersionName)
         versionName = appVersionName
-        buildConfigField("String", "GITHUB_REPO", "\"Zaxar1231/My-cycle\"")
+        buildConfigField("String", "GITHUB_REPO", "\"Zaxar1231/Twilight-cycle\"")
     }
 
     signingConfigs {

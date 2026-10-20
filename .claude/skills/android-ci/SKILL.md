@@ -12,7 +12,7 @@ Android SDK не установлен, `dl.google.com` и `maven.google.com` з�
 Порядок работы: push → PR → дождаться CI. Статус без авторизации можно смотреть через публичный API:
 
 ```bash
-curl -sS "https://api.github.com/repos/Zaxar1231/My-cycle/actions/workflows/ci.yml/runs?branch=<ветка>&per_page=1"
+curl -sS "https://api.github.com/repos/Zaxar1231/Twilight-cycle/actions/workflows/ci.yml/runs?branch=<ветка>&per_page=1"
 ```
 
 Логи упавшей джобы: инструмент `mcp__github__get_job_logs` (`failed_only: true`, `return_content: true`). Ошибка Gradle обычно находится перед строкой `BUILD FAILED`. Хвост лога — это служебный вывод кеша, поэтому `tail_lines` бери с запасом, около 300.

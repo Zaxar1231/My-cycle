@@ -5,22 +5,22 @@
 Нативное Android-приложение для отслеживания менструального цикла.
 **Без рекламы, без трекеров, без Google Play Services** — данные остаются только на устройстве.
 
-[![Последний релиз](https://img.shields.io/github/v/release/Zaxar1231/My-cycle?label=версия&color=c2416b)](https://github.com/Zaxar1231/My-cycle/releases/latest)
-[![Скачивания](https://img.shields.io/github/downloads/Zaxar1231/My-cycle/total?label=скачивания)](https://github.com/Zaxar1231/My-cycle/releases)
-[![CI](https://github.com/Zaxar1231/My-cycle/actions/workflows/ci.yml/badge.svg)](https://github.com/Zaxar1231/My-cycle/actions/workflows/ci.yml)
-[![Release](https://github.com/Zaxar1231/My-cycle/actions/workflows/release.yml/badge.svg)](https://github.com/Zaxar1231/My-cycle/actions/workflows/release.yml)
+[![Последний релиз](https://img.shields.io/github/v/release/Zaxar1231/Twilight-cycle?label=версия&color=c2416b)](https://github.com/Zaxar1231/Twilight-cycle/releases/latest)
+[![Скачивания](https://img.shields.io/github/downloads/Zaxar1231/Twilight-cycle/total?label=скачивания)](https://github.com/Zaxar1231/Twilight-cycle/releases)
+[![CI](https://github.com/Zaxar1231/Twilight-cycle/actions/workflows/ci.yml/badge.svg)](https://github.com/Zaxar1231/Twilight-cycle/actions/workflows/ci.yml)
+[![Release](https://github.com/Zaxar1231/Twilight-cycle/actions/workflows/release.yml/badge.svg)](https://github.com/Zaxar1231/Twilight-cycle/actions/workflows/release.yml)
 ![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3ddc84?logo=android&logoColor=white)
-[![Лицензия MIT](https://img.shields.io/github/license/Zaxar1231/My-cycle?label=лицензия)](LICENSE)
+[![Лицензия MIT](https://img.shields.io/github/license/Zaxar1231/Twilight-cycle?label=лицензия)](LICENSE)
 
-### [Скачать APK (последняя версия)](https://github.com/Zaxar1231/My-cycle/releases/latest/download/my-cycle.apk)
+### [Скачать APK (последняя версия)](https://github.com/Zaxar1231/Twilight-cycle/releases/latest/download/my-cycle.apk)
 
-[Все версии](https://github.com/Zaxar1231/My-cycle/releases) · [Что нового](https://github.com/Zaxar1231/My-cycle/releases/latest) · [Сообщить об ошибке](https://github.com/Zaxar1231/My-cycle/issues/new/choose)
+[Все версии](https://github.com/Zaxar1231/Twilight-cycle/releases) · [Что нового](https://github.com/Zaxar1231/Twilight-cycle/releases/latest) · [Сообщить об ошибке](https://github.com/Zaxar1231/Twilight-cycle/issues/new/choose)
 
 </div>
 
 ## Установка
 
-1. Скачайте [`my-cycle.apk`](https://github.com/Zaxar1231/My-cycle/releases/latest/download/my-cycle.apk) на телефон.
+1. Скачайте [`my-cycle.apk`](https://github.com/Zaxar1231/Twilight-cycle/releases/latest/download/my-cycle.apk) на телефон.
 2. Откройте файл и разрешите установку из этого источника, если Android попросит.
 3. Дальше приложение обновляется само — повторно скачивать APK не нужно.
 
@@ -28,7 +28,7 @@
 
 ## Обновления
 
-Приложение ищет новые версии в [GitHub Releases](https://github.com/Zaxar1231/My-cycle/releases):
+Приложение ищет новые версии в [GitHub Releases](https://github.com/Zaxar1231/Twilight-cycle/releases):
 
 - **автоматически** — при запуске и в фоне раз в 12 часов (WorkManager), с уведомлением о новой версии;
 - **по кнопке** «Проверить обновления» на главном экране.
