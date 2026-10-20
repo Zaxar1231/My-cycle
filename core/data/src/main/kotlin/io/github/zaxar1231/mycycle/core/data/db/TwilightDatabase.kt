@@ -16,6 +16,7 @@ import androidx.room.TypeConverters
         PetEntity::class,
         AffirmationEntity::class,
         PartnerLinkEntity::class,
+        ProfileEntity::class,
     ],
     version = TwilightDatabase.VERSION,
     exportSchema = true,
@@ -26,6 +27,7 @@ abstract class TwilightDatabase : RoomDatabase() {
     abstract fun dayLogDao(): DayLogDao
     abstract fun medicationDao(): MedicationDao
     abstract fun petDao(): PetDao
+    abstract fun profileDao(): ProfileDao
 
     companion object {
         const val VERSION = 1

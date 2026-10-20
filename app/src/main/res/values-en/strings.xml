@@ -5,4 +5,11 @@
     <string name="nav_pet">Pet</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_add_log">Log today</string>
+    <string name="data_lost_title">Your data cannot be opened</string>
+    <string name="data_lost_text">Entries on this device are encrypted and their key is no longer available. This can happen after the secure storage was reset or files were moved to another phone. Nobody, including us, can read the old entries.</string>
+    <string name="data_lost_start_over">Start over</string>
+    <string name="data_lost_confirm_title">Delete unreadable data?</string>
+    <string name="data_lost_confirm_text">Old entries and your pet will be deleted and onboarding starts again. This cannot be undone.</string>
+    <string name="data_lost_confirm_yes">Delete and start over</string>
+    <string name="data_lost_confirm_no">Cancel</string>
 </resources>

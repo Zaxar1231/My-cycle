@@ -54,10 +54,19 @@ interface PetDao {
     @Query("SELECT * FROM pet WHERE id = ${PetEntity.SINGLE_PET_ID}")
     fun observe(): Flow<PetEntity?>
 
-    /** ABORT: a second pet can never replace the first one. */
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    /** IGNORE: a second pet never replaces the first one, and retrying onboarding is harmless. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(pet: PetEntity)
 
     @Update
     suspend fun update(pet: PetEntity)
+}
+
+@Dao
+interface ProfileDao {
+    @Query("SELECT * FROM profile WHERE id = ${ProfileEntity.SINGLE_PROFILE_ID}")
+    fun observe(): Flow<ProfileEntity?>
+
+    @Upsert
+    suspend fun upsert(profile: ProfileEntity)
 }

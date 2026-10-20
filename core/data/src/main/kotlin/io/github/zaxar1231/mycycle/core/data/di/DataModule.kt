@@ -19,8 +19,10 @@ import io.github.zaxar1231.mycycle.core.data.repository.RoomDayLogRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomMedicationRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomPetRepository
 import io.github.zaxar1231.mycycle.core.data.security.DatabaseKeyProvider
+import io.github.zaxar1231.mycycle.core.data.security.EncryptedDataAccess
 import io.github.zaxar1231.mycycle.core.data.settings.DataStoreSettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.DataAccess
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
@@ -36,9 +38,9 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): TwilightDatabase {
+    fun provideDatabase(@ApplicationContext context: Context, keys: DatabaseKeyProvider): TwilightDatabase {
         System.loadLibrary(SQLCIPHER_LIBRARY)
-        val factory = SupportOpenHelperFactory(DatabaseKeyProvider(context).passphrase())
+        val factory = SupportOpenHelperFactory(keys.passphrase())
         return Room.databaseBuilder(context, TwilightDatabase::class.java, TwilightDatabase.NAME)
             .openHelperFactory(factory)
             .addMigrations(*Migrations.ALL)
@@ -52,6 +54,8 @@ object DatabaseModule {
     @Provides fun medicationDao(db: TwilightDatabase) = db.medicationDao()
 
     @Provides fun petDao(db: TwilightDatabase) = db.petDao()
+
+    @Provides fun profileDao(db: TwilightDatabase) = db.profileDao()
 
     @Provides
     @Singleton
@@ -70,5 +74,7 @@ interface RepositoryModule {
 
     @Binds fun pets(impl: RoomPetRepository): PetRepository
 
-    @Binds @Singleton fun settings(impl: DataStoreSettingsRepository): SettingsRepository
+    @Binds fun settings(impl: DataStoreSettingsRepository): SettingsRepository
+
+    @Binds fun dataAccess(impl: EncryptedDataAccess): DataAccess
 }

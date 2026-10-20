@@ -71,3 +71,17 @@ data class PartnerLinkEntity(
     val permissions: String,
     val status: String,
 )
+
+/** Profile values that describe the user's body or role, kept in the encrypted database. Single row. */
+@Entity(tableName = "profile")
+data class ProfileEntity(
+    @PrimaryKey val id: Int = SINGLE_PROFILE_ID,
+    val role: String,
+    @ColumnInfo(name = "usual_cycle_length") val usualCycleLength: Int,
+    @ColumnInfo(name = "usual_period_length") val usualPeriodLength: Int,
+    @ColumnInfo(name = "account_id") val accountId: String?,
+) {
+    companion object {
+        const val SINGLE_PROFILE_ID = 1
+    }
+}

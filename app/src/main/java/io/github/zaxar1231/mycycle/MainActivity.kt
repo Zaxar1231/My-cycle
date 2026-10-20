@@ -41,9 +41,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val settings = main.settings.collectAsStateWithLifecycle().value
+            val appState = main.state.collectAsStateWithLifecycle().value
+            val settings = (appState as? AppState.Ready)?.settings
             TwilightTheme(settings?.theme ?: ThemeSettings()) {
                 Surface(Modifier.fillMaxSize()) {
+                    if (appState is AppState.DataLost) DataLostScreen(onStartOver = main::startOver)
                     if (settings != null) {
                         val updateState = updates.state.collectAsStateWithLifecycle().value
                         val autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value

@@ -6,4 +6,11 @@
     <string name="nav_pet">Питомец</string>
     <string name="nav_settings">Настройки</string>
     <string name="nav_add_log">Записать день</string>
+    <string name="data_lost_title">Не удаётся открыть данные</string>
+    <string name="data_lost_text">Записи на этом устройстве зашифрованы, а ключ к ним больше недоступен. Так бывает после сброса защищённого хранилища или переноса файлов на другой телефон. Прочитать старые записи невозможно ни нам, ни кому-либо ещё.</string>
+    <string name="data_lost_start_over">Начать заново</string>
+    <string name="data_lost_confirm_title">Удалить недоступные данные?</string>
+    <string name="data_lost_confirm_text">Старые записи и питомец будут удалены, онбординг начнётся сначала. Отменить это нельзя.</string>
+    <string name="data_lost_confirm_yes">Удалить и начать заново</string>
+    <string name="data_lost_confirm_no">Отмена</string>
 </resources>
