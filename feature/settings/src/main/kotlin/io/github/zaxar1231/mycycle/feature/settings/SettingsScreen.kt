@@ -3,9 +3,11 @@ package io.github.zaxar1231.mycycle.feature.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,13 +21,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object SettingsRoute
 
-/** [updatesSection] is provided by the app, so this module does not depend on the updater. */
-fun NavGraphBuilder.settingsScreen(updatesSection: @Composable () -> Unit) {
-    composable<SettingsRoute> { SettingsScreen(updatesSection = updatesSection) }
+/** Sections are provided by the app, so this module depends neither on the updater nor on storage. */
+fun NavGraphBuilder.settingsScreen(appearanceSection: @Composable () -> Unit, updatesSection: @Composable () -> Unit) {
+    composable<SettingsRoute> { SettingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection) }
 }
 
 @Composable
-fun SettingsScreen(updatesSection: @Composable () -> Unit, modifier: Modifier = Modifier) {
+fun SettingsScreen(
+    appearanceSection: @Composable () -> Unit,
+    updatesSection: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -39,6 +45,12 @@ fun SettingsScreen(updatesSection: @Composable () -> Unit, modifier: Modifier = 
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
+                appearanceSection()
+            }
+        }
         updatesSection()
     }
 }

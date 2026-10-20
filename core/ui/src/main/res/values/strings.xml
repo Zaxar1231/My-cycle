@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_style">Стиль</string>
+    <string name="theme_style_material_you">Material You</string>
+    <string name="theme_style_twilight">Сумерки</string>
+    <string name="theme_material_you_unsupported">Цвета из обоев доступны на Android 12 и новее, на этом устройстве будет палитра «Сумерки».</string>
+    <string name="theme_mode">Режим</string>
+    <string name="theme_mode_system">Как в системе</string>
+    <string name="theme_mode_light">Светлая</string>
+    <string name="theme_mode_dark">Тёмная</string>
+</resources>

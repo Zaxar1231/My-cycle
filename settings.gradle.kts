@@ -18,8 +18,10 @@ rootProject.name = "TwilightCycle"
 
 include(":app")
 include(":core:domain")
+include(":core:data")
 include(":core:ui")
 include(":core:update")
+include(":feature:onboarding")
 include(":feature:calendar")
 include(":feature:stats")
 include(":feature:daylog")

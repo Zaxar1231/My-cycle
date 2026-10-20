@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onb_start">Начать</string>
+    <string name="onb_next">Далее</string>
+    <string name="onb_back">Назад</string>
+    <string name="onb_finish">Готово</string>
+    <string name="onb_ok">OK</string>
+    <string name="onb_cancel">Отмена</string>
+    <string name="onb_error">Не удалось сохранить данные. Попробуйте ещё раз.</string>
+    <string name="onb_welcome_title">Добро пожаловать в Twilight Cycle</string>
+    <string name="onb_welcome_text">Календарь цикла, прогнозы, самочувствие и питомец, который растёт вместе с вами. Без рекламы и трекеров, данные хранятся зашифрованными на этом устройстве.</string>
+    <string name="onb_disclaimer">Прогнозы приблизительны и не являются медицинской консультацией или методом контрацепции.</string>
+    <string name="onb_account_title">Аккаунт</string>
+    <string name="onb_account_text">Аккаунт нужен только для партнёрского режима и резервной копии, он появится в одном из следующих обновлений. Пока всё работает без него.</string>
+    <string name="onb_account_continue">Продолжить без аккаунта</string>
+    <string name="onb_role_title">Кто вы?</string>
+    <string name="onb_role_tracker">Я веду свой цикл</string>
+    <string name="onb_role_tracker_hint">Календарь, прогнозы, записи о самочувствии</string>
+    <string name="onb_role_partner">Я партнёр</string>
+    <string name="onb_role_partner_hint">Фаза и советы, как поддержать. Подключение к партнёру появится вместе с аккаунтами</string>
+    <string name="onb_cycle_title">Ваш цикл</string>
+    <string name="onb_cycle_text">Эти значения нужны для первых прогнозов. Потом приложение будет уточнять их по вашим записям.</string>
+    <string name="onb_last_period">Начало последних месячных</string>
+    <string name="onb_pick_date">Выбрать дату</string>
+    <string name="onb_last_period_unknown">Можно пропустить и отметить начало месячных позже.</string>
+    <string name="onb_cycle_length">Длина цикла</string>
+    <string name="onb_period_length">Длина месячных</string>
+    <string name="onb_length_value">%1$s: %2$s</string>
+    <plurals name="onb_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="onb_dont_know">Не знаю</string>
+    <string name="onb_pet_title">Выберите питомца</string>
+    <string name="onb_pet_text">Он будет жить на главном экране, реагировать на ваше самочувствие и расти за ваши записи.</string>
+    <string name="onb_pet_locked">Питомец выбран. Сменить его нельзя.</string>
+    <string name="onb_pet_confirm_title">Выбрать: %1$s?</string>
+    <string name="onb_pet_confirm_text">Питомца выбирают один раз. Потом сменить его будет нельзя, но вы сможете наряжать его и открывать новые вещи.</string>
+    <string name="onb_pet_confirm_yes">Выбрать</string>
+    <string name="onb_pet_confirm_no">Подумать ещё</string>
+    <string name="onb_theme_title">Оформление</string>
+    <string name="onb_pin_title">Защита PIN-кодом</string>
+    <string name="onb_pin_text">Вход по PIN-коду и отпечатку пальца появится в одном из следующих обновлений. Включить его можно будет в настройках.</string>
+    <string name="pet_cat">Котик</string>
+    <string name="pet_fox">Лисёнок</string>
+    <string name="pet_bunny">Зайка</string>
+    <string name="pet_panda">Панда</string>
+    <string name="pet_penguin">Пингвин</string>
+</resources>

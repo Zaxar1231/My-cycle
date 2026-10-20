@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onb_start">Get started</string>
+    <string name="onb_next">Next</string>
+    <string name="onb_back">Back</string>
+    <string name="onb_finish">Done</string>
+    <string name="onb_ok">OK</string>
+    <string name="onb_cancel">Cancel</string>
+    <string name="onb_error">Could not save your data. Please try again.</string>
+    <string name="onb_welcome_title">Welcome to Twilight Cycle</string>
+    <string name="onb_welcome_text">Cycle calendar, predictions, wellbeing and a pet that grows with you. No ads, no trackers, your data is stored encrypted on this device.</string>
+    <string name="onb_disclaimer">Predictions are estimates, not medical advice or a method of contraception.</string>
+    <string name="onb_account_title">Account</string>
+    <string name="onb_account_text">An account is only needed for partner mode and backups, and arrives in a later update. Everything works without one for now.</string>
+    <string name="onb_account_continue">Continue without an account</string>
+    <string name="onb_role_title">Who are you?</string>
+    <string name="onb_role_tracker">I track my cycle</string>
+    <string name="onb_role_tracker_hint">Calendar, predictions, wellbeing logs</string>
+    <string name="onb_role_partner">I\'m a partner</string>
+    <string name="onb_role_partner_hint">Phase and tips on how to support. Linking with your partner arrives together with accounts</string>
+    <string name="onb_cycle_title">Your cycle</string>
+    <string name="onb_cycle_text">These values power the first predictions. The app will refine them from your logs.</string>
+    <string name="onb_last_period">First day of your last period</string>
+    <string name="onb_pick_date">Pick a date</string>
+    <string name="onb_last_period_unknown">You can skip this and mark the start of your period later.</string>
+    <string name="onb_cycle_length">Cycle length</string>
+    <string name="onb_period_length">Period length</string>
+    <string name="onb_length_value">%1$s: %2$s</string>
+    <plurals name="onb_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="onb_dont_know">I don\'t know</string>
+    <string name="onb_pet_title">Choose your pet</string>
+    <string name="onb_pet_text">It lives on the home screen, reacts to how you feel and grows as you log.</string>
+    <string name="onb_pet_locked">Pet chosen. It cannot be changed.</string>
+    <string name="onb_pet_confirm_title">Choose %1$s?</string>
+    <string name="onb_pet_confirm_text">You choose your pet once and cannot change it later, but you can dress it up and unlock new items.</string>
+    <string name="onb_pet_confirm_yes">Choose</string>
+    <string name="onb_pet_confirm_no">Not yet</string>
+    <string name="onb_theme_title">Appearance</string>
+    <string name="onb_pin_title">PIN protection</string>
+    <string name="onb_pin_text">PIN and fingerprint unlock arrive in a later update. You will be able to turn them on in Settings.</string>
+    <string name="pet_cat">Kitty</string>
+    <string name="pet_fox">Fox cub</string>
+    <string name="pet_bunny">Bunny</string>
+    <string name="pet_panda">Panda</string>
+    <string name="pet_penguin">Penguin</string>
+</resources>
