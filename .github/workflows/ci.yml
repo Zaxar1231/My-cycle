@@ -73,9 +73,19 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Merge
-        run: gh pr merge "$PR_URL" --merge --match-head-commit "$HEAD_SHA"
+        id: merge
+        run: |
+          # Merged by hand meanwhile: that push already started the release.
+          if [ "$(gh pr view "$PR_URL" --json state --jq .state)" != "OPEN" ]; then
+            echo "PR is no longer open, nothing to do."
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh pr merge "$PR_URL" --merge --match-head-commit "$HEAD_SHA"
+          echo "merged=true" >> "$GITHUB_OUTPUT"
 
       - name: Start release
+        if: steps.merge.outputs.merged == 'true'
         run: |
           # Same paths as release.yml paths-ignore: docs-only PRs do not release.
           ignored='\.md$|^docs/|^\.github/ISSUE_TEMPLATE/|^\.github/pull_request_template\.md$|^\.github/dependabot\.yml$|^LICENSE$|^\.claude/'
