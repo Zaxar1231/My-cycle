@@ -47,7 +47,7 @@
 | --- | --- |
 | Открыт / обновлён PR | [`ci.yml`](.github/workflows/ci.yml): unit-тесты, Android lint, сборка debug APK (лежит в артефактах запуска) |
 | PR влит в `main` | [`release.yml`](.github/workflows/release.yml): считает следующую версию, собирает подписанный release APK, создаёт тег и GitHub Release с `my-cycle.apk`, `my-cycle-vX.Y.Z.apk` и `SHA256SUMS.txt` |
-| Раз в неделю | Dependabot предлагает обновления зависимостей и actions |
+| Раз в неделю | Dependabot открывает PR с обновлениями зависимостей и actions; если CI зелёный, PR вливается автоматически и выходит patch-релиз |
 
 Номер версии определяется заголовком PR / сообщением коммита:
 
