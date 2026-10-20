@@ -18,7 +18,7 @@ description: Как в «Моём цикле» устроены версии, р
 4. APK подписывается ключом из секретов `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`. Подпись проверяется через `apksigner verify`.
 5. `gh release create` создаёт тег и релиз с файлами `my-cycle.apk`, `my-cycle-vX.Y.Z.apk` и `SHA256SUMS.txt`.
 
-Ручной запуск: Actions → Release → Run workflow (patch/minor/major). Merge, сделанный через `GITHUB_TOKEN` (автомерж Dependabot), push-воркфлоу не запускает, поэтому джоба автомержа стартует релиз через `gh workflow run`.
+Ручной запуск: Actions → Release → Run workflow (patch/minor/major). Merge, сделанный через `GITHUB_TOKEN` (автомерж Dependabot и `claude/*`), push-воркфлоу не запускает. Поэтому джоба `automerge` стартует релиз через `gh workflow run release.yml -f bump=auto -f message=<заголовок PR>`: версия считается по заголовку, как при обычном merge. PR, в которых изменились только документы, релиз не запускают.
 
 ## Самообновление в приложении
 

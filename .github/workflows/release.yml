@@ -25,10 +25,14 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: Version bump
+        description: Version bump (auto = from the message below, patch if empty)
         type: choice
-        options: [patch, minor, major]
-        default: patch
+        options: [auto, patch, minor, major]
+        default: auto
+      message:
+        description: Merged PR title (used by auto-merge to pick the bump)
+        type: string
+        default: ''
 
 concurrency:
   group: release
@@ -50,8 +54,8 @@ jobs:
       - name: Compute version
         id: version
         env:
-          MESSAGE: ${{ github.event.head_commit.message }}
-          INPUT_BUMP: ${{ inputs.bump }}
+          MESSAGE: ${{ github.event.head_commit.message || inputs.message }}
+          INPUT_BUMP: ${{ inputs.bump != 'auto' && inputs.bump || '' }}
         run: |
           if grep -qiE '#norelease|\[skip release\]' <<< "$MESSAGE"; then
             echo "skip=true" >> "$GITHUB_OUTPUT"

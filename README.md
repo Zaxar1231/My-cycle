@@ -48,6 +48,7 @@
 | Открыт / обновлён PR | [`ci.yml`](.github/workflows/ci.yml): unit-тесты, Android lint, сборка debug APK (лежит в артефактах запуска) |
 | PR влит в `main` | [`release.yml`](.github/workflows/release.yml): считает следующую версию, собирает подписанный release APK, создаёт тег и GitHub Release с `my-cycle.apk`, `my-cycle-vX.Y.Z.apk` и `SHA256SUMS.txt` |
 | Раз в неделю | Dependabot открывает PR с обновлениями зависимостей и actions; если CI зелёный, PR вливается автоматически и выходит patch-релиз |
+| PR из веток `claude/*` (Claude Code) | после зелёного CI вливается автоматически, версия — по заголовку PR. Метка `no-automerge` оставляет PR открытым |
 
 Номер версии определяется заголовком PR / сообщением коммита:
 
@@ -58,7 +59,7 @@
 | `feat!: …`, `BREAKING CHANGE` или `#major` | major: 0.1.0 → 1.0.0 |
 | `#norelease` или `[skip release]` | релиз не создаётся |
 
-Первый релиз берёт версию из [`version.properties`](version.properties) (`0.1.0`). Если поднять там `VERSION_NAME` выше последнего тега, будет использовано это значение. Также релиз можно запустить вручную: **Actions → Release → Run workflow**.
+Первый релиз берёт версию из [`version.properties`](version.properties) (`0.1.0`). Если поднять там `VERSION_NAME` выше последнего тега, будет использовано это значение. Также релиз можно запустить вручную: **Actions → Release → Run workflow** (`auto` = patch).
 
 `versionCode` вычисляется из версии (`1.2.3` → `1002003`), поэтому каждая новая версия ставится поверх старой.
 
