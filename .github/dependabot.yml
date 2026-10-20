@@ -7,8 +7,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     groups:
-      androidx:
-        patterns: ["androidx.*"]
+      # AGP, Gradle and AndroidX depend on each other, so they are updated together.
+      android-toolchain:
+        patterns: ["com.android*", "gradle-wrapper", "androidx.*"]
       kotlin:
         patterns: ["org.jetbrains.kotlin*", "org.jetbrains.kotlinx*"]
   - package-ecosystem: github-actions
