@@ -30,7 +30,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
-        if (intent.getBooleanExtra(UpdateWorker.EXTRA_CHECK_UPDATE, false)) updates.check() else updates.autoCheckOnce()
+        if (savedInstanceState == null) {
+            if (intent.consumeCheckUpdateExtra()) updates.check() else updates.autoCheckOnce()
+        }
 
         setContent {
             TwilightTheme {
@@ -59,13 +61,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.getBooleanExtra(UpdateWorker.EXTRA_CHECK_UPDATE, false)) updates.check()
+        setIntent(intent)
+        if (intent.consumeCheckUpdateExtra()) updates.check()
     }
 
     override fun onResume() {
         super.onResume()
         updates.onResume()
     }
+
+    /** Reads and clears the flag, so a configuration change does not trigger another check. */
+    private fun Intent.consumeCheckUpdateExtra(): Boolean =
+        getBooleanExtra(UpdateWorker.EXTRA_CHECK_UPDATE, false).also { removeExtra(UpdateWorker.EXTRA_CHECK_UPDATE) }
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&

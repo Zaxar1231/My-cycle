@@ -22,7 +22,7 @@ description: Как в «Моём цикле» устроены версии, р
 
 ## Самообновление в приложении
 
-`UpdateChecker` запрашивает `api.github.com/repos/Zaxar1231/Twilight-cycle/releases/latest` и сравнивает `tag_name` с `BuildConfig.VERSION_NAME` через `Version.isNewer`. Затем берёт первый asset `*.apk`. Pre-release и draft туда не попадают. Репозиторий раньше назывался `My-cycle`: старые версии приложения обращаются к старому адресу, а GitHub перенаправляет его на новый (301), и `HttpURLConnection` идёт по перенаправлению. Поэтому `applicationId` и ключ подписи менять нельзя, иначе обновления не встанут поверх установленного приложения. Если поменять имена файлов или формат тегов, обнови и `ReleaseInfo.fromGitHubJson`.
+`UpdateChecker` запрашивает `api.github.com/repos/Zaxar1231/Twilight-cycle/releases/latest` и сравнивает `tag_name` с версией установленного приложения (`Context.appVersionName()`) через `Version.isNewer`. Затем берёт первый asset `*.apk`. Pre-release и draft туда не попадают. Репозиторий раньше назывался `My-cycle`: старые версии приложения обращаются к старому адресу, а GitHub перенаправляет его на новый (301), и `HttpURLConnection` идёт по перенаправлению. Поэтому `applicationId` и ключ подписи менять нельзя, иначе обновления не встанут поверх установленного приложения. Если поменять имена файлов или формат тегов, обнови и `ReleaseInfo.fromGitHubJson`.
 
 ## Типичные поломки
 
