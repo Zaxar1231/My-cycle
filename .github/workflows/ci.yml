@@ -44,13 +44,21 @@ jobs:
           path: app/build/reports/lint-results-debug.html
           if-no-files-found: ignore
 
-  # Dependabot PRs are merged automatically once the build above is green.
-  # A merge made with GITHUB_TOKEN does not trigger push workflows, so the
-  # release is started explicitly afterwards.
-  dependabot-automerge:
-    name: Auto-merge Dependabot PR
+  # Dependabot PRs and Claude PRs (claude/* branches of this repo) are merged
+  # automatically once the build above is green. Add the `no-automerge` label
+  # to a PR to keep it open. A merge made with GITHUB_TOKEN does not trigger
+  # push workflows, so the release is started explicitly afterwards with the
+  # PR title, which decides the version bump exactly like a manual merge.
+  automerge:
+    name: Auto-merge
     needs: build
-    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    if: >-
+      github.event_name == 'pull_request' &&
+      !github.event.pull_request.draft &&
+      !contains(github.event.pull_request.labels.*.name, 'no-automerge') &&
+      (github.event.pull_request.user.login == 'dependabot[bot]' ||
+       (startsWith(github.event.pull_request.head.ref, 'claude/') &&
+        github.event.pull_request.head.repo.full_name == github.repository))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -61,10 +69,18 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR_URL: ${{ github.event.pull_request.html_url }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Merge
         run: gh pr merge "$PR_URL" --merge --match-head-commit "$HEAD_SHA"
 
       - name: Start release
-        run: gh workflow run release.yml --ref main -f bump=patch
+        run: |
+          # Same paths as release.yml paths-ignore: docs-only PRs do not release.
+          ignored='\.md$|^docs/|^\.github/ISSUE_TEMPLATE/|^\.github/pull_request_template\.md$|^\.github/dependabot\.yml$|^LICENSE$|^\.claude/'
+          if ! gh pr view "$PR_URL" --json files --jq '.files[].path' | grep -qvE "$ignored"; then
+            echo "Only docs changed, no release."
+            exit 0
+          fi
+          gh workflow run release.yml --ref main -f bump=auto -f message="$PR_TITLE"
