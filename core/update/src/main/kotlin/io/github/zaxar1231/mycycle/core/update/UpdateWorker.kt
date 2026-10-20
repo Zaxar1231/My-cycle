@@ -38,7 +38,9 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
     }
 
     companion object {
-        private const val WORK_NAME = "update-check"
+        // Renamed when the worker class moved to :core:update: the old entry points to a class that no longer exists.
+        private const val WORK_NAME = "update-check-v2"
+        private const val LEGACY_WORK_NAME = "update-check"
         const val CHANNEL_ID = "updates"
 
         /** Set on the launch intent from the update notification: the app checks again on open. */
@@ -49,12 +51,17 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             val request = PeriodicWorkRequestBuilder<UpdateWorker>(12, TimeUnit.HOURS)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
-            WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+            WorkManager.getInstance(context).apply {
+                cancelUniqueWork(LEGACY_WORK_NAME)
+                enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+            }
         }
 
         fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+            WorkManager.getInstance(context).apply {
+                cancelUniqueWork(LEGACY_WORK_NAME)
+                cancelUniqueWork(WORK_NAME)
+            }
         }
 
         fun createChannel(context: Context) {

@@ -102,7 +102,7 @@ base64 -w0 release.jks
 Нужны JDK 17+ и Android SDK (проще всего — Android Studio).
 
 ```bash
-./gradlew testDebugUnitTest   # unit-тесты
+./gradlew test                # unit-тесты всех модулей
 ./gradlew assembleDebug       # app/build/outputs/apk/debug/app-debug.apk
 ```
 
