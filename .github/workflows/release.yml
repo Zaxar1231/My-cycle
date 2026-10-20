@@ -116,7 +116,7 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease -PappVersionName=${{ steps.version.outputs.version }}
+        run: ./gradlew --no-daemon testDebugUnitTest assembleRelease -PappVersionName=${{ steps.version.outputs.version }}
 
       - name: Verify signature and collect files
         if: steps.version.outputs.skip != 'true'
