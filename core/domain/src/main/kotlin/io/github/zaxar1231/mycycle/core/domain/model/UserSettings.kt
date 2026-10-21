@@ -33,7 +33,7 @@ data class ThemeSettings(
     val mode: ThemeMode = ThemeMode.SYSTEM,
     /** Decorative flowers around the cycle ring on the home screen. */
     val flowers: Boolean = true,
-    val home: HomeStyle = HomeStyle.MOON,
+    val home: HomeStyle = HomeStyle.SKY,
     /** ARGB seed of the [ThemeStyle.CUSTOM] scheme, picked on the colour wheel. */
     val seedColor: Int = DEFAULT_SEED_COLOR,
     val font: AppFont = AppFont.SYSTEM,
@@ -59,6 +59,6 @@ enum class ThemeStyle {
 enum class AppFont { SYSTEM, INTER, NUNITO, COMFORTAA, LORA, CAVEAT, CUSTOM }
 
 /** The picture at the top of the home screen. */
-enum class HomeStyle { MOON, ORBIT, WAVE, MOSAIC, RING }
+enum class HomeStyle { SKY, MOON, ORBIT, WAVE, MOSAIC, RING }
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }

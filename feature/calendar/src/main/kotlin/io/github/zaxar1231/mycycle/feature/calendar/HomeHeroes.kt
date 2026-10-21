@@ -114,6 +114,10 @@ fun CycleHero(
         RingHero(prediction, today, onEditPeriod, onPeriodStarted, onOpenTheme, modifier)
         return
     }
+    if (style == HomeStyle.SKY) {
+        SkyHero(prediction, today, onEditPeriod, onPeriodStarted, onOpenTheme, modifier)
+        return
+    }
     val pages = heroPages(prediction, today)
     val shape = prediction.shapeOn(today)
     Column(
@@ -162,7 +166,7 @@ private fun EmptyHero(prediction: CyclePrediction, onPeriodStarted: () -> Unit) 
 
 /** When the period is due or late, marking its start is the main action. */
 @Composable
-private fun HeroAction(prediction: CyclePrediction, onEditPeriod: () -> Unit, onPeriodStarted: () -> Unit) {
+internal fun HeroAction(prediction: CyclePrediction, onEditPeriod: () -> Unit, onPeriodStarted: () -> Unit) {
     val status = prediction.today ?: return
     if (status.daysLate > 0 || status.daysUntilNextPeriod == 0) {
         Button(onClick = onPeriodStarted) { Text(stringResource(R.string.hero_period_started)) }
@@ -247,12 +251,17 @@ private fun MoonHero(shape: CycleShape, pages: List<HeroPage>) {
 }
 
 /** A disc in [shadow] with the lit part in [lit]; the terminator is half an ellipse. */
-private fun DrawScope.drawMoon(moon: MoonPhase, lit: Color, shadow: Color) {
-    val r = size.minDimension / 2
-    drawCircle(Brush.radialGradient(listOf(lit.copy(alpha = GLOW_ALPHA), Color.Transparent), center, r * GLOW_SCALE), r * GLOW_SCALE)
-    drawCircle(shadow, r)
+internal fun DrawScope.drawMoon(
+    moon: MoonPhase,
+    lit: Color,
+    shadow: Color,
+    center: Offset = this.center,
+    r: Float = size.minDimension / 2,
+) {
+    drawCircle(Brush.radialGradient(listOf(lit.copy(alpha = GLOW_ALPHA), Color.Transparent), center, r * GLOW_SCALE), r * GLOW_SCALE, center)
+    drawCircle(shadow, r, center)
     // A thin rim, so even the new moon reads as a moon.
-    drawCircle(lit.copy(alpha = RIM_ALPHA), r, style = Stroke(1.5.dp.toPx()))
+    drawCircle(lit.copy(alpha = RIM_ALPHA), r, center, style = Stroke(1.5.dp.toPx()))
     val k = moon.illumination
     if (k < MIN_LIT) return
     val rx = r * abs(2 * k - 1)
