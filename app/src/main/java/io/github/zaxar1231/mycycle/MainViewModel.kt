@@ -9,6 +9,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.DataAccess
 import io.github.zaxar1231.mycycle.core.domain.repository.DataAccessStatus
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.feature.reminders.ReminderScheduler
+import io.github.zaxar1231.mycycle.feature.widgets.WidgetRefresher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,7 @@ class MainViewModel @Inject constructor(
     private val dataAccess: DataAccess,
     private val settingsRepository: SettingsRepository,
     private val reminders: ReminderScheduler,
+    private val widgets: WidgetRefresher,
 ) : ViewModel() {
     private val _state = MutableStateFlow<AppState>(AppState.Loading)
     val state: StateFlow<AppState> = _state.asStateFlow()
@@ -64,6 +66,7 @@ class MainViewModel @Inject constructor(
                 return@launch
             }
             reminders.start()
+            widgets.start()
             settingsRepository.settings.collect { _state.value = AppState.Ready(it) }
         }
     }

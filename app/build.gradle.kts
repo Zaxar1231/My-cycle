@@ -92,6 +92,7 @@ dependencies {
     implementation(project(":feature:account"))
     implementation(project(":feature:partner"))
     implementation(project(":feature:reminders"))
+    implementation(project(":feature:widgets"))
     implementation(project(":feature:daylog"))
     implementation(project(":feature:pet"))
     implementation(project(":feature:settings"))
