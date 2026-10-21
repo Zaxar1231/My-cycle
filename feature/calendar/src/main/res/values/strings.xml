@@ -71,4 +71,5 @@
     <string name="hero_period_started">Месячные начались</string>
     <string name="hero_day_title">День %1$s</string>
     <string name="hero_moon_description">День цикла %1$d из %2$d</string>
+    <string name="hero_cycle_day_phase">%1$s · %2$s</string>
 </resources>

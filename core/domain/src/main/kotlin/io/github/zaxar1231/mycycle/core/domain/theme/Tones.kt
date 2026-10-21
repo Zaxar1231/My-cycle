@@ -112,8 +112,9 @@ object Tones {
     private fun labF(t: Double) = if (t > LAB_E) cbrt(t) else (LAB_K * t + 16) / 116
     private fun labInverse(f: Double) = if (f * f * f > LAB_E) f * f * f else (116 * f - 16) / LAB_K
 
-    private const val WHITE_X = 0.95047
-    private const val WHITE_Z = 1.08883
+    // Row sums of the sRGB matrix, so greys come out with zero chroma.
+    private const val WHITE_X = 0.9505
+    private const val WHITE_Z = 1.089
     private const val LAB_E = 216.0 / 24389.0
     private const val LAB_K = 24389.0 / 27.0
     private const val FULL_TURN = 360.0

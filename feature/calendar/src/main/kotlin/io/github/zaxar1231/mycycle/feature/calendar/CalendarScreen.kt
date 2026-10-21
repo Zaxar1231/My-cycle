@@ -35,7 +35,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
-import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
@@ -98,14 +97,17 @@ fun CalendarScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        CycleHero(
-            style = theme?.home ?: HomeStyle.MOON,
-            prediction = prediction,
-            today = state.today,
-            onEditPeriod = { onOpenDayLog(state.today) },
-            onPeriodStarted = viewModel::markPeriodStartedToday,
-            onOpenTheme = { showTheme = true },
-        )
+        // Drawn once the saved style is known, so the picture does not switch after a moment.
+        theme?.let { saved ->
+            CycleHero(
+                style = saved.home,
+                prediction = prediction,
+                today = state.today,
+                onEditPeriod = { onOpenDayLog(state.today) },
+                onPeriodStarted = viewModel::markPeriodStartedToday,
+                onOpenTheme = { showTheme = true },
+            )
+        }
         Column(
             Modifier.padding(start = SIDE, end = SIDE, top = AIR, bottom = AIR),
             verticalArrangement = Arrangement.spacedBy(AIR),
@@ -133,7 +135,7 @@ fun CalendarScreen(
 
     val savedTheme = theme
     if (showTheme && savedTheme != null) {
-        ThemeSheet(savedTheme, onChange = viewModel::setTheme, onDismiss = { showTheme = false })
+        ThemeSheet(savedTheme, onChange = viewModel::setTheme, onSeedChange = viewModel::setSeedColor, onDismiss = { showTheme = false })
     }
 
     state.selectedDay?.let { day ->
@@ -196,11 +198,17 @@ private fun DayDetailsSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeSheet(theme: ThemeSettings, onChange: (ThemeSettings) -> Unit, onDismiss: () -> Unit) {
+private fun ThemeSheet(theme: ThemeSettings, onChange: (ThemeSettings) -> Unit, onSeedChange: (Int) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             Text(stringResource(R.string.theme_sheet_title), style = MaterialTheme.typography.titleLarge)
-            ThemePicker(theme, onChange)
+            ThemePicker(theme, onChange, onSeedChange = onSeedChange)
         }
     }
 }

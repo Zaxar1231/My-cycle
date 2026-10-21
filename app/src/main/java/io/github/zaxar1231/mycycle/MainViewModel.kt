@@ -41,6 +41,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setTheme(theme) }
     }
 
+    fun setSeedColor(seed: Int) {
+        viewModelScope.launch { settingsRepository.setSeedColor(seed) }
+    }
+
     fun startOver() {
         viewModelScope.launch {
             _state.value = AppState.Loading

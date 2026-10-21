@@ -14,7 +14,8 @@ import io.github.zaxar1231.mycycle.core.domain.theme.Tones
  */
 fun seedColorScheme(seed: Int, dark: Boolean): ColorScheme {
     val (hue, seedChroma) = Tones.hueChroma(seed)
-    val chroma = seedChroma.coerceAtLeast(MIN_PRIMARY_CHROMA)
+    // A grey or white seed stays almost monochrome instead of picking up an accidental hue.
+    val chroma = if (seedChroma < NEUTRAL_SEED_CHROMA) seedChroma else seedChroma.coerceAtLeast(MIN_PRIMARY_CHROMA)
     val primary = Palette(hue, chroma)
     val secondary = Palette(hue, chroma / SECONDARY_DIVISOR)
     val tertiary = Palette((hue + TERTIARY_TURN) % FULL_TURN, chroma / TERTIARY_DIVISOR)
@@ -65,6 +66,7 @@ private class Palette(private val hue: Float, private val chroma: Float) {
 }
 
 private const val MIN_PRIMARY_CHROMA = 36f
+private const val NEUTRAL_SEED_CHROMA = 6f
 private const val SECONDARY_DIVISOR = 3f
 private const val TERTIARY_DIVISOR = 2f
 private const val TERTIARY_TURN = 60f

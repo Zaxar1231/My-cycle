@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +26,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.zaxar1231.mycycle.core.domain.theme.Tones
@@ -42,11 +45,22 @@ import kotlin.math.sin
 @Composable
 fun ColorWheel(color: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifier) {
     val initial = remember { Tones.toHsv(color) }
-    var hue by remember { mutableFloatStateOf(initial.first) }
-    var saturation by remember { mutableFloatStateOf(initial.second) }
-    var value by remember { mutableFloatStateOf(initial.third.coerceAtLeast(MIN_VALUE)) }
+    var hue by rememberSaveable { mutableFloatStateOf(initial.first) }
+    var saturation by rememberSaveable { mutableFloatStateOf(initial.second) }
+    var value by rememberSaveable { mutableFloatStateOf(initial.third.coerceAtLeast(MIN_VALUE)) }
     val emit by rememberUpdatedState(onChange)
     val description = stringResource(R.string.color_wheel_description)
+    val brightness = stringResource(R.string.color_wheel_brightness)
+    val hueUp = stringResource(R.string.color_wheel_hue_next)
+    val hueDown = stringResource(R.string.color_wheel_hue_previous)
+    val more = stringResource(R.string.color_wheel_more_saturated)
+    val less = stringResource(R.string.color_wheel_less_saturated)
+    fun nudge(dHue: Float, dSaturation: Float): Boolean {
+        hue = (hue + dHue + FULL_TURN.toFloat()) % FULL_TURN.toFloat()
+        saturation = (saturation + dSaturation).coerceIn(0f, 1f)
+        emit(Tones.fromHsv(hue, saturation, value))
+        return true
+    }
 
     fun pick(position: Offset, size: Float) {
         val center = size / 2
@@ -63,14 +77,25 @@ fun ColorWheel(color: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifie
                 .widthIn(max = MAX_WHEEL)
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .semantics { contentDescription = description }
+                // TalkBack and keyboard users move the knob with actions instead of dragging.
+                .semantics {
+                    contentDescription = description
+                    customActions = listOf(
+                        CustomAccessibilityAction(hueUp) { nudge(HUE_STEP, 0f) },
+                        CustomAccessibilityAction(hueDown) { nudge(-HUE_STEP, 0f) },
+                        CustomAccessibilityAction(more) { nudge(0f, SATURATION_STEP) },
+                        CustomAccessibilityAction(less) { nudge(0f, -SATURATION_STEP) },
+                    )
+                }
                 .pointerInput(Unit) { detectTapGestures { pick(it, size.width.toFloat()) } }
                 .pointerInput(Unit) { detectDragGestures { change, _ -> pick(change.position, size.width.toFloat()) } },
         ) {
             val radius = size.minDimension / 2
             val hues = List(HUE_STOPS + 1) { Color(Tones.fromHsv(it * FULL_TURN.toFloat() / HUE_STOPS, 1f, value)) }
             drawCircle(Brush.sweepGradient(hues, center), radius)
-            drawCircle(Brush.radialGradient(listOf(Color(Tones.fromHsv(0f, 0f, value)), Color.Transparent), center, radius), radius)
+            // Fades to the same grey at zero alpha: fading to transparent black would darken the middle ring.
+            val white = Color(Tones.fromHsv(0f, 0f, value))
+            drawCircle(Brush.radialGradient(listOf(white, white.copy(alpha = 0f)), center, radius), radius)
             val angle = Math.toRadians(hue.toDouble())
             val knob = Offset(center.x + (cos(angle) * saturation * radius).toFloat(), center.y + (sin(angle) * saturation * radius).toFloat())
             drawCircle(Color(Tones.fromHsv(hue, saturation, value)), KNOB_RADIUS.toPx(), knob)
@@ -85,7 +110,7 @@ fun ColorWheel(color: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifie
                 emit(Tones.fromHsv(hue, saturation, value))
             },
             valueRange = MIN_VALUE..1f,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = brightness },
         )
     }
 }
@@ -95,6 +120,8 @@ private val KNOB_RADIUS = 12.dp
 private val KNOB_RING = 3.dp
 private const val KNOB_SHADOW_ALPHA = 0.4f
 private const val HUE_STOPS = 12
+private const val HUE_STEP = 15f
+private const val SATURATION_STEP = 0.1f
 private const val FULL_TURN = 360.0
 /** Very dark seeds give muddy schemes; the scheme sets its own lightness anyway. */
 private const val MIN_VALUE = 0.3f

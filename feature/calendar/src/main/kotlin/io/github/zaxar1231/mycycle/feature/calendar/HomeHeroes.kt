@@ -42,11 +42,9 @@ import androidx.compose.ui.unit.dp
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.theme.MoonPhase
-import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -55,9 +53,10 @@ import kotlin.random.Random
 /** Day numbers of the current cycle, for the pictures. */
 internal class CycleShape(val cycleDay: Int, val length: Int, val periodLength: Int, val fertileStart: Int, val ovulation: Int)
 
-private fun CyclePrediction.shapeOn(today: LocalDate): CycleShape? {
+internal fun CyclePrediction.shapeOn(today: LocalDate): CycleShape? {
     val status = this.today ?: return null
-    val segment = segmentFor(today) ?: return null
+    // The recorded cycle, not the predicted one that starts today when the period is due or late.
+    val segment = timeline.lastOrNull { !it.isPredicted && !today.isBefore(it.start) } ?: segmentFor(today) ?: return null
     fun dayOf(date: LocalDate) = ChronoUnit.DAYS.between(segment.start, date).toInt() + 1
     // A late period stretches the cycle to today.
     val length = maxOf(segment.length, status.cycleDay)
@@ -97,16 +96,21 @@ fun CycleHero(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { PaletteButton(onOpenTheme) }
-        if (pages.isEmpty() || shape == null) {
+        if (pages.isEmpty()) {
             EmptyHero(prediction, onPeriodStarted)
             return@Column
         }
-        when (style) {
-            HomeStyle.MOON -> MoonHero(shape, pages)
-            HomeStyle.ORBIT -> OrbitHero(shape, pages)
-            HomeStyle.WAVE -> WaveHero(shape, pages)
-            HomeStyle.MOSAIC -> MosaicHero(pages)
-            HomeStyle.RING -> Unit
+        when {
+            style == HomeStyle.MOSAIC -> MosaicHero(pages)
+            // Without a cycle to draw, the facts alone.
+            shape == null -> {
+                DayTitle(pages)
+                Spacer(Modifier.height(AIR))
+                HeroFacts(pages)
+            }
+            style == HomeStyle.MOON -> MoonHero(shape, pages)
+            style == HomeStyle.ORBIT -> OrbitHero(shape, pages)
+            else -> WaveHero(shape, pages)
         }
         Spacer(Modifier.height(AIR))
         HeroAction(prediction, onEditPeriod, onPeriodStarted)
@@ -244,7 +248,7 @@ private fun OrbitHero(shape: CycleShape, pages: List<HeroPage>) {
             // Day d covers the arc from d-1 to d.
             drawArc(colors.period, angleOf(1f), 360f * shape.periodLength / shape.length, false, box.topLeft, box.size, style = Stroke(stroke, cap = StrokeCap.Round))
             val fertileDays = shape.ovulation - shape.fertileStart + 1
-            drawArc(colors.fertile, angleOf(shape.fertileStart.toFloat()), 360f * fertileDays / shape.length, false, box.topLeft, box.size, style = Stroke(stroke, cap = StrokeCap.Round))
+            drawArc(colors.ovulation.copy(alpha = FERTILE_ALPHA), angleOf(shape.fertileStart.toFloat()), 360f * fertileDays / shape.length, false, box.topLeft, box.size, style = Stroke(stroke, cap = StrokeCap.Round))
             drawPlanet(angleOf(shape.ovulation + HALF), r, colors.ovulation, ORBIT_MARK.toPx())
             val now = angleOf(shape.cycleDay + HALF)
             drawPlanet(now, r, accent.copy(alpha = GLOW_ALPHA), ORBIT_GLOW.toPx())
@@ -275,7 +279,7 @@ private fun WaveHero(shape: CycleShape, pages: List<HeroPage>) {
             style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Light),
         )
         Text(
-            stringResource(R.string.hero_cycle_day) + " · " + pages.first { it.kind == PageKind.CYCLE_DAY }.note.orEmpty(),
+            stringResource(R.string.hero_cycle_day_phase, stringResource(R.string.hero_cycle_day), pages.first { it.kind == PageKind.CYCLE_DAY }.note.orEmpty()),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -287,7 +291,7 @@ private fun WaveHero(shape: CycleShape, pages: List<HeroPage>) {
             fun y(day: Float) = bottom - (bottom - top) * MoonPhase.of(day.toInt().coerceAtLeast(1), shape.length, shape.ovulation).illumination
             // Period and fertile days as soft bands under the wave.
             drawRect(colors.period.copy(alpha = BAND_ALPHA), Offset(x(1f), 0f), Size(x(shape.periodLength.toFloat()) - x(1f) + BAND_MIN, size.height))
-            drawRect(colors.fertile.copy(alpha = BAND_ALPHA), Offset(x(shape.fertileStart.toFloat()), 0f), Size(x(shape.ovulation.toFloat()) - x(shape.fertileStart.toFloat()) + BAND_MIN, size.height))
+            drawRect(colors.ovulation.copy(alpha = BAND_ALPHA), Offset(x(shape.fertileStart.toFloat()), 0f), Size(x(shape.ovulation.toFloat()) - x(shape.fertileStart.toFloat()) + BAND_MIN, size.height))
             val wave = Path().apply {
                 moveTo(x(1f), y(1f))
                 for (day in 2..shape.length) lineTo(x(day.toFloat()), y(day.toFloat()))
@@ -365,6 +369,8 @@ private val WAVE_HEIGHT = 140.dp
 private val WAVE_PAD = 16.dp
 private val WAVE_STROKE = 3.dp
 private const val BAND_ALPHA = 0.35f
+/** Fertile days in the ovulation colour: the container tone is too close to the background for a thin line. */
+private const val FERTILE_ALPHA = 0.7f
 private const val BAND_MIN = 4f
 private val TILE_GAP = 12.dp
 private val TILE_CORNER = 28.dp
