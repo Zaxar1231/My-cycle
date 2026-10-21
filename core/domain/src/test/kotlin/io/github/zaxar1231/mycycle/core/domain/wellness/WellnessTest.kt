@@ -36,6 +36,16 @@ class WellnessTest {
     }
 
     @Test
+    fun `sessions end on a whole breath cycle`() {
+        // 60 s of 19 s cycles → 4 cycles; 60 s of 16 s cycles → 4 cycles; 180 s of 10 s cycles → 18.
+        assertEquals(76_000L, BreathingPlan.sessionMillis(BreathingTechnique.RELAX_478, 1))
+        assertEquals(64_000L, BreathingPlan.sessionMillis(BreathingTechnique.BOX, 1))
+        assertEquals(180_000L, BreathingPlan.sessionMillis(BreathingTechnique.SLOW, 3))
+        val total = BreathingPlan.sessionMillis(BreathingTechnique.RELAX_478, 1)
+        assertEquals(BreathPhase.EXHALE, BreathingPlan.stateAt(BreathingTechnique.RELAX_478, total - 1, total).phase)
+    }
+
+    @Test
     fun `mood tone prefers support when any hard mood is logged`() {
         assertNull(emptySet<Mood>().tone())
         assertEquals(MoodTone.UPLIFT, setOf(Mood.HAPPY, Mood.CALM).tone())

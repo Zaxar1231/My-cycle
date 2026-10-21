@@ -47,6 +47,14 @@ object BreathingPlan {
     /** Session lengths offered to the user, in minutes. */
     val SESSION_MINUTES = listOf(1, 3, 5)
     private const val MILLIS_PER_SECOND = 1_000L
+    private const val MILLIS_PER_MINUTE = 60_000L
+
+    /** Length of a session of about [minutes], rounded up to whole breath cycles so it never stops mid-breath. */
+    fun sessionMillis(technique: BreathingTechnique, minutes: Int): Long {
+        val cycleMillis = technique.cycleSeconds * MILLIS_PER_SECOND
+        val cycles = (minutes * MILLIS_PER_MINUTE + cycleMillis - 1) / cycleMillis
+        return cycles * cycleMillis
+    }
 
     /** State [elapsedMillis] after the start of a session of [totalMillis] with [technique]. */
     fun stateAt(technique: BreathingTechnique, elapsedMillis: Long, totalMillis: Long): BreathState {

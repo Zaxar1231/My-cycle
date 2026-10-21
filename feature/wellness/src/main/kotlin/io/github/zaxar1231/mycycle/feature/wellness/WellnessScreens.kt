@@ -37,10 +37,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
@@ -55,10 +57,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.wellness.BreathPhase
+import io.github.zaxar1231.mycycle.core.domain.wellness.BreathState
 import io.github.zaxar1231.mycycle.core.domain.wellness.BreathingPlan
 import io.github.zaxar1231.mycycle.core.domain.wellness.BreathingTechnique
 import kotlinx.serialization.Serializable
@@ -102,31 +107,34 @@ private fun BreathingScreen(onBack: () -> Unit) {
     var technique by rememberSaveable { mutableStateOf(BreathingTechnique.RELAX_478) }
     var minutes by rememberSaveable { mutableIntStateOf(BreathingPlan.SESSION_MINUTES[1]) }
     var running by rememberSaveable { mutableStateOf(false) }
-    var elapsed by rememberSaveable { mutableLongStateOf(0L) }
-    val total = minutes * MILLIS_PER_MINUTE
-    val state = BreathingPlan.stateAt(technique, elapsed, total)
+    val elapsedState = rememberSaveable { mutableLongStateOf(0L) }
+    val total = BreathingPlan.sessionMillis(technique, minutes)
+    // Only the display reads the elapsed time every frame; the rest of the screen recomposes when the session ends.
+    val finished by remember(total) { derivedStateOf { elapsedState.longValue >= total } }
     val view = LocalView.current
 
+    // A locked screen or a call pauses the session instead of letting it run on unseen.
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { running = false }
     if (running) {
         LaunchedEffect(technique, minutes) {
-            // Resumes from the saved elapsed time after rotation.
-            val startedAt = withFrameMillis { it } - elapsed
-            while (true) {
-                elapsed = withFrameMillis { it } - startedAt
-                if (elapsed >= total) {
-                    running = false
-                    break
-                }
+            // Adds up frame deltas, so it resumes from the saved time after rotation or a pause.
+            var lastFrame = withFrameMillis { it }
+            var lastStep = BreathingPlan.stateAt(technique, elapsedState.longValue, total).stepKey()
+            while (elapsedState.longValue < total) {
+                val now = withFrameMillis { it }
+                elapsedState.longValue += (now - lastFrame).coerceAtMost(MAX_FRAME_GAP_MILLIS)
+                lastFrame = now
+                val step = BreathingPlan.stateAt(technique, elapsedState.longValue, total).stepKey()
+                // Haptic tick on every change of step; respects the system's touch feedback setting.
+                if (step != lastStep) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                lastStep = step
             }
+            running = false
         }
         DisposableEffect(Unit) {
             view.keepScreenOn = true
             onDispose { view.keepScreenOn = false }
         }
-    }
-    // Haptic tick on every change of step; respects the system's touch feedback setting.
-    LaunchedEffect(state.phase, state.cycle) {
-        if (running) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
     }
 
     WellnessScaffold(R.string.breathing_title, onBack) { padding ->
@@ -146,22 +154,14 @@ private fun BreathingScreen(onBack: () -> Unit) {
                         onClick = {
                             technique = option
                             running = false
-                            elapsed = 0
+                            elapsedState.longValue = 0
                         },
                         shape = SegmentedButtonDefaults.itemShape(index, BreathingTechnique.entries.size),
                     ) { Text(stringResource(option.titleRes())) }
                 }
             }
             Text(stringResource(technique.descriptionRes()), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-            BreathingCircle(phase = state.phase, progress = state.progress, active = running || elapsed > 0) {
-                Text(stringResource(state.phase.labelRes()), style = MaterialTheme.typography.titleLarge)
-                Text(state.secondsLeft.toString(), style = MaterialTheme.typography.displayMedium)
-            }
-            val remainingSeconds = ((total - elapsed).coerceAtLeast(0) / MILLIS_PER_SECOND).toInt()
-            Text(
-                stringResource(R.string.breathing_remaining, remainingSeconds / SECONDS_PER_MINUTE, remainingSeconds % SECONDS_PER_MINUTE),
-                style = MaterialTheme.typography.titleMedium,
-            )
+            BreathingDisplay(technique, total, elapsed = { elapsedState.longValue }, running = running)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BreathingPlan.SESSION_MINUTES.forEach { option ->
                     FilterChip(
@@ -169,7 +169,7 @@ private fun BreathingScreen(onBack: () -> Unit) {
                         onClick = {
                             minutes = option
                             running = false
-                            elapsed = 0
+                            elapsedState.longValue = 0
                         },
                         label = { Text(pluralStringResource(R.plurals.breathing_minutes, option, option)) },
                     )
@@ -177,17 +177,17 @@ private fun BreathingScreen(onBack: () -> Unit) {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = {
-                    if (state.finished) elapsed = 0
+                    if (finished) elapsedState.longValue = 0
                     running = !running
                 }) {
                     Text(stringResource(if (running) R.string.breathing_pause else R.string.breathing_start))
                 }
                 OutlinedButton(onClick = {
                     running = false
-                    elapsed = 0
+                    elapsedState.longValue = 0
                 }) { Text(stringResource(R.string.breathing_reset)) }
             }
-            if (state.finished) Text(stringResource(R.string.breathing_done), style = MaterialTheme.typography.bodyLarge)
+            if (finished) Text(stringResource(R.string.breathing_done), style = MaterialTheme.typography.bodyLarge)
             Text(
                 stringResource(R.string.breathing_note),
                 style = MaterialTheme.typography.bodySmall,
@@ -197,6 +197,25 @@ private fun BreathingScreen(onBack: () -> Unit) {
         }
     }
 }
+
+/** The circle, the step countdown and the session timer; recomposes every frame while a session runs. */
+@Composable
+private fun BreathingDisplay(technique: BreathingTechnique, total: Long, elapsed: () -> Long, running: Boolean) {
+    val now = elapsed()
+    val state = BreathingPlan.stateAt(technique, now, total)
+    BreathingCircle(phase = state.phase, progress = state.progress, active = running || now > 0) {
+        Text(stringResource(state.phase.labelRes()), style = MaterialTheme.typography.titleLarge)
+        Text(state.secondsLeft.toString(), style = MaterialTheme.typography.displayMedium)
+    }
+    // Rounded up, like the step countdown: 3:00 right after the start, 0:01 in the last second.
+    val remainingSeconds = (((total - now).coerceAtLeast(0) + MILLIS_PER_SECOND - 1) / MILLIS_PER_SECOND).toInt()
+    Text(
+        stringResource(R.string.breathing_remaining, remainingSeconds / SECONDS_PER_MINUTE, remainingSeconds % SECONDS_PER_MINUTE),
+        style = MaterialTheme.typography.titleMedium,
+    )
+}
+
+private fun BreathState.stepKey() = phase to cycle
 
 @Composable
 private fun BreathingCircle(phase: BreathPhase, progress: Float, active: Boolean, content: @Composable () -> Unit) {
@@ -268,7 +287,8 @@ private fun BreathPhase.labelRes() = when (this) {
 }
 
 private const val MILLIS_PER_SECOND = 1_000L
-private const val MILLIS_PER_MINUTE = 60_000L
+/** Longer gaps between frames (the app was in the background) are not counted as breathing time. */
+private const val MAX_FRAME_GAP_MILLIS = 200L
 private const val SECONDS_PER_MINUTE = 60
 private const val MIN_SCALE = 0.55f
 private const val MID_SCALE = 0.75f
