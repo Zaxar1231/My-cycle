@@ -50,6 +50,7 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerView
 import io.github.zaxar1231.mycycle.core.domain.pet.PetConstants
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItems
+import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
 import io.github.zaxar1231.mycycle.core.domain.pet.PetRules
 import io.github.zaxar1231.mycycle.core.domain.pet.SharedPet
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
@@ -60,6 +61,7 @@ import io.github.zaxar1231.mycycle.core.ui.pet.PetPicture
 import io.github.zaxar1231.mycycle.core.ui.pet.nameRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
@@ -173,7 +175,10 @@ private fun SharedPetCard(pet: SharedPet, viewModel: PartnerCycleViewModel) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.partner_pet_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.fillMaxWidth())
             val name = stringResource(pet.type.nameRes())
-            PetPicture(PetLook(pet.type, pet.mood, worn), stringResource(R.string.partner_pet_description, name, pet.level), Modifier.size(PET_SIZE))
+            // The owner's clock is not shared: at night on this phone the pet sleeps.
+            val hour = LocalTime.now().hour
+            val mood = if (hour >= PetConstants.SLEEP_HOUR || hour < PetConstants.WAKE_HOUR) PetMood.SLEEPY else pet.mood
+            PetPicture(PetLook(pet.type, mood, worn), stringResource(R.string.partner_pet_description, name, pet.level), Modifier.size(PET_SIZE))
             Text(stringResource(R.string.partner_pet_level, name, pet.level), style = MaterialTheme.typography.bodyMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = viewModel::feed, enabled = !fedToday) {

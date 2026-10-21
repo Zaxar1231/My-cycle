@@ -29,7 +29,10 @@ data class PartnerSnapshot(
     /** Logged on [date]. */
     val moods: Set<Mood> = emptySet(),
     val symptoms: Set<Symptom> = emptySet(),
-    /** The shared pet; its mood is worked out only from what the permissions share. */
+    /**
+     * The shared pet, with [PartnerPermission.PET]; its mood is worked out only from what the
+     * permissions share. The owner's clock is left out (the partner's phone shows night itself).
+     */
     val pet: SharedPet? = null,
 )
 
@@ -50,13 +53,14 @@ data class PartnerView(
 )
 
 object PartnerShare {
+    private const val NOON = 12
+
     fun snapshot(
         prediction: CyclePrediction,
         todayLog: DayLog?,
         permissions: Set<PartnerPermission>,
         today: LocalDate,
         pet: Pet? = null,
-        hour: Int = NOON,
     ): PartnerSnapshot {
         val status = prediction.today
         val phase = PartnerPermission.PHASE in permissions && status != null
@@ -64,13 +68,13 @@ object PartnerShare {
         val log = todayLog?.takeIf { it.date == today }
         val moods = if (PartnerPermission.MOOD in permissions) log?.moods.orEmpty() else emptySet()
         // A hot water bottle would tell the period, so the pet only knows what the partner may see.
-        val sharedPet = pet?.let {
+        val sharedPet = pet?.takeIf { PartnerPermission.PET in permissions }?.let {
             SharedPet(
                 type = it.type,
                 level = it.level,
                 worn = it.equippedItems,
                 ownedItems = it.ownedItems,
-                mood = PetRules.mood(status?.phase?.takeIf { phase }, moods, hour),
+                mood = PetRules.mood(status?.phase?.takeIf { phase }, moods, NOON),
             )
         }
         return PartnerSnapshot(
@@ -117,8 +121,6 @@ object PartnerShare {
      * The period start to remind the partner about today, or null. A reminder goes out once per
      * period, from [CycleConstants.PARTNER_NOTICE_DAYS_BEFORE] days before it to the day itself.
      */
-    private const val NOON = 12
-
     fun noticeFor(snapshot: PartnerSnapshot, today: LocalDate, lastNotice: LocalDate?): LocalDate? {
         val start = snapshot.nextPeriodStart ?: return null
         if (start == lastNotice) return null

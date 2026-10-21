@@ -287,28 +287,27 @@ class SupabasePartnerRepository @Inject constructor(
         PartnerResult.Done
     }
 
-    override suspend fun takeCare(): List<PetCare> = try {
-        val link = lock.withLock { current() }?.takeIf { it.role == Role.SHARING }
-        val bearer = if (link != null) accounts.accessToken() else null
-        if (link == null || bearer == null) {
-            emptyList()
-        } else {
-            val response = http.request("GET", "/rest/v1/partner_pet_care?select=id,payload&link_id=eq.${link.linkId}", bearer = bearer)
-            val ids = if (response.ok) PartnerErrors.column(response.body, "id") else emptyList()
-            val payloads = if (response.ok) PartnerErrors.column(response.body, "payload") else emptyList()
-            val cares = payloads.mapNotNull { payload ->
-                PartnerCrypto.open(link.keyBytes(), careAad(link.linkId), payload)?.let(PartnerCodec::decodeCare)
+    override suspend fun takeCare(apply: suspend (List<PetCare>) -> Boolean) {
+        try {
+            val link = lock.withLock { current() }?.takeIf { it.role == Role.SHARING }
+            val bearer = if (link != null) accounts.accessToken() else null
+            if (link != null && bearer != null) {
+                val response = http.request("GET", "/rest/v1/partner_pet_care?select=id,payload&link_id=eq.${link.linkId}&limit=$CARE_BATCH", bearer = bearer)
+                val ids = if (response.ok) PartnerErrors.column(response.body, "id") else emptyList()
+                val payloads = if (response.ok) PartnerErrors.column(response.body, "payload") else emptyList()
+                val cares = payloads.mapNotNull { payload ->
+                    PartnerCrypto.open(link.keyBytes(), careAad(link.linkId), payload)?.let(PartnerCodec::decodeCare)
+                }
+                // Removed only once applied; applying twice is harmless, the limits catch repeats.
+                if (ids.isNotEmpty() && apply(cares)) {
+                    http.request("DELETE", "/rest/v1/partner_pet_care?id=in.(${ids.joinToString(",")})", bearer = bearer)
+                }
             }
-            // Taken care goes away; the limits are checked again on this phone when it is applied.
-            if (ids.isNotEmpty()) {
-                http.request("DELETE", "/rest/v1/partner_pet_care?id=in.(${ids.joinToString(",")})", bearer = bearer)
-            }
-            cares
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Offline or a damaged row: the care stays queued for the next try.
         }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        emptyList()
     }
 
     override suspend fun lastNotice(): LocalDate? = lock.withLock { current() }?.lastNotice.toDate()
@@ -378,6 +377,9 @@ class SupabasePartnerRepository @Inject constructor(
     private companion object {
         const val PREFER = "Prefer"
         const val RETURN_MINIMAL = "return=minimal"
+
+        /** Care rows read at a time; the server keeps at most a few per link anyway. */
+        const val CARE_BATCH = 50
 
         /** A little under the server's day, so the phone never shows a code the server already dropped. */
         const val INVITE_LIFETIME_MILLIS = 23 * 60 * 60 * 1000L

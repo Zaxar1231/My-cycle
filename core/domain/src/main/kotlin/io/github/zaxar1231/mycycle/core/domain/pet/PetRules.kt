@@ -22,6 +22,9 @@ object PetConstants {
     const val PARTNER_FEED_XP = 10
     const val PARTNER_GIFT_DAYS = 7
 
+    /** Care older than this many days, or dated after tomorrow, is not applied. */
+    const val PARTNER_CARE_MAX_AGE_DAYS = 7L
+
     /** From this hour until [WAKE_HOUR] the pet sleeps. */
     const val SLEEP_HOUR = 23
     const val WAKE_HOUR = 6

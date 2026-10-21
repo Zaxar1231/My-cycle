@@ -9,9 +9,29 @@ create table if not exists public.partner_pet_care (
     id uuid primary key default gen_random_uuid(),
     link_id uuid not null references public.partner_links (id) on delete cascade,
     sender uuid not null default auth.uid() references auth.users (id) on delete cascade,
-    payload text not null
+    payload text not null check (length(payload) <= 4096)
 );
 create index if not exists partner_pet_care_link on public.partner_pet_care (link_id);
+
+-- At most a few waiting messages per link, so a changed app cannot flood the queue.
+create or replace function public.partner_pet_care_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if (select count(*) from public.partner_pet_care where link_id = new.link_id) >= 20 then
+        raise exception 'care_queue_full';
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists partner_pet_care_limit on public.partner_pet_care;
+create trigger partner_pet_care_limit
+    before insert on public.partner_pet_care
+    for each row execute function public.partner_pet_care_limit();
 
 alter table public.partner_pet_care enable row level security;
 

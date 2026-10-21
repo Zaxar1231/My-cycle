@@ -247,6 +247,7 @@ private fun PartnerPermission.labelRes() = when (this) {
     PartnerPermission.MOOD -> R.string.partner_share_mood
     PartnerPermission.SYMPTOMS -> R.string.partner_share_symptoms
     PartnerPermission.FERTILITY -> R.string.partner_share_fertility
+    PartnerPermission.PET -> R.string.partner_share_pet
 }
 
 internal fun PartnerError.messageRes() = when (this) {

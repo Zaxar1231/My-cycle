@@ -6,10 +6,18 @@ import java.time.Instant
 import java.time.LocalDate
 
 /** What the person who tracks the cycle lets the partner see. Notes, sex and weight are never shared. */
-enum class PartnerPermission { PHASE, MOOD, SYMPTOMS, FERTILITY }
+enum class PartnerPermission {
+    PHASE,
+    MOOD,
+    SYMPTOMS,
+    FERTILITY,
 
-/** Shared by default: only the phase and the period forecast; everything else is opt-in. */
-val DEFAULT_PARTNER_PERMISSIONS: Set<PartnerPermission> = setOf(PartnerPermission.PHASE)
+    /** The shared pet: its look and level (which grows with logging), never the logs themselves. */
+    PET,
+}
+
+/** Shared by default: the phase with the period forecast, and the pet; everything else is opt-in. */
+val DEFAULT_PARTNER_PERMISSIONS: Set<PartnerPermission> = setOf(PartnerPermission.PHASE, PartnerPermission.PET)
 
 sealed interface PartnerState {
     /** The build has no server configured. */
@@ -111,8 +119,11 @@ interface PartnerRepository {
     /** Partner: sends care for the shared pet, encrypted like everything else. */
     suspend fun sendCare(care: PetCare): PartnerResult
 
-    /** Owner: downloads the partner's care for the pet and removes it from the server. */
-    suspend fun takeCare(): List<PetCare>
+    /**
+     * Owner: downloads the partner's care for the pet and hands it to [apply]; it is removed from
+     * the server only when [apply] returns true, so nothing is lost if applying fails.
+     */
+    suspend fun takeCare(apply: suspend (List<PetCare>) -> Boolean)
 
     /** Partner: the period start the last reminder was about, so each period is announced once. */
     suspend fun lastNotice(): LocalDate?

@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
 import kotlin.random.Random
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -75,26 +74,22 @@ class PartnerSync @Inject constructor(
         }
         // Notices an accepted invitation or a link the other side removed while the app was closed.
         scope.launch { partners.refresh() }
-        // The partner's care for the shared pet arrives while the app is open, too.
+        // The partner's care is picked up when the owner starts sharing or opens the app, and by the
+        // background worker; no constant polling, so the server learns little about app use.
         scope.launch {
-            partners.state.map { it is PartnerState.Sharing }.distinctUntilChanged().collectLatest { sharing ->
-                while (sharing) {
-                    takeCare()
-                    delay(CARE_CHECK_MILLIS)
-                }
-            }
+            partners.state.map { it is PartnerState.Sharing }.distinctUntilChanged().collect { sharing -> if (sharing) takeCare() }
         }
     }
 
     private suspend fun takeCare() {
-        val cares = partners.takeCare()
-        if (cares.isNotEmpty()) {
+        partners.takeCare { cares ->
             try {
-                applyCare(cares)
+                applyCare(cares) != null
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // The pet stays as it was; nothing else depends on it.
+                // Kept on the server for the next try.
+                false
             }
         }
     }
@@ -129,19 +124,19 @@ class PartnerSync @Inject constructor(
     }
 
     private suspend fun snapshotOn(today: LocalDate, permissions: Set<PartnerPermission>): PartnerSnapshot =
-        PartnerShare.snapshot(observePrediction(today).first(), dayLogs.get(today), permissions, today, pets.pet(), LocalTime.now().hour)
+        PartnerShare.snapshot(observePrediction(today).first(), dayLogs.get(today), permissions, today, pets.pet())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun snapshots(permissions: Set<PartnerPermission>): Flow<PartnerSnapshot> = moments().flatMapLatest { (today, hour) ->
+    private fun snapshots(permissions: Set<PartnerPermission>): Flow<PartnerSnapshot> = todays().flatMapLatest { today ->
         combine(observePrediction(today), dayLogs.observe(today), pets.observePet()) { prediction, log, pet ->
-            PartnerShare.snapshot(prediction, log, permissions, today, pet, hour)
+            PartnerShare.snapshot(prediction, log, permissions, today, pet)
         }
     }
 
-    /** Today's date and the hour, again every quarter of an hour: the pet sleeps at night. */
-    private fun moments(): Flow<Pair<LocalDate, Int>> = flow {
+    /** Today's date, again after midnight. */
+    private fun todays(): Flow<LocalDate> = flow {
         while (true) {
-            emit(dates.today() to LocalTime.now().hour)
+            emit(dates.today())
             delay(DATE_CHECK_MILLIS)
         }
     }.distinctUntilChanged()
@@ -150,6 +145,5 @@ class PartnerSync @Inject constructor(
         const val UPLOAD_DELAY_MILLIS = 60_000L
         const val UPLOAD_JITTER_MILLIS = 4 * 60_000L
         const val DATE_CHECK_MILLIS = 15 * 60 * 1000L
-        const val CARE_CHECK_MILLIS = 15 * 60 * 1000L
     }
 }
