@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="partner_channel">Партнёрский режим</string>
+    <string name="partner_notice_public">Напоминание Twilight Cycle</string>
     <string name="partner_notice_title">Скоро начнутся месячные</string>
     <string name="partner_notice_today">Ожидаются примерно сегодня. Будь внимательнее.</string>
     <plurals name="partner_notice_days">

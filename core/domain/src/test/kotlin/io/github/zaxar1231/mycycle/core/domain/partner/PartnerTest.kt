@@ -49,6 +49,16 @@ class PartnerTest {
     }
 
     @Test
+    fun `the verification code depends on the key and the partner`() {
+        val key = ByteArray(InviteCode.KEY_BYTES) { 7 }
+        val code = PartnerVerification.code(key, "partner-a")
+        assertTrue(Regex("\\d{3} \\d{3}").matches(code))
+        assertEquals(code, PartnerVerification.code(key.copyOf(), "partner-a"))
+        assertFalse(code == PartnerVerification.code(key, "partner-b"))
+        assertFalse(code == PartnerVerification.code(ByteArray(InviteCode.KEY_BYTES) { 8 }, "partner-a"))
+    }
+
+    @Test
     fun `broken codes are rejected`() {
         val code = InviteCode.format(Invite(UUID.randomUUID(), ByteArray(InviteCode.KEY_BYTES)))
         assertNull(InviteCode.parse(code.dropLast(1)))

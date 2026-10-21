@@ -11,6 +11,7 @@ import io.github.zaxar1231.mycycle.core.domain.partner.PartnerRepository
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerResult
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerSnapshot
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerState
+import io.github.zaxar1231.mycycle.core.domain.partner.PartnerVerification
 import io.github.zaxar1231.mycycle.core.domain.partner.SharedCycle
 import io.github.zaxar1231.mycycle.core.sync.SupabaseHttp
 import io.github.zaxar1231.mycycle.core.sync.partner.StoredLink.Role
@@ -55,29 +56,32 @@ class SupabasePartnerRepository @Inject constructor(
     override val state: StateFlow<PartnerState> = combine(accounts.account, stored, orphaned, ended) { a, l, o, e -> stateOf(a, l, o, e) }
         .stateIn(scope, SharingStarted.Eagerly, stateOf(accounts.account.value, stored.value, orphaned.value, ended.value))
 
-    private fun stateOf(account: Account?, link: StoredLink?, orphan: Boolean, endedByOther: Boolean): PartnerState {
+    private fun stateOf(account: Account?, links: Map<String, StoredLink>, orphan: Boolean, endedByOther: Boolean): PartnerState {
         if (!http.isConfigured) return PartnerState.Unavailable
         if (account == null) return PartnerState.SignedOut
-        val mine = link?.takeIf { it.userId == account.userId }
+        val mine = links[account.userId]
         return when (mine?.role) {
             Role.INVITING -> PartnerState.Inviting(InviteCode.format(mine.invite()), Instant.ofEpochMilli(mine.expiresAt))
+            Role.CONFIRMING -> PartnerState.Confirming(PartnerVerification.code(mine.keyBytes(), mine.partnerId.orEmpty()))
             Role.SHARING -> PartnerState.Sharing(mine.permissionSet())
-            Role.FOLLOWING -> PartnerState.Following(mine.notify)
+            Role.FOLLOWING -> PartnerState.Following(mine.notify, PartnerVerification.code(mine.keyBytes(), account.userId))
             null -> if (orphan) PartnerState.Orphaned else PartnerState.None(endedByOther)
         }
     }
 
     override suspend fun refresh(): PartnerResult = call {
         val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
-        val response = http.request("GET", "/rest/v1/partner_links?select=id", bearer = bearer)
+        val response = http.request("GET", "/rest/v1/partner_links?select=id,partner", bearer = bearer)
         if (!response.ok) return@call failed(response)
-        val links = PartnerErrors.column(response.body, "id").toSet()
+        val partnersById = PartnerErrors.column(response.body, "id").zip(PartnerErrors.column(response.body, "partner")).toMap()
+        val links = partnersById.keys
         lock.withLock {
             val link = current()
             when {
                 link == null -> orphaned.value = links.isNotEmpty()
                 link.role == Role.INVITING -> when {
-                    link.linkId in links -> save(link.copy(role = Role.SHARING, permissions = DEFAULT_PARTNER_PERMISSIONS.names()))
+                    // Accepted: nothing is shared until the owner compares the verification codes.
+                    link.linkId in links -> save(link.copy(role = Role.CONFIRMING, partnerId = partnersById[link.linkId]))
                     // An old link of this account blocks the invitation; it has to be removed first.
                     links.isNotEmpty() -> {
                         save(null)
@@ -98,9 +102,7 @@ class SupabasePartnerRepository @Inject constructor(
     override suspend fun createInvite(): PartnerResult = call {
         lock.withLock {
             val account = accounts.account.value ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
-            if (current()?.role.let { it == Role.SHARING || it == Role.FOLLOWING }) {
-                return@call PartnerResult.Failed(PartnerError.ALREADY_LINKED)
-            }
+            if (current()?.isLinked() == true) return@call PartnerResult.Failed(PartnerError.ALREADY_LINKED)
             val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
             // A new invitation replaces the old ones, so an earlier code stops working.
             val cleared = http.request("DELETE", "/rest/v1/partner_invites?owner=eq.${account.userId}", bearer = bearer)
@@ -128,7 +130,7 @@ class SupabasePartnerRepository @Inject constructor(
         lock.withLock {
             val link = current()?.takeIf { it.role == Role.INVITING } ?: return
             save(null)
-            // Best effort: the code is useless without this phone anyway, and the server drops it after a day.
+            // Best effort: the server refuses an invitation older than a day and clears such rows on the next accept.
             runCatching {
                 val bearer = accounts.accessToken() ?: return
                 http.request("DELETE", "/rest/v1/partner_invites?id=eq.${link.linkId}", bearer = bearer)
@@ -140,9 +142,7 @@ class SupabasePartnerRepository @Inject constructor(
         val invite = InviteCode.parse(code) ?: return@call PartnerResult.Failed(PartnerError.INVALID_CODE)
         lock.withLock {
             val account = accounts.account.value ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
-            if (current()?.role.let { it == Role.SHARING || it == Role.FOLLOWING }) {
-                return@call PartnerResult.Failed(PartnerError.ALREADY_LINKED)
-            }
+            if (current()?.isLinked() == true) return@call PartnerResult.Failed(PartnerError.ALREADY_LINKED)
             val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
             val body = buildJsonObject { put("invite_id", invite.linkId.toString()) }.toString()
             val response = http.request("POST", "/rest/v1/rpc/accept_partner_invite", body, bearer)
@@ -160,6 +160,9 @@ class SupabasePartnerRepository @Inject constructor(
             PartnerResult.Done
         }
     }
+
+    override suspend fun confirmPartner() =
+        update(Role.CONFIRMING) { it.copy(role = Role.SHARING, permissions = DEFAULT_PARTNER_PERMISSIONS.names()) }
 
     override suspend fun setPermissions(permissions: Set<PartnerPermission>) = update(Role.SHARING) { it.copy(permissions = permissions.names()) }
 
@@ -186,10 +189,10 @@ class SupabasePartnerRepository @Inject constructor(
             val link = lock.withLock { current() }?.takeIf { it.role == Role.SHARING } ?: return@call PartnerResult.Done
             val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
             val payload = PartnerCrypto.seal(link.keyBytes(), link.linkId, PartnerCodec.encode(snapshot))
+            // No timestamp: the snapshot carries its date inside the ciphertext.
             val body = buildJsonObject {
                 put("link_id", link.linkId)
                 put("payload", payload)
-                put("updated_at", Instant.now().toString())
             }.toString()
             val headers = mapOf(PREFER to "resolution=merge-duplicates,$RETURN_MINIMAL")
             val response = http.request("POST", "/rest/v1/partner_shares?on_conflict=link_id", body, bearer, headers)
@@ -232,13 +235,18 @@ class SupabasePartnerRepository @Inject constructor(
     /** The stored link of the signed-in account. */
     private fun current(): StoredLink? {
         val account = accounts.account.value ?: return null
-        return stored.value?.takeIf { it.userId == account.userId }
+        return stored.value[account.userId]
     }
 
+    /** Replaces (or with null removes) the signed-in account's link; other accounts' links stay. */
     private fun save(link: StoredLink?) {
-        if (link == null) store.clear() else store.write(link)
-        stored.value = link
+        val account = accounts.account.value ?: return
+        val links = if (link == null) stored.value - account.userId else stored.value + (account.userId to link)
+        store.write(links)
+        stored.value = links
     }
+
+    private fun StoredLink.isLinked() = role == Role.CONFIRMING || role == Role.SHARING || role == Role.FOLLOWING
 
     private suspend fun update(role: Role, change: (StoredLink) -> StoredLink) {
         lock.withLock {

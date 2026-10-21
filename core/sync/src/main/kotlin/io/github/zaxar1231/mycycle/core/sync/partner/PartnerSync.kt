@@ -16,13 +16,11 @@ import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,13 +28,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.random.Random
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Keeps the partner up to date. While the app runs, every change to the cycle, today's log or the
- * permissions is shared a moment later; the background worker covers the time the app is closed
- * and reminds the partner before a period.
+ * Keeps the partner up to date. While the app runs, changes to the cycle, today's log or the
+ * permissions are shared a few random minutes later, so the upload time does not tell the server
+ * when something was logged; the background worker covers the time the app is closed and
+ * reminds the partner before a period.
  */
 @Singleton
 class PartnerSync @Inject constructor(
@@ -48,7 +48,6 @@ class PartnerSync @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
             partners.state.map { it is PartnerState.Sharing || it is PartnerState.Following }.distinctUntilChanged().collect { linked ->
@@ -58,7 +57,11 @@ class PartnerSync @Inject constructor(
         scope.launch {
             partners.state.map { (it as? PartnerState.Sharing)?.permissions }.distinctUntilChanged().collectLatest { permissions ->
                 if (permissions == null) return@collectLatest
-                snapshots(permissions).distinctUntilChanged().debounce(SETTLE_MILLIS).collect { partners.share(it) }
+                snapshots(permissions).distinctUntilChanged().collectLatest { snapshot ->
+                    // A newer change restarts the wait, so quick edits go out as one upload.
+                    delay(UPLOAD_DELAY_MILLIS + Random.nextLong(UPLOAD_JITTER_MILLIS))
+                    partners.share(snapshot)
+                }
             }
         }
         // Notices an accepted invitation or a link the other side removed while the app was closed.
@@ -112,8 +115,8 @@ class PartnerSync @Inject constructor(
     }.distinctUntilChanged()
 
     private companion object {
-        /** Several quick edits in a row go out as one upload. */
-        const val SETTLE_MILLIS = 3_000L
+        const val UPLOAD_DELAY_MILLIS = 60_000L
+        const val UPLOAD_JITTER_MILLIS = 4 * 60_000L
         const val DATE_CHECK_MILLIS = 15 * 60 * 1000L
     }
 }

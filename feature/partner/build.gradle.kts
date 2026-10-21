@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:domain"))
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)

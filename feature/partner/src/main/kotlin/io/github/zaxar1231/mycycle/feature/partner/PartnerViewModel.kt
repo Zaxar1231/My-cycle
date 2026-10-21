@@ -33,6 +33,10 @@ class PartnerViewModel @Inject constructor(
 
     fun unlink() = perform { partners.unlink() }
 
+    fun confirmPartner() {
+        viewModelScope.launch { partners.confirmPartner() }
+    }
+
     fun cancelInvite() {
         viewModelScope.launch { partners.cancelInvite() }
     }

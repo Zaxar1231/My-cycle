@@ -46,3 +46,19 @@ object InviteCode {
         return Invite(id, key)
     }
 }
+
+/**
+ * A six-digit code both phones show after joining: derived from the shared key and the partner's
+ * account id, so it matches only when the intended partner holds the key.
+ */
+object PartnerVerification {
+    private const val DIGITS = 1_000_000
+
+    fun code(key: ByteArray, partnerUserId: String): String {
+        val mac = javax.crypto.Mac.getInstance("HmacSHA256").apply { init(javax.crypto.spec.SecretKeySpec(key, "HmacSHA256")) }
+        val hash = mac.doFinal("verify:$partnerUserId".toByteArray(Charsets.UTF_8))
+        val number = ByteBuffer.wrap(hash, 0, Int.SIZE_BYTES).int.toLong() and 0xFFFFFFFFL
+        val digits = (number % DIGITS).toString().padStart(6, '0')
+        return digits.substring(0, 3) + " " + digits.substring(3)
+    }
+}

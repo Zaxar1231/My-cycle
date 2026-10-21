@@ -23,11 +23,17 @@ sealed interface PartnerState {
     /** An invitation is waiting for the partner. [code] holds the encryption key: it is shown, never uploaded. */
     data class Inviting(val code: String, val expiresAt: Instant) : PartnerState
 
+    /**
+     * Someone accepted the invitation. Nothing is shared until the owner checks that [verification]
+     * matches the code on the partner's phone, so a leaked invitation cannot be used unnoticed.
+     */
+    data class Confirming(val verification: String) : PartnerState
+
     /** This phone tracks the cycle and shares it with a partner. */
     data class Sharing(val permissions: Set<PartnerPermission>) : PartnerState
 
-    /** This phone follows the cycle of the person who invited it. */
-    data class Following(val notify: Boolean) : PartnerState
+    /** This phone follows the cycle of the person who invited it; [verification] is shown to compare. */
+    data class Following(val notify: Boolean, val verification: String) : PartnerState
 
     /**
      * The server has a link for this account but this phone has no key for it (reinstall, another
@@ -78,6 +84,9 @@ interface PartnerRepository {
     suspend fun createInvite(): PartnerResult
     suspend fun cancelInvite()
     suspend fun acceptInvite(code: String): PartnerResult
+
+    /** Owner: the verification codes match, sharing starts. */
+    suspend fun confirmPartner()
     suspend fun setPermissions(permissions: Set<PartnerPermission>)
     suspend fun setNotify(enabled: Boolean)
 

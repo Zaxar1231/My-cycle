@@ -11,7 +11,14 @@
     <string name="partner_join">Подключиться</string>
     <string name="partner_invite_hint">Пусть партнёр отсканирует QR-код камерой своего телефона и откроет ссылку в Twilight Cycle. Или отправьте код: его нужно вставить в настройках, в разделе «Партнёрский режим». Код действует сутки и подходит один раз.</string>
     <string name="partner_qr_description">QR-код приглашения</string>
-    <string name="partner_key_warning">В коде ключ шифрования. Передавайте его только партнёру и не публикуйте.</string>
+    <string name="partner_key_warning">В коде ключ шифрования. Надёжнее всего показать QR-код лично: отправленный текст остаётся в переписке. Не публикуйте код.</string>
+    <string name="partner_copy">Скопировать код</string>
+    <string name="partner_from_link">Код пришёл по ссылке. Подключайтесь, только если вас пригласил знакомый человек.</string>
+    <string name="partner_confirm_title">Кто-то принял приглашение.</string>
+    <string name="partner_confirm_hint">Сравните этот код с кодом на телефоне партнёра (Настройки → Партнёрский режим). Пока вы не подтвердите, ничего не передаётся. Если коды разные или партнёр ещё не подключался, отвяжите и пригласите заново.</string>
+    <string name="partner_confirm">Коды совпадают, это мой партнёр</string>
+    <string name="partner_verification">Код проверки</string>
+    <string name="partner_verification_hint">Этот же код должен быть на телефоне того, кто вас пригласил.</string>
     <string name="partner_share">Отправить код</string>
     <string name="partner_share_text">Приглашение в Twilight Cycle. Открой ссылку на телефоне с приложением: %1$s\n\nИли вставь код в настройках, раздел «Партнёрский режим»: %2$s</string>
     <string name="partner_cancel_invite">Отменить</string>
@@ -42,7 +49,7 @@
     <string name="partner_back">Назад</string>
     <string name="partner_reload">Обновить</string>
     <string name="partner_retry">Повторить</string>
-    <string name="partner_nothing_yet">Пока ничего не передано. Данные появятся, когда телефон партнёра выйдет в интернет.</string>
+    <string name="partner_nothing_yet">Пока ничего не передано. Данные появятся, когда пригласивший сверит код проверки и его телефон выйдет в интернет.</string>
     <string name="partner_day">День %1$d</string>
     <string name="partner_phase_hidden">Фазу и прогноз партнёр не показывает.</string>
     <string name="partner_period_today">Месячные ожидаются примерно сегодня.</string>

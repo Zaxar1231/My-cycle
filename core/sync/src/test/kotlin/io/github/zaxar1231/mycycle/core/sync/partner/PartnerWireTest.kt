@@ -34,6 +34,16 @@ class PartnerWireTest {
     }
 
     @Test
+    fun `every snapshot has the same payload length`() {
+        val key = PartnerCrypto.newKey()
+        val empty = PartnerCrypto.seal(key, "link-1", PartnerCodec.encode(PartnerSnapshot(date = snapshot.date)))
+        val full = PartnerCrypto.seal(key, "link-1", PartnerCodec.encode(snapshot.copy(moods = Mood.entries.toSet(), symptoms = Symptom.entries.toSet())))
+        val luteal = PartnerCrypto.seal(key, "link-1", PartnerCodec.encode(snapshot.copy(phase = CyclePhase.LUTEAL, cycleDay = 3)))
+        assertEquals(empty.length, full.length)
+        assertEquals(empty.length, luteal.length)
+    }
+
+    @Test
     fun `another key, another link or a changed byte cannot open it`() {
         val key = PartnerCrypto.newKey()
         val sealed = PartnerCrypto.seal(key, "link-1", PartnerCodec.encode(snapshot))

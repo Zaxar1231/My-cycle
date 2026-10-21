@@ -1,6 +1,12 @@
 package io.github.zaxar1231.mycycle.feature.partner
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.os.PersistableBundle
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,6 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -58,6 +65,7 @@ fun PartnerSection(onOpenPartner: () -> Unit, viewModel: PartnerViewModel = hilt
             PartnerState.SignedOut -> Note(stringResource(R.string.partner_sign_in_first))
             is PartnerState.None -> NotLinked(s.endedByOther, viewModel, form.busy)
             is PartnerState.Inviting -> Inviting(s, viewModel)
+            is PartnerState.Confirming -> Confirming(s, viewModel, form.busy)
             is PartnerState.Sharing -> Sharing(s, viewModel, form.busy)
             is PartnerState.Following -> Following(s, onOpenPartner, viewModel, form.busy)
             PartnerState.Orphaned -> {
@@ -73,9 +81,11 @@ fun PartnerSection(onOpenPartner: () -> Unit, viewModel: PartnerViewModel = hilt
 private fun NotLinked(endedByOther: Boolean, viewModel: PartnerViewModel, busy: Boolean) {
     val incoming by viewModel.incomingCode.collectAsStateWithLifecycle()
     var code by rememberSaveable { mutableStateOf("") }
+    var fromLink by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(incoming) {
         incoming?.let {
             code = it
+            fromLink = true
             viewModel.consumeIncoming()
         }
     }
@@ -86,12 +96,17 @@ private fun NotLinked(endedByOther: Boolean, viewModel: PartnerViewModel, busy: 
     Text(stringResource(R.string.partner_have_code), style = MaterialTheme.typography.titleSmall)
     OutlinedTextField(
         value = code,
-        onValueChange = { code = it.trim() },
+        onValueChange = {
+            code = it.trim()
+            fromLink = false
+        },
         label = { Text(stringResource(R.string.partner_code)) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        // The code holds the key: no suggestions, no learning by the keyboard.
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false, imeAction = ImeAction.Done),
         modifier = Modifier.fillMaxWidth(),
     )
+    if (fromLink) Note(stringResource(R.string.partner_from_link))
     if (busy) {
         CircularProgressIndicator()
     } else {
@@ -105,6 +120,13 @@ private fun NotLinked(endedByOther: Boolean, viewModel: PartnerViewModel, busy: 
 private fun Inviting(state: PartnerState.Inviting, viewModel: PartnerViewModel) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // The code holds the key: no screenshots or recents preview while it is shown.
+    val window = LocalActivity.current?.window
+    DisposableEffect(window) {
+        val wasSecure = window != null && window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0
+        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { if (!wasSecure) window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+    }
     // Checks every few seconds, while the screen is visible, whether the partner has joined.
     LaunchedEffect(state.code) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -119,10 +141,10 @@ private fun Inviting(state: PartnerState.Inviting, viewModel: PartnerViewModel) 
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         QrCode(link, stringResource(R.string.partner_qr_description))
     }
-    SelectionContainer {
-        Text(state.code, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
-    }
+    Text(state.code, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
     Note(stringResource(R.string.partner_key_warning))
+    val copyLabel = stringResource(R.string.partner_code)
+    TextButton(onClick = { copySensitive(context, copyLabel, state.code) }) { Text(stringResource(R.string.partner_copy)) }
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         val shareText = stringResource(R.string.partner_share_text, link, state.code)
         val chooserTitle = stringResource(R.string.partner_share)
@@ -135,6 +157,24 @@ private fun Inviting(state: PartnerState.Inviting, viewModel: PartnerViewModel) 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
         Text(stringResource(R.string.partner_waiting), style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun Confirming(state: PartnerState.Confirming, viewModel: PartnerViewModel, busy: Boolean) {
+    Text(stringResource(R.string.partner_confirm_title), style = MaterialTheme.typography.bodyLarge)
+    VerificationCode(state.verification)
+    Note(stringResource(R.string.partner_confirm_hint))
+    Button(onClick = viewModel::confirmPartner, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.partner_confirm))
+    }
+    UnlinkButton(viewModel, busy)
+}
+
+@Composable
+private fun VerificationCode(code: String) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(code, style = MaterialTheme.typography.displaySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -158,6 +198,9 @@ private fun Following(state: PartnerState.Following, onOpenPartner: () -> Unit, 
     Text(stringResource(R.string.partner_linked_partner), style = MaterialTheme.typography.bodyLarge)
     Button(onClick = onOpenPartner, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.partner_open)) }
     SwitchRow(stringResource(R.string.partner_notify), state.notify, viewModel::setNotify)
+    Text(stringResource(R.string.partner_verification), style = MaterialTheme.typography.titleSmall)
+    VerificationCode(state.verification)
+    Note(stringResource(R.string.partner_verification_hint))
     UnlinkButton(viewModel, busy)
 }
 
@@ -217,4 +260,14 @@ internal fun PartnerError.messageRes() = when (this) {
     PartnerError.UNKNOWN -> R.string.partner_error_unknown
 }
 
+/** Copies the invitation code marked as sensitive, so Android 13+ hides it in the clipboard preview. */
+private fun copySensitive(context: Context, label: String, text: String) {
+    val clip = ClipData.newPlainText(label, text)
+    clip.description.extras = PersistableBundle().apply { putBoolean(EXTRA_IS_SENSITIVE, true) }
+    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(clip)
+}
+
 private const val POLL_MILLIS = 5_000L
+
+/** ClipDescription.EXTRA_IS_SENSITIVE, spelled out: the constant exists only from API 33, the key works everywhere. */
+private const val EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE"

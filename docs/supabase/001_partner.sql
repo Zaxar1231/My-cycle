@@ -8,6 +8,7 @@
 -- people of one link.
 
 -- An invitation waiting for a partner. Only its owner can see or delete it.
+-- Expired rows are removed by accept_partner_invite(), so they do not pile up.
 create table if not exists public.partner_invites (
     id uuid primary key,
     owner uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -100,6 +101,7 @@ begin
     if auth.uid() is null then
         raise exception 'not_signed_in';
     end if;
+    delete from public.partner_invites where expires_at <= now();
     select owner into invite_owner
     from public.partner_invites
     where id = invite_id and expires_at > now()
