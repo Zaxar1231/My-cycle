@@ -39,6 +39,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.zaxar1231.mycycle.R
+import io.github.zaxar1231.mycycle.feature.account.AccountSection
+import io.github.zaxar1231.mycycle.feature.account.AccountStepContent
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
 import io.github.zaxar1231.mycycle.feature.calendar.HomeCustomizerRoute
 import io.github.zaxar1231.mycycle.feature.calendar.homeCustomizerScreen
@@ -98,6 +100,7 @@ fun TwilightAppRoot(
             onboardingScreen(
                 onFinished = { navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } } },
                 pinOffer = { PinOffer() },
+                accountStep = { onSignedIn -> AccountStepContent(onSignedIn) },
             )
             calendarScreen(
                 onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } },
@@ -119,6 +122,7 @@ fun TwilightAppRoot(
             settingsScreen(
                 appearanceSection = appearanceSection,
                 securitySection = { SecuritySection() },
+                accountSection = { AccountSection() },
                 updatesSection = updatesSection,
                 onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },
             )

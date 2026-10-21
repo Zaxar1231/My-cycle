@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_unavailable">Аккаунты в этой сборке пока не подключены. Приложение полностью работает без них.</string>
+    <string name="account_why">Аккаунт нужен только для партнёрского режима и резервной копии. Всё остальное работает без него.</string>
+    <string name="account_privacy">На сервер уходят только email и пароль. Данные о цикле и здоровье не отправляются; партнёрский режим будет передавать их только зашифрованными.</string>
+    <string name="account_signed_in">Вы вошли как %1$s</string>
+    <string name="account_sign_out">Выйти</string>
+    <string name="account_email">Email</string>
+    <string name="account_password">Пароль</string>
+    <string name="account_password_hint">Не короче 8 символов</string>
+    <string name="account_show">Показать</string>
+    <string name="account_hide">Скрыть</string>
+    <string name="account_sign_in">Войти</string>
+    <string name="account_sign_up">Создать аккаунт</string>
+    <string name="account_forgot">Забыли пароль?</string>
+    <string name="account_confirm_email">Аккаунт создан. Откройте письмо на почте и подтвердите адрес, затем войдите.</string>
+    <string name="account_reset_sent">Если такой аккаунт есть, на почту придёт ссылка для смены пароля.</string>
+    <string name="account_bad_email">Проверьте адрес почты.</string>
+    <string name="account_short_password">Пароль должен быть не короче 8 символов.</string>
+    <string name="account_error_credentials">Неверная почта или пароль.</string>
+    <string name="account_error_not_confirmed">Адрес ещё не подтверждён: откройте письмо на почте.</string>
+    <string name="account_error_exists">Аккаунт с этой почтой уже есть. Попробуйте войти.</string>
+    <string name="account_error_weak">Пароль слишком простой, придумайте другой.</string>
+    <string name="account_error_rate">Слишком много попыток. Подождите немного и попробуйте снова.</string>
+    <string name="account_error_network">Нет связи с сервером. Проверьте интернет.</string>
+    <string name="account_error_unknown">Не получилось. Попробуйте ещё раз.</string>
+</resources>

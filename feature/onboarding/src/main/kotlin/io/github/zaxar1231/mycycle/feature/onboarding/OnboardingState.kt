@@ -23,6 +23,8 @@ data class OnboardingState(
     val saving: Boolean = false,
     val finished: Boolean = false,
     val error: Boolean = false,
+    /** Signed in on the account step; the button then reads "Next" instead of "without account". */
+    val signedIn: Boolean = false,
 ) {
     /** Partners do not track a cycle, so they skip the cycle step. */
     val steps: List<OnboardingStep>

@@ -26,6 +26,7 @@ data object SettingsRoute
 fun NavGraphBuilder.settingsScreen(
     appearanceSection: @Composable () -> Unit,
     securitySection: @Composable () -> Unit,
+    accountSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
 ) {
@@ -33,6 +34,7 @@ fun NavGraphBuilder.settingsScreen(
         SettingsScreen(
             appearanceSection = appearanceSection,
             securitySection = securitySection,
+            accountSection = accountSection,
             updatesSection = updatesSection,
             onCustomizeHome = onCustomizeHome,
         )
@@ -43,6 +45,7 @@ fun NavGraphBuilder.settingsScreen(
 fun SettingsScreen(
     appearanceSection: @Composable () -> Unit,
     securitySection: @Composable () -> Unit,
+    accountSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
@@ -71,6 +74,12 @@ fun SettingsScreen(
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.settings_security), style = MaterialTheme.typography.titleMedium)
                 securitySection()
+            }
+        }
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.settings_account), style = MaterialTheme.typography.titleMedium)
+                accountSection()
             }
         }
         updatesSection()

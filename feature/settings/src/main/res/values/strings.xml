@@ -5,4 +5,5 @@
     <string name="settings_appearance">Оформление</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_customize_home">Настроить главный экран</string>
+    <string name="settings_account">Аккаунт</string>
 </resources>
