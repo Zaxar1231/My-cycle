@@ -13,4 +13,33 @@
     <string name="phase_ovulatory">Ovulatory phase</string>
     <string name="phase_luteal">Luteal phase</string>
     <string name="medical_disclaimer">Predictions are estimates, not medical advice or a method of contraception.</string>
+    <!-- Day log values, shared by the day log form, statistics and reports -->
+    <string name="period_started">Started</string>
+    <string name="period_ended">Ended</string>
+    <string name="flow_spotting">Spotting</string>
+    <string name="flow_light">Light</string>
+    <string name="flow_medium">Medium</string>
+    <string name="flow_heavy">Heavy</string>
+    <string name="mood_calm">Calm</string>
+    <string name="mood_happy">Happy</string>
+    <string name="mood_energetic">Energetic</string>
+    <string name="mood_sensitive">Sensitive</string>
+    <string name="mood_sad">Sad</string>
+    <string name="mood_anxious">Anxious</string>
+    <string name="mood_irritable">Irritable</string>
+    <string name="mood_tired">Tired</string>
+    <string name="mood_swings">Mood swings</string>
+    <string name="symptom_cramps">Lower abdominal pain</string>
+    <string name="symptom_headache">Headache</string>
+    <string name="symptom_bloating">Bloating</string>
+    <string name="symptom_acne">Acne</string>
+    <string name="symptom_tender_breasts">Breast tenderness</string>
+    <string name="symptom_fatigue">Fatigue</string>
+    <string name="symptom_sweet_cravings">Sugar cravings</string>
+    <string name="symptom_backache">Lower back pain</string>
+    <string name="symptom_nausea">Nausea</string>
+    <string name="symptom_insomnia">Insomnia</string>
+    <string name="sex_none">None</string>
+    <string name="sex_protected">Protected</string>
+    <string name="sex_unprotected">Unprotected</string>
 </resources>

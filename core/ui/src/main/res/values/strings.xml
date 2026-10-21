@@ -13,4 +13,33 @@
     <string name="phase_ovulatory">Овуляторная фаза</string>
     <string name="phase_luteal">Лютеиновая фаза</string>
     <string name="medical_disclaimer">Прогнозы приблизительны и не являются медицинской консультацией или методом контрацепции.</string>
+    <!-- Day log values, shared by the day log form, statistics and reports -->
+    <string name="period_started">Начались</string>
+    <string name="period_ended">Закончились</string>
+    <string name="flow_spotting">Мажущие</string>
+    <string name="flow_light">Слабые</string>
+    <string name="flow_medium">Средние</string>
+    <string name="flow_heavy">Обильные</string>
+    <string name="mood_calm">Спокойствие</string>
+    <string name="mood_happy">Радость</string>
+    <string name="mood_energetic">Энергия</string>
+    <string name="mood_sensitive">Чувствительность</string>
+    <string name="mood_sad">Грусть</string>
+    <string name="mood_anxious">Тревога</string>
+    <string name="mood_irritable">Раздражение</string>
+    <string name="mood_tired">Усталость</string>
+    <string name="mood_swings">Перепады</string>
+    <string name="symptom_cramps">Боль внизу живота</string>
+    <string name="symptom_headache">Головная боль</string>
+    <string name="symptom_bloating">Вздутие</string>
+    <string name="symptom_acne">Акне</string>
+    <string name="symptom_tender_breasts">Чувствительность груди</string>
+    <string name="symptom_fatigue">Усталость</string>
+    <string name="symptom_sweet_cravings">Тяга к сладкому</string>
+    <string name="symptom_backache">Боль в пояснице</string>
+    <string name="symptom_nausea">Тошнота</string>
+    <string name="symptom_insomnia">Бессонница</string>
+    <string name="sex_none">Не было</string>
+    <string name="sex_protected">Защищённый</string>
+    <string name="sex_unprotected">Незащищённый</string>
 </resources>

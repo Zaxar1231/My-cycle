@@ -46,4 +46,16 @@ object CycleConstants {
     const val MAX_TEMPERATURE_CELSIUS = 42.0
     const val MIN_WEIGHT_KG = 20.0
     const val MAX_WEIGHT_KG = 300.0
+
+    /** Statistics: completed cycles whose lengths differ by at most this many days are usually called regular. */
+    const val REGULARITY_MAX_SPREAD_DAYS = 7
+    const val MIN_CYCLES_FOR_REGULARITY = 3
+
+    /**
+     * Statistics: a symptom forms a pattern when it was logged on at least [MIN_PATTERN_OCCURRENCES] days
+     * and at least [PATTERN_MIN_SHARE] of them fall on the same [PATTERN_WINDOW_DAYS] cycle days.
+     */
+    const val MIN_PATTERN_OCCURRENCES = 3
+    const val PATTERN_WINDOW_DAYS = 2
+    const val PATTERN_MIN_SHARE = 0.5
 }
