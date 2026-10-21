@@ -11,7 +11,7 @@
     <string name="onb_welcome_text">Cycle calendar, predictions, wellbeing and a pet that grows with you. No ads, no trackers, your data is stored encrypted on this device.</string>
     <string name="onb_disclaimer">Predictions are estimates, not medical advice or a method of contraception.</string>
     <string name="onb_account_title">Account</string>
-    <string name="onb_account_text">An account is only needed for partner mode and backups, and arrives in a later update. Everything works without one for now.</string>
+    <string name="onb_account_text">An account is only needed for partner mode and backups. Everything else works the same without one; you can also sign in later in Settings.</string>
     <string name="onb_account_continue">Continue without an account</string>
     <string name="onb_role_title">Who are you?</string>
     <string name="onb_role_tracker">I track my cycle</string>

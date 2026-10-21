@@ -49,6 +49,8 @@ class OnboardingViewModel @Inject constructor(
 
     fun selectRole(role: UserRole) = _state.update { it.copy(role = role) }
 
+    fun accountReady() = _state.update { it.copy(signedIn = true) }
+
     fun setLastPeriodStart(date: LocalDate?) = _state.update { it.copy(lastPeriodStart = date) }
 
     fun setCycleLength(days: Int) = _state.update { it.copy(cycleLength = days) }

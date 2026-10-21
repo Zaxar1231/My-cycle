@@ -31,6 +31,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Build (debug + unsigned release, so R8 problems show up before merge)
+        # Public Supabase address and anon key; empty for forks, then account features stay hidden.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: ./gradlew --no-daemon test lintDebug assembleDebug assembleRelease
 
       - name: Upload debug APK

@@ -62,13 +62,25 @@ import kotlin.math.roundToInt
 @Serializable
 data object OnboardingRoute
 
-/** [pinOffer] is provided by the app, so onboarding does not depend on the security module. */
-fun NavGraphBuilder.onboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit) {
-    composable<OnboardingRoute> { OnboardingScreen(onFinished = onFinished, pinOffer = pinOffer) }
+/**
+ * [pinOffer] and [accountStep] are provided by the app, so onboarding depends on neither the
+ * security nor the account module. [accountStep] calls its argument once signed in.
+ */
+fun NavGraphBuilder.onboardingScreen(
+    onFinished: () -> Unit,
+    pinOffer: @Composable () -> Unit,
+    accountStep: @Composable (onSignedIn: () -> Unit) -> Unit,
+) {
+    composable<OnboardingRoute> { OnboardingScreen(onFinished = onFinished, pinOffer = pinOffer, accountStep = accountStep) }
 }
 
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
+fun OnboardingScreen(
+    onFinished: () -> Unit,
+    pinOffer: @Composable () -> Unit,
+    accountStep: @Composable (onSignedIn: () -> Unit) -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.finished) { if (state.finished) onFinished() }
     BackHandler(enabled = state.stepIndex > 0, onBack = viewModel::back)
@@ -92,7 +104,10 @@ fun OnboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit, v
         ) {
             when (state.step) {
                 OnboardingStep.WELCOME -> WelcomeStep()
-                OnboardingStep.ACCOUNT -> AccountStep()
+                OnboardingStep.ACCOUNT -> {
+                    StepTitle(R.string.onb_account_title, R.string.onb_account_text)
+                    accountStep(viewModel::accountReady)
+                }
                 OnboardingStep.ROLE -> RoleStep(state.role, viewModel::selectRole)
                 OnboardingStep.CYCLE -> CycleStep(state, viewModel)
                 OnboardingStep.PET -> PetStep(state.pet, viewModel::requestPet)
@@ -136,7 +151,7 @@ fun OnboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit, v
 
 private fun nextLabel(state: OnboardingState) = when {
     state.step == OnboardingStep.WELCOME -> R.string.onb_start
-    state.step == OnboardingStep.ACCOUNT -> R.string.onb_account_continue
+    state.step == OnboardingStep.ACCOUNT -> if (state.signedIn) R.string.onb_next else R.string.onb_account_continue
     state.stepIndex == state.steps.lastIndex -> R.string.onb_finish
     else -> R.string.onb_next
 }
@@ -153,11 +168,6 @@ private fun StepTitle(title: Int, text: Int? = null) {
 private fun WelcomeStep() {
     StepTitle(R.string.onb_welcome_title, R.string.onb_welcome_text)
     Text(stringResource(R.string.onb_disclaimer), style = MaterialTheme.typography.bodySmall)
-}
-
-@Composable
-private fun AccountStep() {
-    StepTitle(R.string.onb_account_title, R.string.onb_account_text)
 }
 
 @Composable
