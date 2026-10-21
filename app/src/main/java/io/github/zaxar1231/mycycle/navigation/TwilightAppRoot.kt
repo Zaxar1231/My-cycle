@@ -1,15 +1,18 @@
 package io.github.zaxar1231.mycycle.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -112,9 +117,25 @@ private fun RowScope.TabItem(tab: TopLevelDestination, destination: NavDestinati
             }
         },
         icon = { Icon(painterResource(tab.icon), contentDescription = null) },
-        label = { Text(stringResource(tab.label)) },
+        label = { TabLabel(stringResource(tab.label)) },
     )
 }
+
+/** One line always: with four tabs and the FAB, long words or a large font would otherwise wrap by letters. */
+@Composable
+private fun TabLabel(text: String) {
+    val style = MaterialTheme.typography.labelMedium
+    BasicText(
+        text = text,
+        style = style.copy(color = LocalContentColor.current),
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+        autoSize = TextAutoSize.StepBased(minFontSize = MIN_LABEL_SIZE, maxFontSize = style.fontSize),
+    )
+}
+
+private val MIN_LABEL_SIZE = 8.sp
 
 private fun NavDestination?.isOn(tab: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(tab.routeClass) } == true
