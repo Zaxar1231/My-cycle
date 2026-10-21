@@ -209,6 +209,7 @@ private fun <T> Chips(options: List<T>, selected: T, label: @Composable (T) -> S
 }
 
 private fun HomeStyle.labelRes() = when (this) {
+    HomeStyle.SKY -> R.string.home_sky
     HomeStyle.MOON -> R.string.home_moon
     HomeStyle.ORBIT -> R.string.home_orbit
     HomeStyle.WAVE -> R.string.home_wave

@@ -11,6 +11,7 @@
     <string name="color_wheel_description">Colour wheel: the angle sets the hue, the distance from the centre the saturation</string>
     <string name="color_wheel_brightness">Brightness</string>
     <string name="theme_home">Home screen</string>
+    <string name="home_sky">Twilight sky</string>
     <string name="home_moon">Moon</string>
     <string name="home_orbit">Orbit</string>
     <string name="home_wave">Wave</string>

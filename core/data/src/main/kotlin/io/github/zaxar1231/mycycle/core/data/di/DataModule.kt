@@ -1,10 +1,13 @@
 package io.github.zaxar1231.mycycle.core.data.di
 
 import android.content.Context
+import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
@@ -76,6 +79,7 @@ object DatabaseModule {
     fun provideSettingsStore(@ApplicationContext context: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+            migrations = listOf(SkyHomeMigration),
         ) { context.preferencesDataStoreFile(SETTINGS_FILE) }
 }
 
@@ -103,4 +107,22 @@ interface RepositoryModule {
     @Binds fun affirmationGenerator(impl: TemplateAffirmationGenerator): AffirmationGenerator
 
     @Binds fun pin(impl: KeystorePinRepository): PinRepository
+}
+
+/**
+ * The "Twilight sky" home picture replaced the moon as the default. Saved settings always hold a
+ * home style, so the old default is switched once; a style picked on purpose stays.
+ */
+private object SkyHomeMigration : DataMigration<Preferences> {
+    private val home = stringPreferencesKey("theme_home")
+    private val done = booleanPreferencesKey("migration_sky_home")
+
+    override suspend fun shouldMigrate(currentData: Preferences) = currentData[done] != true
+
+    override suspend fun migrate(currentData: Preferences): Preferences = currentData.toMutablePreferences().apply {
+        if (this[home] == "MOON") this[home] = "SKY"
+        this[done] = true
+    }
+
+    override suspend fun cleanUp() = Unit
 }

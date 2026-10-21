@@ -11,6 +11,7 @@
     <string name="color_wheel_description">Цветовой круг: угол задаёт оттенок, расстояние от центра — насыщенность</string>
     <string name="color_wheel_brightness">Яркость</string>
     <string name="theme_home">Главный экран</string>
+    <string name="home_sky">Сумеречное небо</string>
     <string name="home_moon">Луна</string>
     <string name="home_orbit">Орбита</string>
     <string name="home_wave">Волна</string>
