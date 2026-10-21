@@ -1,5 +1,7 @@
 package io.github.zaxar1231.mycycle.core.data.di
 
+import io.github.zaxar1231.mycycle.core.data.backup.RoomBackupRepository
+import io.github.zaxar1231.mycycle.core.domain.backup.BackupRepository
 import android.content.Context
 import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
@@ -107,6 +109,8 @@ interface RepositoryModule {
     @Binds fun affirmationGenerator(impl: TemplateAffirmationGenerator): AffirmationGenerator
 
     @Binds fun pin(impl: KeystorePinRepository): PinRepository
+
+    @Binds fun backup(impl: RoomBackupRepository): BackupRepository
 }
 
 /**

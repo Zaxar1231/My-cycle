@@ -29,6 +29,7 @@ fun NavGraphBuilder.settingsScreen(
     accountSection: @Composable () -> Unit,
     partnerSection: @Composable () -> Unit,
     remindersSection: @Composable () -> Unit,
+    dataSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
 ) {
@@ -39,6 +40,7 @@ fun NavGraphBuilder.settingsScreen(
             accountSection = accountSection,
             partnerSection = partnerSection,
             remindersSection = remindersSection,
+            dataSection = dataSection,
             updatesSection = updatesSection,
             onCustomizeHome = onCustomizeHome,
         )
@@ -52,6 +54,7 @@ fun SettingsScreen(
     accountSection: @Composable () -> Unit,
     partnerSection: @Composable () -> Unit,
     remindersSection: @Composable () -> Unit,
+    dataSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
@@ -98,6 +101,12 @@ fun SettingsScreen(
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.settings_partner), style = MaterialTheme.typography.titleMedium)
                 partnerSection()
+            }
+        }
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.settings_data), style = MaterialTheme.typography.titleMedium)
+                dataSection()
             }
         }
         updatesSection()

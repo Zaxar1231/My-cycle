@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Настройки</string>
-    <string name="settings_placeholder">Экспорт и отчёт для врача появятся на следующем этапе. Виджеты добавляются с рабочего стола.</string>
+    <string name="settings_placeholder">Все данные хранятся только на этом телефоне. Виджеты добавляются с рабочего стола.</string>
     <string name="settings_appearance">Оформление</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_customize_home">Настроить главный экран</string>
     <string name="settings_account">Аккаунт</string>
     <string name="settings_partner">Партнёрский режим</string>
     <string name="settings_reminders">Напоминания</string>
+    <string name="settings_data">Данные</string>
 </resources>
