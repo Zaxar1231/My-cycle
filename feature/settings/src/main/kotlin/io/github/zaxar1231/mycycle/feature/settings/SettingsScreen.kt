@@ -22,13 +22,20 @@ import kotlinx.serialization.Serializable
 data object SettingsRoute
 
 /** Sections are provided by the app, so this module depends neither on the updater nor on storage. */
-fun NavGraphBuilder.settingsScreen(appearanceSection: @Composable () -> Unit, updatesSection: @Composable () -> Unit) {
-    composable<SettingsRoute> { SettingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection) }
+fun NavGraphBuilder.settingsScreen(
+    appearanceSection: @Composable () -> Unit,
+    securitySection: @Composable () -> Unit,
+    updatesSection: @Composable () -> Unit,
+) {
+    composable<SettingsRoute> {
+        SettingsScreen(appearanceSection = appearanceSection, securitySection = securitySection, updatesSection = updatesSection)
+    }
 }
 
 @Composable
 fun SettingsScreen(
     appearanceSection: @Composable () -> Unit,
+    securitySection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,6 +56,12 @@ fun SettingsScreen(
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
                 appearanceSection()
+            }
+        }
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.settings_security), style = MaterialTheme.typography.titleMedium)
+                securitySection()
             }
         }
         updatesSection()

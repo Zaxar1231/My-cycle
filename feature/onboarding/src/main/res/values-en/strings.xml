@@ -40,7 +40,7 @@
     <string name="onb_pet_confirm_no">Not yet</string>
     <string name="onb_theme_title">Appearance</string>
     <string name="onb_pin_title">PIN protection</string>
-    <string name="onb_pin_text">PIN and fingerprint unlock arrive in a later update. You will be able to turn them on in Settings.</string>
+    <string name="onb_pin_text">A 4-digit PIN keeps the app private, and you can unlock it with your fingerprint or face too. You can also do this later in Settings.</string>
     <string name="pet_cat">Kitty</string>
     <string name="pet_fox">Fox cub</string>
     <string name="pet_bunny">Bunny</string>

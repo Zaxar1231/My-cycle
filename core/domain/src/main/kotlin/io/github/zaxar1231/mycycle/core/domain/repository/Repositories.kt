@@ -9,6 +9,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
+import io.github.zaxar1231.mycycle.core.domain.security.PinCheck
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
@@ -73,6 +74,20 @@ interface DataAccess {
 
     /** Deletes data that can no longer be decrypted. Only after the user explicitly agreed. */
     suspend fun resetUnreadableData()
+}
+
+/**
+ * The app PIN. Only a keyed hash of it is stored, and the key never leaves the Android Keystore,
+ * so the PIN cannot be brute-forced from copied files.
+ */
+interface PinRepository {
+    val hasPin: Flow<Boolean>
+    suspend fun setPin(pin: String)
+    suspend fun check(pin: String): PinCheck
+
+    /** Wrong-attempt freeze still in force, if any. */
+    suspend fun lockedUntil(): Long?
+    suspend fun clear()
 }
 
 /** Favourite affirmations, stored on the device. */

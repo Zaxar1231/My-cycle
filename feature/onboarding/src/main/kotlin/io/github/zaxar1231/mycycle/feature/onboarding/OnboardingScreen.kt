@@ -62,12 +62,13 @@ import kotlin.math.roundToInt
 @Serializable
 data object OnboardingRoute
 
-fun NavGraphBuilder.onboardingScreen(onFinished: () -> Unit) {
-    composable<OnboardingRoute> { OnboardingScreen(onFinished = onFinished) }
+/** [pinOffer] is provided by the app, so onboarding does not depend on the security module. */
+fun NavGraphBuilder.onboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit) {
+    composable<OnboardingRoute> { OnboardingScreen(onFinished = onFinished, pinOffer = pinOffer) }
 }
 
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
+fun OnboardingScreen(onFinished: () -> Unit, pinOffer: @Composable () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.finished) { if (state.finished) onFinished() }
     BackHandler(enabled = state.stepIndex > 0, onBack = viewModel::back)
@@ -99,7 +100,10 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
                     StepTitle(R.string.onb_theme_title)
                     ThemePicker(state.theme, viewModel::setTheme)
                 }
-                OnboardingStep.PIN -> PinStep()
+                OnboardingStep.PIN -> {
+                    StepTitle(R.string.onb_pin_title, R.string.onb_pin_text)
+                    pinOffer()
+                }
             }
             if (state.error) Text(stringResource(R.string.onb_error), color = MaterialTheme.colorScheme.error)
         }
@@ -292,11 +296,6 @@ private fun PetStep(selected: PetType?, onPick: (PetType) -> Unit) {
     if (selected != null) {
         Text(stringResource(R.string.onb_pet_locked), style = MaterialTheme.typography.bodySmall)
     }
-}
-
-@Composable
-private fun PinStep() {
-    StepTitle(R.string.onb_pin_title, R.string.onb_pin_text)
 }
 
 private fun PetType.nameRes() = when (this) {

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_title">Enter PIN</string>
+    <string name="lock_biometric_title">Unlock Twilight Cycle</string>
+    <string name="lock_biometric_cancel">Use PIN</string>
+    <string name="lock_forgot">Forgot PIN?</string>
+    <string name="lock_forgot_title">Forgot your PIN?</string>
+    <string name="lock_forgot_text">The PIN cannot be recovered: it is stored only on this device. You can erase all app data and start over.</string>
+    <string name="lock_forgot_text_biometric">Unlock with your fingerprint or face and change the PIN in settings. If that is not possible, you can erase all app data and start over.</string>
+    <string name="lock_forgot_use_biometric">Use biometrics</string>
+    <string name="lock_forgot_erase">Erase all data</string>
+    <string name="lock_forgot_cancel">Cancel</string>
+    <string name="lock_erase_title">Erase all data?</string>
+    <string name="lock_erase_text">Cycles, logs, medications, favourites and settings will be deleted for good. The app will close and start with the welcome screen next time.</string>
+    <string name="lock_erase_confirm">Erase</string>
+
+    <string name="pin_dots_description">%1$d of %2$d digits entered</string>
+    <string name="pin_biometric">Use biometrics</string>
+    <string name="pin_backspace">Delete</string>
+    <string name="pin_frozen">Too many attempts. Try again in %1$d:%2$02d</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Wrong PIN. %d attempt left</item>
+        <item quantity="other">Wrong PIN. %d attempts left</item>
+    </plurals>
+    <string name="pin_setup_enter">Choose a 4-digit PIN</string>
+    <string name="pin_setup_confirm">Repeat the PIN</string>
+    <string name="pin_setup_mismatch">The PINs did not match, try again</string>
+    <string name="pin_verify_title">Enter your current PIN</string>
+
+    <string name="security_pin">PIN</string>
+    <string name="security_pin_hint">Ask for it when opening the app</string>
+    <string name="security_change_pin">Change PIN</string>
+    <string name="security_biometric">Fingerprint or face</string>
+    <string name="security_biometric_hint">Unlock without typing the PIN</string>
+    <string name="security_biometric_unavailable">Unavailable: no biometrics on this device, none set up, or Android older than 10</string>
+    <string name="security_lock_after">Lock after leaving the app</string>
+    <string name="security_lock_now">Immediately</string>
+    <plurals name="security_lock_minutes">
+        <item quantity="one">After %d minute</item>
+        <item quantity="other">After %d minutes</item>
+    </plurals>
+    <string name="security_hide_recents">Hide in recent apps</string>
+    <string name="security_hide_recents_hint">Shows a blank preview. Screenshots inside the app are blocked too</string>
+    <string name="security_set_pin">Set a PIN</string>
+    <string name="security_pin_set">PIN is set. You can change or remove it in settings.</string>
+</resources>

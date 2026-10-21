@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_title">Введите PIN-код</string>
+    <string name="lock_biometric_title">Вход в Twilight Cycle</string>
+    <string name="lock_biometric_cancel">Ввести PIN</string>
+    <string name="lock_forgot">Забыли PIN?</string>
+    <string name="lock_forgot_title">Забыли PIN-код?</string>
+    <string name="lock_forgot_text">PIN-код нельзя восстановить: он хранится только на этом устройстве. Можно удалить все данные приложения и начать заново.</string>
+    <string name="lock_forgot_text_biometric">Войдите по отпечатку или лицу и смените PIN в настройках. Если это невозможно, можно удалить все данные приложения и начать заново.</string>
+    <string name="lock_forgot_use_biometric">Войти по биометрии</string>
+    <string name="lock_forgot_erase">Удалить все данные</string>
+    <string name="lock_forgot_cancel">Отмена</string>
+    <string name="lock_erase_title">Удалить все данные?</string>
+    <string name="lock_erase_text">Циклы, записи, препараты, избранное и настройки будут удалены без возможности восстановления. Приложение закроется, при следующем запуске оно начнётся с приветствия.</string>
+    <string name="lock_erase_confirm">Удалить</string>
+
+    <string name="pin_dots_description">Введено цифр: %1$d из %2$d</string>
+    <string name="pin_biometric">Войти по биометрии</string>
+    <string name="pin_backspace">Стереть</string>
+    <string name="pin_frozen">Слишком много попыток. Повторите через %1$d:%2$02d</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Неверный PIN. Осталась %d попытка</item>
+        <item quantity="few">Неверный PIN. Осталось %d попытки</item>
+        <item quantity="many">Неверный PIN. Осталось %d попыток</item>
+        <item quantity="other">Неверный PIN. Осталось %d попытки</item>
+    </plurals>
+    <string name="pin_setup_enter">Придумайте PIN из 4 цифр</string>
+    <string name="pin_setup_confirm">Повторите PIN</string>
+    <string name="pin_setup_mismatch">PIN-коды не совпали, попробуйте ещё раз</string>
+    <string name="pin_verify_title">Введите текущий PIN</string>
+
+    <string name="security_pin">PIN-код</string>
+    <string name="security_pin_hint">Спрашивать при входе в приложение</string>
+    <string name="security_change_pin">Сменить PIN-код</string>
+    <string name="security_biometric">Отпечаток или лицо</string>
+    <string name="security_biometric_hint">Входить без ввода PIN</string>
+    <string name="security_biometric_unavailable">Недоступно: на устройстве нет биометрии, она не настроена, или Android ниже 10</string>
+    <string name="security_lock_after">Блокировать после сворачивания</string>
+    <string name="security_lock_now">Сразу</string>
+    <plurals name="security_lock_minutes">
+        <item quantity="one">Через %d минуту</item>
+        <item quantity="few">Через %d минуты</item>
+        <item quantity="many">Через %d минут</item>
+        <item quantity="other">Через %d минуты</item>
+    </plurals>
+    <string name="security_hide_recents">Скрывать в недавних приложениях</string>
+    <string name="security_hide_recents_hint">Вместо содержимого — пустой экран. Снимки экрана в приложении тоже будут недоступны</string>
+    <string name="security_set_pin">Установить PIN-код</string>
+    <string name="security_pin_set">PIN-код установлен. Изменить или убрать его можно в настройках.</string>
+</resources>

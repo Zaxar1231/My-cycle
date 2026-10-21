@@ -51,6 +51,8 @@ import io.github.zaxar1231.mycycle.feature.insights.insightsScreens
 import io.github.zaxar1231.mycycle.feature.onboarding.OnboardingRoute
 import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
+import io.github.zaxar1231.mycycle.feature.security.PinOffer
+import io.github.zaxar1231.mycycle.feature.security.SecuritySection
 import io.github.zaxar1231.mycycle.feature.settings.settingsScreen
 import io.github.zaxar1231.mycycle.feature.stats.statsScreen
 import io.github.zaxar1231.mycycle.feature.wellness.AffirmationCard
@@ -91,9 +93,10 @@ fun TwilightAppRoot(
                 .padding(padding)
                 .consumeWindowInsets(padding),
         ) {
-            onboardingScreen(onFinished = {
-                navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } }
-            })
+            onboardingScreen(
+                onFinished = { navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } } },
+                pinOffer = { PinOffer() },
+            )
             calendarScreen(
                 onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } },
                 onOpenPhases = { navController.navigate(PhasesRoute) { launchSingleTop = true } },
@@ -109,7 +112,7 @@ fun TwilightAppRoot(
             wellnessScreens(onBack = { navController.navigateUp() })
             statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
-            settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)
+            settingsScreen(appearanceSection = appearanceSection, securitySection = { SecuritySection() }, updatesSection = updatesSection)
             dayLogScreen(
                 onBack = { navController.navigateUp() },
                 onManageMedications = { navController.navigate(MedicationsRoute) { launchSingleTop = true } },
