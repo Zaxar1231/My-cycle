@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="partner_channel">Partner mode</string>
+    <string name="partner_notice_public">A Twilight Cycle reminder</string>
+    <string name="partner_notice_title">A period is coming soon</string>
+    <string name="partner_notice_today">Expected around today. A little extra care goes a long way.</string>
+    <plurals name="partner_notice_days">
+        <item quantity="one">In about %d day. A little extra care goes a long way.</item>
+        <item quantity="other">In about %d days. A little extra care goes a long way.</item>
+    </plurals>
+</resources>

@@ -59,6 +59,9 @@ object CycleConstants {
     const val PATTERN_WINDOW_DAYS = 2
     const val PATTERN_MIN_SHARE = 0.5
 
+    /** Partner mode: the partner is reminded this many days before the expected period, and on the day itself. */
+    const val PARTNER_NOTICE_DAYS_BEFORE = 2
+
     /**
      * Chance of conception from intercourse on a single day, by day relative to ovulation, in percent.
      * Rounded from Wilcox et al., NEJM 1995. Days outside the window get [CONCEPTION_CHANCE_OUTSIDE_WINDOW].

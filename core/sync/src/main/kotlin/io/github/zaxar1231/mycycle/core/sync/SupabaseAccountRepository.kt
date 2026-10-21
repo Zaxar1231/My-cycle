@@ -6,17 +6,13 @@ import io.github.zaxar1231.mycycle.core.domain.account.AccountRules
 import io.github.zaxar1231.mycycle.core.domain.account.AuthError
 import io.github.zaxar1231.mycycle.core.domain.account.AuthResult
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,13 +21,13 @@ import javax.inject.Singleton
  * sign-out. Only the email and password ever go to the server here; no health data.
  */
 @Singleton
-class SupabaseAccountRepository @Inject constructor(private val sessions: SessionStore) : AccountRepository {
-    private val url = BuildConfig.SUPABASE_URL
-    private val anonKey = BuildConfig.SUPABASE_ANON_KEY
+class SupabaseAccountRepository @Inject constructor(
+    private val sessions: SessionStore,
+    private val http: SupabaseHttp,
+) : AccountRepository {
     private val refreshLock = Mutex()
 
-    // Plain HTTP would expose passwords, so only an https address enables accounts.
-    override val isAvailable: Boolean = url.startsWith("https://") && anonKey.isNotEmpty()
+    override val isAvailable: Boolean = http.isConfigured
 
     private val _account = MutableStateFlow(sessions.read()?.let { Account(it.userId, it.email) })
     override val account: StateFlow<Account?> = _account.asStateFlow()
@@ -125,29 +121,12 @@ class SupabaseAccountRepository @Inject constructor(private val sessions: Sessio
         )
     }
 
-    private suspend fun post(path: String, body: JSONObject, bearer: String? = null): Response = withContext(Dispatchers.IO) {
-        val connection = (URL(url + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            connectTimeout = TIMEOUT_MILLIS
-            readTimeout = TIMEOUT_MILLIS
-            doOutput = true
-            setRequestProperty("apikey", anonKey)
-            setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Authorization", "Bearer ${bearer ?: anonKey}")
-        }
-        try {
-            connection.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            val code = connection.responseCode
-            val stream = if (code in SUCCESS) connection.inputStream else connection.errorStream
-            val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-            Response(code, runCatching { JSONObject(text) }.getOrDefault(JSONObject()))
-        } finally {
-            connection.disconnect()
-        }
+    private suspend fun post(path: String, body: JSONObject, bearer: String? = null): Response {
+        val response = http.request("POST", path, body.toString(), bearer)
+        return Response(response.code, runCatching { JSONObject(response.body) }.getOrDefault(JSONObject()))
     }
 
     private companion object {
-        const val TIMEOUT_MILLIS = 15_000
         const val MILLIS_PER_SECOND = 1_000L
         const val REFRESH_MARGIN_MILLIS = 60_000L
         val SUCCESS = 200..299

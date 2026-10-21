@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.navigation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -54,9 +55,15 @@ import io.github.zaxar1231.mycycle.feature.insights.PhasesRoute
 import io.github.zaxar1231.mycycle.feature.insights.insightsScreens
 import io.github.zaxar1231.mycycle.feature.onboarding.OnboardingRoute
 import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
+import io.github.zaxar1231.mycycle.feature.partner.PartnerHomeCard
+import io.github.zaxar1231.mycycle.feature.partner.PartnerInviteNavigator
+import io.github.zaxar1231.mycycle.feature.partner.PartnerRoute
+import io.github.zaxar1231.mycycle.feature.partner.PartnerSection
+import io.github.zaxar1231.mycycle.feature.partner.partnerScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
 import io.github.zaxar1231.mycycle.feature.security.PinOffer
 import io.github.zaxar1231.mycycle.feature.security.SecuritySection
+import io.github.zaxar1231.mycycle.feature.settings.SettingsRoute
 import io.github.zaxar1231.mycycle.feature.settings.settingsScreen
 import io.github.zaxar1231.mycycle.feature.stats.statsScreen
 import io.github.zaxar1231.mycycle.feature.wellness.AffirmationCard
@@ -108,10 +115,13 @@ fun TwilightAppRoot(
                 onOpenHormones = { navController.navigate(HormonesRoute) { launchSingleTop = true } },
                 onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },
                 homeExtras = {
-                    AffirmationCard(
-                        onOpenBreathing = { navController.navigate(BreathingRoute) { launchSingleTop = true } },
-                        onOpenFavorites = { navController.navigate(FavoriteAffirmationsRoute) { launchSingleTop = true } },
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        PartnerHomeCard(onOpen = { navController.navigate(PartnerRoute) { launchSingleTop = true } })
+                        AffirmationCard(
+                            onOpenBreathing = { navController.navigate(BreathingRoute) { launchSingleTop = true } },
+                            onOpenFavorites = { navController.navigate(FavoriteAffirmationsRoute) { launchSingleTop = true } },
+                        )
+                    }
                 },
             )
             insightsScreens(onBack = { navController.navigateUp() })
@@ -123,6 +133,7 @@ fun TwilightAppRoot(
                 appearanceSection = appearanceSection,
                 securitySection = { SecuritySection() },
                 accountSection = { AccountSection() },
+                partnerSection = { PartnerSection(onOpenPartner = { navController.navigate(PartnerRoute) { launchSingleTop = true } }) },
                 updatesSection = updatesSection,
                 onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },
             )
@@ -131,6 +142,16 @@ fun TwilightAppRoot(
                 onManageMedications = { navController.navigate(MedicationsRoute) { launchSingleTop = true } },
             )
             medicationsScreen(onBack = { navController.navigateUp() })
+            partnerScreen(onBack = { navController.navigateUp() })
+        }
+        // An invitation link opens the settings, where the code is filled in for the partner to accept.
+        if (!startWithOnboarding || destination?.hasRoute(OnboardingRoute::class) == false) {
+            PartnerInviteNavigator(onInvite = {
+                navController.navigate(SettingsRoute) {
+                    popUpTo(CalendarRoute) { saveState = true }
+                    launchSingleTop = true
+                }
+            })
         }
     }
 }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="partner_unavailable">Partner mode is not set up in this build yet.</string>
+    <string name="partner_sign_in_first">Sign in to an account first to connect a partner.</string>
+    <string name="partner_intro">Invite someone close: they will see the phase and the period forecast and get ideas on how to be supportive. You decide what is shown.</string>
+    <string name="partner_e2e">Data is encrypted on the phone. The key travels only inside the invitation, so the server cannot read it.</string>
+    <string name="partner_ended">The partner link has ended. The shared data was deleted.</string>
+    <string name="partner_invite">Invite a partner</string>
+    <string name="partner_have_code">Were you invited?</string>
+    <string name="partner_code">Invitation code</string>
+    <string name="partner_join">Connect</string>
+    <string name="partner_invite_hint">Your partner can scan the QR code with their phone camera and open the link in Twilight Cycle. Or send the code: it goes into Settings, under Partner mode. The code works once and for one day.</string>
+    <string name="partner_qr_description">Invitation QR code</string>
+    <string name="partner_key_warning">The code holds the encryption key. Showing the QR code in person is safest: a sent message stays in the chat. Do not post the code anywhere.</string>
+    <string name="partner_copy">Copy code</string>
+    <string name="partner_from_link">This code came from a link. Connect only if someone you know invited you.</string>
+    <string name="partner_confirm_title">Someone accepted the invitation.</string>
+    <string name="partner_confirm_hint">Compare this code with the one on your partner\'s phone (Settings → Partner mode). Nothing is shared until you confirm. If the codes differ or your partner has not joined yet, unlink and invite again.</string>
+    <string name="partner_confirm">The codes match, this is my partner</string>
+    <string name="partner_verification">Verification code</string>
+    <string name="partner_verification_hint">The person who invited you should see the same code.</string>
+    <string name="partner_share">Send code</string>
+    <string name="partner_share_text">An invitation to Twilight Cycle. Open this link on a phone with the app: %1$s\n\nOr paste the code in Settings, under Partner mode: %2$s</string>
+    <string name="partner_cancel_invite">Cancel</string>
+    <string name="partner_waiting">Waiting for your partner to accept…</string>
+    <string name="partner_linked_owner">Your partner is connected.</string>
+    <string name="partner_what_shared">What your partner sees</string>
+    <string name="partner_share_phase">Phase and period forecast</string>
+    <string name="partner_share_mood">Today\'s mood</string>
+    <string name="partner_share_symptoms">Today\'s symptoms</string>
+    <string name="partner_share_fertility">Fertile window</string>
+    <string name="partner_never_shared">Notes, sex, weight, temperature and medications are never shared.</string>
+    <string name="partner_linked_partner">You see the cycle of the person who invited you.</string>
+    <string name="partner_open">Open</string>
+    <string name="partner_notify">Remind me before a period</string>
+    <string name="partner_orphaned">A partner link exists, but this phone has no encryption key for it (for example after a reinstall). Unlink and send a new invitation.</string>
+    <string name="partner_unlink">Unlink</string>
+    <string name="partner_unlink_title">Unlink your partner?</string>
+    <string name="partner_unlink_text">The shared data is deleted from the server right away and disappears for your partner. You can connect again with a new invitation.</string>
+    <string name="partner_keep">Keep</string>
+    <string name="partner_error_code">This does not look like an invitation code. Check that it was copied in full.</string>
+    <string name="partner_error_not_found">Invitation not found: it was used, cancelled or has expired. Ask for a new one.</string>
+    <string name="partner_error_own">This is your own invitation. It has to be opened on your partner\'s phone.</string>
+    <string name="partner_error_linked">One of the accounts already has a partner. Unlink first.</string>
+    <string name="partner_error_server">The server is not set up for partner mode yet (see docs/supabase.md).</string>
+    <string name="partner_error_network">No connection to the server. Check the internet.</string>
+    <string name="partner_error_unknown">Something went wrong. Please try again.</string>
+    <string name="partner_screen_title">Partner\'s cycle</string>
+    <string name="partner_back">Back</string>
+    <string name="partner_reload">Refresh</string>
+    <string name="partner_retry">Try again</string>
+    <string name="partner_nothing_yet">Nothing shared yet. Data appears once the person who invited you checks the verification code and their phone is online.</string>
+    <string name="partner_day">Day %1$d</string>
+    <string name="partner_phase_hidden">Your partner does not share the phase and forecast.</string>
+    <string name="partner_period_today">The period is expected around today.</string>
+    <plurals name="partner_period_in">
+        <item quantity="one">The period is expected in about %d day.</item>
+        <item quantity="other">The period is expected in about %d days.</item>
+    </plurals>
+    <plurals name="partner_period_late">
+        <item quantity="one">The period was expected %d day ago.</item>
+        <item quantity="other">The period was expected %d days ago.</item>
+    </plurals>
+    <plurals name="partner_updated_days_ago">
+        <item quantity="one">Updated %d day ago: the phase may have changed.</item>
+        <item quantity="other">Updated %d days ago: the phase may have changed.</item>
+    </plurals>
+    <string name="partner_date_format">MMMM d</string>
+    <string name="partner_fertile_title">Fertile window</string>
+    <string name="partner_fertile_range">Roughly %1$s to %2$s</string>
+    <string name="partner_fertile_today">Today is in the fertile window.</string>
+    <string name="partner_logged_on">Logged on %1$s</string>
+    <string name="partner_mood_chip">%1$s %2$s</string>
+    <string name="partner_tips_title">How to be supportive</string>
+    <string name="partner_tip_bullet">• %1$s</string>
+    <string-array name="partner_tips_menstrual">
+        <item>Ask how you can help, and just be there.</item>
+        <item>Take on some of the chores.</item>
+        <item>Warm tea, a heating pad or a favourite meal often help.</item>
+        <item>Wanting quiet and rest is normal; do not take it personally.</item>
+    </string-array>
+    <string-array name="partner_tips_follicular">
+        <item>Many people have more energy these days: a good time for plans together.</item>
+        <item>Suggest a walk, sport or trying something new together.</item>
+        <item>Back their ideas and plans.</item>
+    </string-array>
+    <string-array name="partner_tips_ovulatory">
+        <item>Many people feel especially sociable and confident these days.</item>
+        <item>A good time for a date or meeting friends.</item>
+        <item>Compliments and attention are welcome.</item>
+    </string-array>
+    <string-array name="partner_tips_luteal">
+        <item>Closer to the period, tiredness and mood swings are common. Be patient.</item>
+        <item>Fewer arguments, more care.</item>
+        <item>Help lighten the schedule and leave time to rest.</item>
+        <item>A cosy evening in and something tasty often cheer people up.</item>
+    </string-array>
+    <string name="partner_disclaimer">The forecast is approximate. It is not medical advice and not a method of contraception.</string>
+    <string name="partner_home_title">Partner\'s cycle</string>
+    <string name="partner_separator">" · "</string>
+</resources>

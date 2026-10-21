@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Already declared by :core:update; repeated so this module's lint sees it. Merged into one entry. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+</manifest>

@@ -29,9 +29,11 @@ import io.github.zaxar1231.mycycle.core.update.UpdateViewModel
 import io.github.zaxar1231.mycycle.core.update.UpdateWorker
 import io.github.zaxar1231.mycycle.core.update.ui.UpdateDialog
 import io.github.zaxar1231.mycycle.core.update.ui.UpdatesCard
+import io.github.zaxar1231.mycycle.feature.partner.PartnerInviteInbox
 import io.github.zaxar1231.mycycle.feature.security.AppLockGate
 import io.github.zaxar1231.mycycle.feature.security.AppLockViewModel
 import io.github.zaxar1231.mycycle.navigation.TwilightAppRoot
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -40,12 +42,15 @@ class MainActivity : ComponentActivity() {
     private val lock: AppLockViewModel by viewModels()
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
+    @Inject lateinit var partnerInvites: PartnerInviteInbox
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
         if (savedInstanceState == null) {
             if (intent.consumeCheckUpdateExtra()) updates.check() else updates.autoCheckOnce()
+            intent.offerPartnerInvite()
         }
 
         setContent {
@@ -119,6 +124,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (intent.consumeCheckUpdateExtra()) updates.check()
+        intent.offerPartnerInvite()
+    }
+
+    /** A partner invitation link only fills in the code; joining still needs a tap in settings. */
+    private fun Intent.offerPartnerInvite() {
+        if (action == Intent.ACTION_VIEW) dataString?.let(partnerInvites::offer)
     }
 
     override fun onStart() {
