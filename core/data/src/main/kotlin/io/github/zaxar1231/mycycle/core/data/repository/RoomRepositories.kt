@@ -32,6 +32,7 @@ class RoomCycleRepository @Inject constructor(private val dao: CycleDao) : Cycle
 class RoomDayLogRepository @Inject constructor(private val dao: DayLogDao) : DayLogRepository {
     override fun observe(date: LocalDate): Flow<DayLog?> = dao.observe(date).map { it?.toDomain() }
     override suspend fun get(date: LocalDate): DayLog? = dao.get(date)?.toDomain()
+    override suspend fun range(from: LocalDate, to: LocalDate): List<DayLog> = dao.range(from, to).map { it.toDomain() }
     override fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLog>> =
         dao.observeRange(from, to).map { list -> list.map { it.toDomain() } }
     override suspend fun save(log: DayLog) = dao.upsert(log.toEntity())

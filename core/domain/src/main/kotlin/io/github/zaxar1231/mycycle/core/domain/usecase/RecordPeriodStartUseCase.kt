@@ -7,14 +7,15 @@ import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.math.abs
 
 /**
  * Starts a new cycle on [date] (today by default) and closes the previous one: its end date and
  * length are filled in. Marking the same day twice changes nothing.
  *
- * A start inside the period of the latest cycle corrects that cycle's start instead of creating a
- * two-day cycle (for example, the onboarding guess was off by a few days). The old start date is
- * returned in that case, so the caller can clear its day log.
+ * A start within the period of the latest cycle, a few days before or after its start, corrects that
+ * cycle's start instead of creating a one- or two-day cycle (for example, the onboarding guess was
+ * off). The old start date is returned in that case, so the caller can update the day logs.
  */
 class RecordPeriodStartUseCase @Inject constructor(
     private val cycles: CycleRepository,
@@ -26,7 +27,9 @@ class RecordPeriodStartUseCase @Inject constructor(
         if (existing.any { it.startDate == date }) return null
 
         val replaced = existing.lastOrNull()?.takeIf { latest ->
-            latest.startDate.isBefore(date) && ChronoUnit.DAYS.between(latest.startDate, date) < latest.periodLength
+            val earlier = existing.getOrNull(existing.size - 2)
+            abs(ChronoUnit.DAYS.between(latest.startDate, date)) < latest.periodLength &&
+                (earlier == null || earlier.startDate.isBefore(date))
         }
         if (replaced != null) {
             cycles.delete(replaced)

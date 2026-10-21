@@ -8,7 +8,6 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
-import io.github.zaxar1231.mycycle.core.domain.model.PeriodEvent
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
@@ -161,9 +160,7 @@ class CalendarViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Asked at tap time, not taken from state: the screen may show yesterday after midnight.
-                val day = dateProvider.today()
-                val log = dayLogs.get(day) ?: DayLog(date = day)
-                saveDayLog(log.copy(periodEvent = PeriodEvent.STARTED), settings.settings.first().usualPeriodLength)
+                saveDayLog.markPeriodStart(dateProvider.today(), settings.settings.first().usualPeriodLength)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

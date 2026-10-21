@@ -40,7 +40,7 @@ class SaveDayLogUseCase @Inject constructor(
                 }
             }
             when (clean.periodEvent) {
-                PeriodEvent.STARTED -> recordPeriodStart(clean.date, usualPeriodLength)?.let { clearStartMark(it) }
+                PeriodEvent.STARTED -> recordPeriodStart(clean.date, usualPeriodLength)?.let { realignMarks(it, clean.date) }
                 PeriodEvent.ENDED -> if (!recordPeriodEnd(clean.date)) {
                     throw InvalidDayLogException(InvalidDayLogException.Field.PERIOD_END)
                 }
@@ -50,10 +50,27 @@ class SaveDayLogUseCase @Inject constructor(
         }
     }
 
-    /** The cycle start moved away from [date], so that day's log no longer marks a start. */
-    private suspend fun clearStartMark(date: LocalDate) {
-        val old = dayLogs.get(date) ?: return
-        if (old.periodEvent == PeriodEvent.STARTED) put(old.copy(periodEvent = null))
+    /** Marks the period start on [date], keeping whatever else that day's log holds. */
+    suspend fun markPeriodStart(date: LocalDate, usualPeriodLength: Int) = transactions.inTransaction {
+        val log = dayLogs.get(date) ?: DayLog(date = date)
+        invoke(log.copy(periodEvent = PeriodEvent.STARTED), usualPeriodLength)
+    }
+
+    /**
+     * The cycle start moved from [oldStart] to [newStart]: the old start mark goes, an end mark before
+     * the new start goes, and an end mark after it sets the period length again.
+     */
+    private suspend fun realignMarks(oldStart: LocalDate, newStart: LocalDate) {
+        val from = minOf(oldStart, newStart)
+        val to = maxOf(oldStart, newStart).plusDays(CycleConstants.MAX_PERIOD_LENGTH.toLong())
+        // The log of newStart itself is about to be replaced by the one being saved.
+        dayLogs.range(from, to).filter { it.date != newStart }.forEach { log ->
+            when {
+                log.periodEvent == PeriodEvent.STARTED && log.date == oldStart -> put(log.copy(periodEvent = null))
+                log.periodEvent != PeriodEvent.ENDED -> Unit
+                log.date.isBefore(newStart) || !recordPeriodEnd(log.date) -> put(log.copy(periodEvent = null))
+            }
+        }
     }
 
     private suspend fun put(log: DayLog) {

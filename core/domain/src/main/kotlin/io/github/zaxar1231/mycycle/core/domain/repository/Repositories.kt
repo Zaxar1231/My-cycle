@@ -20,7 +20,10 @@ interface TransactionRunner {
 interface CycleRepository {
     fun observeCycles(): Flow<List<Cycle>>
 
-    /** One-shot read, ordered by start date. Safe inside [TransactionRunner.inTransaction]. */
+    /**
+     * One-shot read, ordered by start date. The Room implementation queries directly, so it is safe
+     * inside [TransactionRunner.inTransaction]; this default is only for test fakes.
+     */
     suspend fun cycles(): List<Cycle> = observeCycles().first()
     /** Inserts or updates the cycle with the same start date and returns its id. */
     suspend fun upsert(cycle: Cycle): Long
@@ -30,8 +33,9 @@ interface CycleRepository {
 interface DayLogRepository {
     fun observe(date: LocalDate): Flow<DayLog?>
 
-    /** One-shot read. Safe inside [TransactionRunner.inTransaction]. */
+    /** One-shot reads. The Room implementation is safe inside [TransactionRunner.inTransaction]. */
     suspend fun get(date: LocalDate): DayLog? = observe(date).first()
+    suspend fun range(from: LocalDate, to: LocalDate): List<DayLog> = observeRange(from, to).first()
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLog>>
     suspend fun save(log: DayLog)
     suspend fun delete(date: LocalDate)

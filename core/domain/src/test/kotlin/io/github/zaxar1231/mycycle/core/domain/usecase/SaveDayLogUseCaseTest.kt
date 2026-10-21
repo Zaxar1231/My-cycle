@@ -131,6 +131,29 @@ class SaveDayLogUseCaseTest {
         assertNull(logs.items[guessed.startDate])
     }
 
+    @Test
+    fun `an earlier start moves the cycle back and re-applies its end mark`() = runTest {
+        cycles.items.value = listOf(Cycle(id = 1, startDate = today.minusDays(4), periodLength = 4))
+        logs.items[today.minusDays(4)] = DayLog(date = today.minusDays(4), periodEvent = PeriodEvent.STARTED)
+        logs.items[today.minusDays(1)] = DayLog(date = today.minusDays(1), periodEvent = PeriodEvent.ENDED)
+
+        useCase(DayLog(date = today.minusDays(5), periodEvent = PeriodEvent.STARTED), 5)
+
+        val cycle = cycles.items.value.single()
+        assertEquals(today.minusDays(5), cycle.startDate)
+        assertEquals(5, cycle.periodLength)
+        assertNull(logs.items[today.minusDays(4)])
+        assertEquals(PeriodEvent.ENDED, logs.items[today.minusDays(1)]?.periodEvent)
+    }
+
+    @Test
+    fun `the calendar button keeps the rest of the day log`() = runTest {
+        logs.items[today] = DayLog(date = today, flow = Flow.MEDIUM)
+        useCase.markPeriodStart(today, 5)
+        assertEquals(DayLog(date = today, flow = Flow.MEDIUM, periodEvent = PeriodEvent.STARTED), logs.items[today])
+        assertEquals(today, cycles.items.value.single().startDate)
+    }
+
     private class FakeLogs : DayLogRepository {
         val items = mutableMapOf<LocalDate, DayLog>()
         private val flow = MutableStateFlow(0)

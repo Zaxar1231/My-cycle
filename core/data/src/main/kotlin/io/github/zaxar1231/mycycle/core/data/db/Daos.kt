@@ -48,6 +48,9 @@ interface DayLogDao {
     suspend fun get(date: LocalDate): DayLogEntity?
 
     @Query("SELECT * FROM day_logs WHERE date BETWEEN :from AND :to ORDER BY date")
+    suspend fun range(from: LocalDate, to: LocalDate): List<DayLogEntity>
+
+    @Query("SELECT * FROM day_logs WHERE date BETWEEN :from AND :to ORDER BY date")
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLogEntity>>
 
     @Upsert
