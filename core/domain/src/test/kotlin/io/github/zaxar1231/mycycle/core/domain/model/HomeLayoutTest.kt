@@ -29,7 +29,7 @@ class HomeLayoutTest {
     @Test
     fun `moving keeps the other blocks in order`() {
         val moved = HomeLayout.DEFAULT.moved(from = 0, to = 2)
-        assertEquals(listOf(HomeBlock.KEY_DATES, HomeBlock.CALENDAR, HomeBlock.HERO, HomeBlock.TODAY, HomeBlock.AFFIRMATION), moved.order)
+        assertEquals(listOf(HomeBlock.KEY_DATES, HomeBlock.CALENDAR, HomeBlock.HERO, HomeBlock.TODAY, HomeBlock.AFFIRMATION, HomeBlock.PET), moved.order)
         assertEquals(HomeLayout.DEFAULT, HomeLayout.DEFAULT.moved(0, 9))
     }
 }

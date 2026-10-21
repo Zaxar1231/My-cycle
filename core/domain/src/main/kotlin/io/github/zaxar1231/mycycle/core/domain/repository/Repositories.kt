@@ -57,6 +57,9 @@ interface MedicationRepository {
 interface PetRepository {
     fun observePet(): Flow<Pet?>
 
+    /** A one-shot read. The Room implementation is safe inside [TransactionRunner.inTransaction]. */
+    suspend fun pet(): Pet? = observePet().first()
+
     /** Adopts the pet. Does nothing if a pet already exists: the choice is permanent. */
     suspend fun adopt(pet: Pet)
     suspend fun update(pet: Pet)

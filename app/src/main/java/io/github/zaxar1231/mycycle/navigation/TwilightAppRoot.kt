@@ -60,6 +60,8 @@ import io.github.zaxar1231.mycycle.feature.partner.PartnerInviteNavigator
 import io.github.zaxar1231.mycycle.feature.partner.PartnerRoute
 import io.github.zaxar1231.mycycle.feature.partner.PartnerSection
 import io.github.zaxar1231.mycycle.feature.partner.partnerScreen
+import io.github.zaxar1231.mycycle.feature.pet.PetHomeCard
+import io.github.zaxar1231.mycycle.feature.pet.PetRoute
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
 import io.github.zaxar1231.mycycle.feature.security.PinOffer
 import io.github.zaxar1231.mycycle.feature.security.SecuritySection
@@ -122,6 +124,15 @@ fun TwilightAppRoot(
                             onOpenFavorites = { navController.navigate(FavoriteAffirmationsRoute) { launchSingleTop = true } },
                         )
                     }
+                },
+                petCard = {
+                    PetHomeCard(onOpen = {
+                        navController.navigate(PetRoute) {
+                            popUpTo(CalendarRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    })
                 },
             )
             insightsScreens(onBack = { navController.navigateUp() })

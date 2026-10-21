@@ -96,6 +96,7 @@
     <string name="block_calendar">Calendar</string>
     <string name="block_today">Today</string>
     <string name="block_affirmation">Affirmation and breathing</string>
+    <string name="block_pet">Pet</string>
     <string name="look_none">No background</string>
     <string name="look_filled">Filled</string>
     <string name="look_tonal">Tonal</string>

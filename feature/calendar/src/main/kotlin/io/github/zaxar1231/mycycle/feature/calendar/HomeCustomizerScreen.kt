@@ -261,6 +261,7 @@ private fun HomeBlock.labelRes() = when (this) {
     HomeBlock.CALENDAR -> R.string.block_calendar
     HomeBlock.TODAY -> R.string.block_today
     HomeBlock.AFFIRMATION -> R.string.block_affirmation
+    HomeBlock.PET -> R.string.block_pet
 }
 
 private fun BlockLook.labelRes() = when (this) {

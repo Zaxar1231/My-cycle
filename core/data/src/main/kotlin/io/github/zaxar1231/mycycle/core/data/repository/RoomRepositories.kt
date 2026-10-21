@@ -52,6 +52,7 @@ class RoomMedicationRepository @Inject constructor(private val dao: MedicationDa
 
 class RoomPetRepository @Inject constructor(private val dao: PetDao) : PetRepository {
     override fun observePet(): Flow<Pet?> = dao.observe().map { it?.toDomain() }
+    override suspend fun pet(): Pet? = dao.get()?.toDomain()
     override suspend fun adopt(pet: Pet) = dao.insert(pet.toEntity())
     override suspend fun update(pet: Pet) = dao.update(pet.toEntity())
 }

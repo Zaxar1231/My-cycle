@@ -54,13 +54,14 @@ import java.time.temporal.ChronoUnit
 @Serializable
 data object CalendarRoute
 
-/** [homeExtras] are cards from other features shown under the calendar, such as the affirmation. */
+/** [homeExtras] and [petCard] are cards from other features: the affirmation and the pet. */
 fun NavGraphBuilder.calendarScreen(
     onOpenDayLog: (LocalDate) -> Unit,
     onOpenPhases: () -> Unit,
     onOpenHormones: () -> Unit,
     onCustomizeHome: () -> Unit,
     homeExtras: @Composable () -> Unit = {},
+    petCard: @Composable () -> Unit = {},
 ) {
     composable<CalendarRoute> {
         CalendarScreen(
@@ -69,6 +70,7 @@ fun NavGraphBuilder.calendarScreen(
             onOpenHormones = onOpenHormones,
             onCustomizeHome = onCustomizeHome,
             homeExtras = homeExtras,
+            petCard = petCard,
         )
     }
 }
@@ -81,9 +83,11 @@ fun CalendarScreen(
     onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
     homeExtras: @Composable () -> Unit = {},
+    petCard: @Composable () -> Unit = {},
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val hasPet by viewModel.hasPet.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
     val language = LocalConfiguration.current.locales[0].language
     LaunchedEffect(language) { viewModel.setLanguage(language) }
@@ -123,6 +127,7 @@ fun CalendarScreen(
             blocks.style(block).visible && when (block) {
                 HomeBlock.KEY_DATES -> hasShape
                 HomeBlock.TODAY -> prediction.today != null
+                HomeBlock.PET -> hasPet
                 else -> true
             }
         }
@@ -170,6 +175,7 @@ fun CalendarScreen(
                         )
                     }
                     HomeBlock.AFFIRMATION -> Box(side) { homeExtras() }
+                    HomeBlock.PET -> Box(side) { petCard() }
                 }
             }
         }

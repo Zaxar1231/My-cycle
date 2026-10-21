@@ -11,6 +11,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
@@ -56,7 +57,12 @@ class CalendarViewModel @Inject constructor(
     private val saveDayLog: SaveDayLogUseCase,
     private val dateProvider: DateProvider,
     private val phaseContent: PhaseContentRepository,
+    pets: PetRepository,
 ) : ViewModel() {
+    /** Without a pet the pet block is left out, so it leaves no empty gap. */
+    val hasPet: StateFlow<Boolean> = pets.observePet().map { it != null }.distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
+
     // "Today" is refreshed whenever the screen resumes: the ViewModel can outlive midnight.
     private val today = MutableStateFlow(dateProvider.today())
     private val month = MutableStateFlow(YearMonth.from(today.value))
