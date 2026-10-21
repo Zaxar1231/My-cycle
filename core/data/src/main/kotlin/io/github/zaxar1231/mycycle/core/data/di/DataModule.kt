@@ -111,9 +111,10 @@ interface RepositoryModule {
 
 /**
  * The "Twilight sky" home picture replaced the moon as the default. Saved settings always hold a
- * home style, so the old default is switched once; a style picked on purpose stays.
+ * home style, so a saved moon cannot be told apart from the old default and is switched once;
+ * any other style stays.
  */
-private object SkyHomeMigration : DataMigration<Preferences> {
+internal object SkyHomeMigration : DataMigration<Preferences> {
     private val home = stringPreferencesKey("theme_home")
     private val done = booleanPreferencesKey("migration_sky_home")
 

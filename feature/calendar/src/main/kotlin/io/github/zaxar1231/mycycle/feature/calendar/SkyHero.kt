@@ -1,12 +1,6 @@
 package io.github.zaxar1231.mycycle.feature.calendar
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,14 +11,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LongState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.CacheDrawScope
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -34,6 +39,9 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -44,7 +52,9 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.theme.MoonPhase
 import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import kotlin.math.abs
 import kotlin.random.Random
 
 /** Sky colours from the top to the horizon, and how many stars and how much cloud show. */
@@ -57,7 +67,7 @@ private class SkyPalette(val top: Color, val middle: Color, val horizon: Color, 
 private fun paletteOf(phase: CyclePhase?) = when (phase) {
     CyclePhase.MENSTRUAL -> SkyPalette(Color(0xFF2A0F2E), Color(0xFF6A2143), Color(0xFFE07A86), stars = 0.7f, clouds = 0.35f)
     CyclePhase.FOLLICULAR -> SkyPalette(Color(0xFF15294D), Color(0xFF4572A8), Color(0xFFF3BBCB), stars = 0.35f, clouds = 0.5f)
-    CyclePhase.OVULATORY -> SkyPalette(Color(0xFF0F3B68), Color(0xFF3F8FD0), Color(0xFFC4E5FF), stars = 0f, clouds = 0.75f)
+    CyclePhase.OVULATORY -> SkyPalette(Color(0xFF0F3B68), Color(0xFF3F8FD0), Color(0xFFC4E5FF), stars = 0f, clouds = 0.5f)
     CyclePhase.LUTEAL, null -> SkyPalette(Color(0xFF110C2D), Color(0xFF3C2A6C), Color(0xFFB48CD8), stars = 1f, clouds = 0.3f)
 }
 
@@ -103,27 +113,45 @@ internal fun SkyHero(
     val layout = remember { SceneLayout(SCENE_SEED) }
     val ground = TwilightThemeExtras.solidBackground
     val colors = TwilightThemeExtras.cycleColors
-    val transition = rememberInfiniteTransition(label = "sky")
-    val drift by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(DRIFT_MILLIS, easing = LinearEasing)), label = "drift")
-    val twinkle by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(TWINKLE_MILLIS), RepeatMode.Reverse), label = "twinkle")
+    var onScreen by remember { mutableStateOf(true) }
+    val clock = sceneClock(onScreen)
     val description = shape?.let { stringResource(R.string.hero_moon_description, it.cycleDay, it.length) }.orEmpty()
     val heart = status?.phase == CyclePhase.OVULATORY ||
         (shape != null && shape.cycleDay in shape.fertileStart..shape.ovulation)
+    val inFuture = status == null && prediction.timeline.isNotEmpty()
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(Modifier.fillMaxWidth().height(SCENE_HEIGHT)) {
-            Canvas(Modifier.fillMaxWidth().height(SCENE_HEIGHT).semantics { contentDescription = description }) {
-                drawSky(palette, ground)
-                drawStars(layout, palette, twinkle)
-                shape?.let { drawSceneMoon(MoonPhase.of(it.cycleDay, it.length, it.ovulation), palette) }
-                drawClouds(layout, palette, drift)
-                if (heart) drawHeartCloud(Offset(size.width * HEART_X, size.height * HEART_Y), HEART_SIZE.toPx())
-                shape?.let { drawCyclePath(it, colors.period, FERTILE_GOLD, twinkle) }
-                drawForest(layout, palette, ground)
-            }
+            Spacer(
+                Modifier
+                    .fillMaxWidth()
+                    .height(SCENE_HEIGHT)
+                    .clipToBounds()
+                    .onGloballyPositioned { onScreen = it.boundsInWindow().height > 0f }
+                    .semantics { contentDescription = description }
+                    .drawWithCache {
+                        // The sky, forest and mist only change with the size or the phase, so they are built once.
+                        val sky = skyBrush(palette, ground)
+                        val forest = forestLayers(layout, palette, ground)
+                        val mist = mistBrush(palette)
+                        onDrawBehind {
+                            val millis = clock.longValue
+                            val drift = (millis % DRIFT_MILLIS).toFloat() / DRIFT_MILLIS
+                            val twinkle = abs(1f - 2f * (millis % (TWINKLE_MILLIS * 2)).toFloat() / (TWINKLE_MILLIS * 2))
+                            drawRect(sky)
+                            drawStars(layout, palette, twinkle)
+                            shape?.let { drawSceneMoon(MoonPhase.of(it.cycleDay, it.length, it.ovulation), palette) }
+                            drawClouds(layout, palette, drift)
+                            if (heart) drawHeartCloud(Offset(size.width * HEART_X, size.height * HEART_Y), HEART_SIZE.toPx())
+                            forest.forEach { (path, tone) -> drawPath(path, tone) }
+                            drawRect(mist, Offset(0f, size.height * MIST_TOP), Size(size.width, size.height * MIST_HEIGHT))
+                            shape?.let { drawCyclePath(it, colors.period, FERTILE_GOLD, twinkle) }
+                        }
+                    },
+            )
             PaletteButton(onOpenTheme, Modifier.align(Alignment.TopEnd).padding(16.dp))
             Column(
-                Modifier.align(Alignment.TopCenter).padding(top = TITLE_TOP),
+                Modifier.align(Alignment.TopCenter).padding(top = TITLE_TOP, start = SIDE, end = SIDE),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 val day = pages.firstOrNull { it.kind == PageKind.CYCLE_DAY }
@@ -134,11 +162,11 @@ internal fun SkyHero(
                         color = Color.White,
                     )
                     day.note?.let {
-                        Text(it, style = MaterialTheme.typography.titleMedium.copy(shadow = GLOW), color = Color.White.copy(alpha = SOFT_WHITE))
+                        Text(it, style = MaterialTheme.typography.titleMedium.copy(shadow = GLOW), color = Color.White)
                     }
                 } else {
                     Text(
-                        stringResource(R.string.today_no_data_title),
+                        stringResource(if (inFuture) R.string.today_cycle_in_future else R.string.today_no_data_title),
                         style = MaterialTheme.typography.headlineSmall.copy(shadow = GLOW),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -158,8 +186,39 @@ internal fun SkyHero(
             }
             Spacer(Modifier.height(20.dp))
         }
-        HeroAction(prediction, onEditPeriod, onPeriodStarted)
+        if (status == null) {
+            // Nothing to show yet: marking the first period is the way in.
+            if (!inFuture) Button(onClick = onPeriodStarted) { Text(stringResource(R.string.today_period_started)) }
+        } else {
+            HeroAction(prediction, onEditPeriod, onPeriodStarted)
+        }
     }
+}
+
+/**
+ * Milliseconds of scene time. It runs at a calm frame rate only while the scene is on screen
+ * and stands still when the system asks for no animations, so the picture costs little battery.
+ * The state is read only while drawing, so ticking it redraws the scene without recomposing.
+ */
+@Composable
+private fun sceneClock(onScreen: Boolean): LongState {
+    val context = LocalContext.current
+    val clock = remember { mutableLongStateOf(0L) }
+    val still = remember(context) {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+    }
+    LaunchedEffect(still, onScreen) {
+        if (still || !onScreen) return@LaunchedEffect
+        var last = withFrameMillis { it }
+        while (true) {
+            delay(FRAME_MILLIS)
+            withFrameMillis { now ->
+                clock.longValue += (now - last).coerceAtMost(FRAME_MILLIS * 4)
+                last = now
+            }
+        }
+    }
+    return clock
 }
 
 @Composable
@@ -172,22 +231,24 @@ private fun FactTile(page: HeroPage) {
     }
 }
 
-private fun DrawScope.drawSky(palette: SkyPalette, ground: Color) {
-    drawRect(
-        Brush.verticalGradient(
-            0f to palette.top,
-            0.45f to palette.middle,
-            HORIZON to palette.horizon,
-            1f to lerp(palette.horizon, ground, 0.6f),
-        ),
-    )
-}
+private fun skyBrush(palette: SkyPalette, ground: Color) = Brush.verticalGradient(
+    0f to palette.top,
+    0.45f to palette.middle,
+    HORIZON to palette.horizon,
+    1f to lerp(palette.horizon, ground, 0.6f),
+)
+
+private fun CacheDrawScope.mistBrush(palette: SkyPalette) = Brush.verticalGradient(
+    listOf(Color.Transparent, palette.horizon.copy(alpha = 0.18f), Color.Transparent),
+    size.height * MIST_TOP,
+    size.height * (MIST_TOP + MIST_HEIGHT),
+)
 
 private fun DrawScope.drawStars(layout: SceneLayout, palette: SkyPalette, twinkle: Float) {
     if (palette.stars <= 0f) return
     layout.stars.forEach { (x, y, seed) ->
         // Each star twinkles at its own phase.
-        val shimmer = 0.5f + 0.5f * kotlin.math.abs(kotlin.math.sin((twinkle + seed) * Math.PI)).toFloat()
+        val shimmer = 0.5f + 0.5f * abs(kotlin.math.sin((twinkle + seed) * Math.PI)).toFloat()
         val alpha = palette.stars * shimmer * (0.4f + seed * 0.6f)
         drawCircle(Color.White.copy(alpha = alpha.coerceIn(0f, 1f)), (0.8f + seed * 1.6f).dp.toPx(), Offset(x * size.width, y * size.height))
     }
@@ -202,10 +263,12 @@ private fun DrawScope.drawSceneMoon(moon: MoonPhase, palette: SkyPalette) {
 
 private fun DrawScope.drawClouds(layout: SceneLayout, palette: SkyPalette, drift: Float) {
     layout.clouds.forEachIndexed { index, (x, y, scale) ->
-        // Clouds drift right at different speeds and come back from the left.
-        val speed = 0.5f + index * 0.25f
-        val cx = ((x + drift * speed) % 1.2f - 0.1f) * size.width
-        drawCloud(Offset(cx, y * size.height), CLOUD_SIZE.toPx() * scale, Color.White.copy(alpha = palette.clouds))
+        // Clouds drift right at one or two laps per loop, so the loop closes without a jump,
+        // and leave the scene fully before they come back from the left.
+        val width = CLOUD_SIZE.toPx() * scale
+        val lap = (x + drift * (1 + index % 2)) % 1f
+        val cx = -width + lap * (size.width + 2 * width)
+        drawCloud(Offset(cx, y * size.height), width, Color.White.copy(alpha = palette.clouds))
     }
 }
 
@@ -267,8 +330,8 @@ private fun DrawScope.drawCyclePath(shape: CycleShape, period: Color, fertile: C
 }
 
 /** Three rows of pine silhouettes, each nearer one closer to the page colour, so the scene melts into it. */
-private fun DrawScope.drawForest(layout: SceneLayout, palette: SkyPalette, ground: Color) {
-    layout.forests.forEachIndexed { layer, trees ->
+private fun CacheDrawScope.forestLayers(layout: SceneLayout, palette: SkyPalette, ground: Color): List<Pair<Path, Color>> =
+    layout.forests.mapIndexed { layer, trees ->
         val baseY = size.height * (FOREST_BASE + layer * FOREST_STEP)
         val maxHeight = size.height * (FOREST_HEIGHT - layer * 0.03f)
         val tone = lerp(lerp(palette.top, Color.Black, 0.35f), ground, FOREST_MIX[layer])
@@ -287,29 +350,21 @@ private fun DrawScope.drawForest(layout: SceneLayout, palette: SkyPalette, groun
                 path.lineTo(left + offset + tierWidth, tierBase)
                 path.close()
             }
-            path.addRect(androidx.compose.ui.geometry.Rect(left + w * 0.45f, baseY - 2f, left + w * 0.55f, baseY + 6.dp.toPx()))
+            path.addRect(Rect(left + w * 0.45f, baseY - 2f, left + w * 0.55f, baseY + 6.dp.toPx()))
         }
-        drawPath(path, tone)
-        drawRect(tone, Offset(0f, baseY), Size(size.width, size.height - baseY))
+        path.addRect(Rect(0f, baseY, size.width, size.height))
+        path to tone
     }
-    // Mist between the trees.
-    drawRect(
-        Brush.verticalGradient(listOf(Color.Transparent, palette.horizon.copy(alpha = 0.18f), Color.Transparent), size.height * 0.62f, size.height * 0.85f),
-        Offset(0f, size.height * 0.62f),
-        Size(size.width, size.height * 0.23f),
-    )
-}
 
 private val SCENE_HEIGHT = 440.dp
 private val TITLE_TOP = 64.dp
 private val MOON_RADIUS = 30.dp
 private val CLOUD_SIZE = 150.dp
-private val HEART_SIZE = 64.dp
+private val HEART_SIZE = 56.dp
 private val TODAY_GLOW = 22.dp
 private val MOON_LIGHT = Color(0xFFFFF4DC)
 private val FERTILE_GOLD = Color(0xFFFFD66B)
-private val GLOW = Shadow(Color.Black.copy(alpha = 0.35f), Offset(0f, 2f), 12f)
-private const val SOFT_WHITE = 0.85f
+private val GLOW = Shadow(Color.Black.copy(alpha = 0.6f), Offset(0f, 2f), 14f)
 private const val SCENE_SEED = 21
 private const val STAR_COUNT = 40
 private const val STAR_BAND = 0.55f
@@ -320,13 +375,16 @@ private const val FOREST_LAYERS = 3
 private const val FOREST_BASE = 0.8f
 private const val FOREST_STEP = 0.07f
 private const val FOREST_HEIGHT = 0.2f
-private val FOREST_MIX = listOf(0.25f, 0.55f, 0.92f)
+private val FOREST_MIX = listOf(0.25f, 0.55f, 1f)
 private const val HORIZON = 0.78f
-private const val MOON_X = 0.8f
-private const val MOON_Y = 0.17f
+private const val MOON_X = 0.72f
+private const val MOON_Y = 0.21f
 private const val HEART_X = 0.26f
-private const val HEART_Y = 0.36f
-private const val ARC_BASE = 0.7f
-private const val ARC_CONTROL = 0.1f
+private const val HEART_Y = 0.47f
+private const val ARC_BASE = 0.56f
+private const val ARC_CONTROL = 0.16f
+private const val MIST_TOP = 0.62f
+private const val MIST_HEIGHT = 0.23f
 private const val DRIFT_MILLIS = 90_000
 private const val TWINKLE_MILLIS = 2_400
+private const val FRAME_MILLIS = 33L
