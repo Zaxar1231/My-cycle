@@ -8,6 +8,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
@@ -15,18 +16,21 @@ import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 
 /**
- * App theme. "Twilight rose" is the default; Material You (colors from the wallpaper, Android 12+)
- * and the violet "twilight" palette are options. Material You falls back to "twilight" on older devices.
+ * App theme. "Twilight rose" is the default; Material You (colors from the wallpaper, Android 12+),
+ * the violet "twilight" palette and a custom scheme built from a colour on the wheel are options.
+ * Material You falls back to "twilight" on older devices.
  */
 @Composable
 fun TwilightTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     style: ThemeStyle = ThemeStyle.ROSE,
     showFlowers: Boolean = true,
+    seedColor: Int = ThemeSettings.DEFAULT_SEED_COLOR,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         style == ThemeStyle.ROSE -> if (darkTheme) RoseDark else RoseLight
+        style == ThemeStyle.CUSTOM -> remember(seedColor, darkTheme) { seedColorScheme(seedColor, darkTheme) }
         style == ThemeStyle.MATERIAL_YOU && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -51,7 +55,7 @@ fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    TwilightTheme(darkTheme = dark, style = settings.style, showFlowers = settings.flowers, content = content)
+    TwilightTheme(darkTheme = dark, style = settings.style, showFlowers = settings.flowers, seedColor = settings.seedColor, content = content)
 }
 
 /** Whether decorative flowers are drawn (the user can turn them off). */

@@ -60,4 +60,6 @@
         <item quantity="other">days until ovulation</item>
     </plurals>
     <string name="hero_period_started">Period started</string>
+    <string name="hero_day_title">Day %1$s</string>
+    <string name="hero_moon_description">Cycle day %1$d of %2$d</string>
 </resources>

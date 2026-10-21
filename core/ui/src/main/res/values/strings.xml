@@ -6,6 +6,16 @@
     <string name="theme_style_material_you">Material You</string>
     <string name="theme_style_twilight">Сумерки</string>
     <string name="theme_material_you_unsupported">Цвета из обоев доступны на Android 12 и новее, на этом устройстве будет палитра «Сумерки».</string>
+    <string name="theme_style_custom">Свой цвет</string>
+    <string name="theme_custom_hint">Выберите цвет на круге: из него соберутся все цвета интерфейса для светлой и тёмной темы.</string>
+    <string name="color_wheel_description">Цветовой круг: угол задаёт оттенок, расстояние от центра — насыщенность</string>
+    <string name="color_wheel_brightness">Яркость</string>
+    <string name="theme_home">Главный экран</string>
+    <string name="home_moon">Луна</string>
+    <string name="home_orbit">Орбита</string>
+    <string name="home_wave">Волна</string>
+    <string name="home_mosaic">Мозаика</string>
+    <string name="home_ring">Кольцо</string>
     <string name="theme_mode">Режим</string>
     <string name="theme_mode_system">Как в системе</string>
     <string name="theme_mode_light">Светлая</string>

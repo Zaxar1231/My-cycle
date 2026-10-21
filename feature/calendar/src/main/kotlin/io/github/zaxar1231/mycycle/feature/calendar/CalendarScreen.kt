@@ -35,6 +35,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
@@ -91,12 +92,14 @@ fun CalendarScreen(
         return
     }
     var showTheme by rememberSaveable { mutableStateOf(false) }
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     Column(
         modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
         CycleHero(
+            style = theme?.home ?: HomeStyle.MOON,
             prediction = prediction,
             today = state.today,
             onEditPeriod = { onOpenDayLog(state.today) },
@@ -104,8 +107,8 @@ fun CalendarScreen(
             onOpenTheme = { showTheme = true },
         )
         Column(
-            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            Modifier.padding(start = SIDE, end = SIDE, top = AIR, bottom = AIR),
+            verticalArrangement = Arrangement.spacedBy(AIR),
         ) {
             MonthCalendar(
                 month = state.month,
@@ -128,7 +131,6 @@ fun CalendarScreen(
         }
     }
 
-    val theme by viewModel.theme.collectAsStateWithLifecycle()
     val savedTheme = theme
     if (showTheme && savedTheme != null) {
         ThemeSheet(savedTheme, onChange = viewModel::setTheme, onDismiss = { showTheme = false })

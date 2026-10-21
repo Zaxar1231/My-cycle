@@ -12,6 +12,7 @@ import dagger.Lazy
 import io.github.zaxar1231.mycycle.core.data.db.Converters.Companion.enumOrNull
 import io.github.zaxar1231.mycycle.core.data.db.ProfileDao
 import io.github.zaxar1231.mycycle.core.data.db.ProfileEntity
+import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.SecuritySettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
@@ -85,6 +86,8 @@ class DataStoreSettingsRepository @Inject constructor(
                 style = enumOrNull<ThemeStyle>(prefs[THEME_STYLE]) ?: defaults.theme.style,
                 mode = enumOrNull<ThemeMode>(prefs[THEME_MODE]) ?: defaults.theme.mode,
                 flowers = prefs[THEME_FLOWERS] ?: defaults.theme.flowers,
+                home = enumOrNull<HomeStyle>(prefs[THEME_HOME]) ?: defaults.theme.home,
+                seedColor = prefs[THEME_SEED] ?: defaults.theme.seedColor,
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
             security = SecuritySettings(
@@ -101,6 +104,8 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[THEME_STYLE] = theme.style.name
         prefs[THEME_MODE] = theme.mode.name
         prefs[THEME_FLOWERS] = theme.flowers
+        prefs[THEME_HOME] = theme.home.name
+        prefs[THEME_SEED] = theme.seedColor
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
         prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
         prefs[BIOMETRIC_UNLOCK] = security.biometricUnlock
@@ -113,6 +118,8 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME_STYLE = stringPreferencesKey("theme_style")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val THEME_FLOWERS = booleanPreferencesKey("theme_flowers")
+        val THEME_HOME = stringPreferencesKey("theme_home")
+        val THEME_SEED = intPreferencesKey("theme_seed")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
         val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
         val BIOMETRIC_UNLOCK = booleanPreferencesKey("biometric_unlock")
