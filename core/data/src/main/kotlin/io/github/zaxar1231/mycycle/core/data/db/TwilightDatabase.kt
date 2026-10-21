@@ -28,6 +28,7 @@ abstract class TwilightDatabase : RoomDatabase() {
     abstract fun medicationDao(): MedicationDao
     abstract fun petDao(): PetDao
     abstract fun profileDao(): ProfileDao
+    abstract fun affirmationDao(): AffirmationDao
 
     companion object {
         const val VERSION = 1

@@ -1,6 +1,7 @@
 package io.github.zaxar1231.mycycle.core.data.repository
 
 import androidx.room.withTransaction
+import io.github.zaxar1231.mycycle.core.data.db.AffirmationDao
 import io.github.zaxar1231.mycycle.core.data.db.CycleDao
 import io.github.zaxar1231.mycycle.core.data.db.DayLogDao
 import io.github.zaxar1231.mycycle.core.data.db.MedicationDao
@@ -8,10 +9,12 @@ import io.github.zaxar1231.mycycle.core.data.db.PetDao
 import io.github.zaxar1231.mycycle.core.data.db.TwilightDatabase
 import io.github.zaxar1231.mycycle.core.data.db.toDomain
 import io.github.zaxar1231.mycycle.core.data.db.toEntity
+import io.github.zaxar1231.mycycle.core.domain.model.Affirmation
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Medication
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.repository.AffirmationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
@@ -55,4 +58,11 @@ class RoomPetRepository @Inject constructor(private val dao: PetDao) : PetReposi
 
 class RoomTransactionRunner @Inject constructor(private val db: TwilightDatabase) : TransactionRunner {
     override suspend fun <T> inTransaction(block: suspend () -> T): T = db.withTransaction { block() }
+}
+
+class RoomAffirmationRepository @Inject constructor(private val dao: AffirmationDao) : AffirmationRepository {
+    override fun observeFavorites(): Flow<List<Affirmation>> =
+        dao.observeFavorites().map { list -> list.map { Affirmation(it.id, it.text, it.isFavorite) } }
+    override fun observeIsFavorite(text: String): Flow<Boolean> = dao.observeIsFavorite(text)
+    override suspend fun setFavorite(text: String, favorite: Boolean) = dao.setFavorite(text, favorite)
 }

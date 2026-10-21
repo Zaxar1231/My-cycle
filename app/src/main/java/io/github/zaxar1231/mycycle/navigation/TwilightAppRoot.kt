@@ -53,6 +53,10 @@ import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
 import io.github.zaxar1231.mycycle.feature.settings.settingsScreen
 import io.github.zaxar1231.mycycle.feature.stats.statsScreen
+import io.github.zaxar1231.mycycle.feature.wellness.AffirmationCard
+import io.github.zaxar1231.mycycle.feature.wellness.BreathingRoute
+import io.github.zaxar1231.mycycle.feature.wellness.FavoriteAffirmationsRoute
+import io.github.zaxar1231.mycycle.feature.wellness.wellnessScreens
 import java.time.LocalDate
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
@@ -94,8 +98,15 @@ fun TwilightAppRoot(
                 onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } },
                 onOpenPhases = { navController.navigate(PhasesRoute) { launchSingleTop = true } },
                 onOpenHormones = { navController.navigate(HormonesRoute) { launchSingleTop = true } },
+                homeExtras = {
+                    AffirmationCard(
+                        onOpenBreathing = { navController.navigate(BreathingRoute) { launchSingleTop = true } },
+                        onOpenFavorites = { navController.navigate(FavoriteAffirmationsRoute) { launchSingleTop = true } },
+                    )
+                },
             )
             insightsScreens(onBack = { navController.navigateUp() })
+            wellnessScreens(onBack = { navController.navigateUp() })
             statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)

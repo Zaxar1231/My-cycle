@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wellness_back">Back</string>
+
+    <string name="affirmation_title">Affirmation of the day</string>
+    <string name="affirmation_quote">“%1$s”</string>
+    <string name="affirmation_more">Another</string>
+    <string name="affirmation_save">Save</string>
+    <string name="affirmation_saved">Saved</string>
+    <string name="affirmation_share">Share</string>
+    <string name="affirmation_favorites">Favourites</string>
+    <string name="affirmation_favorites_empty">Affirmations you save will appear here.</string>
+    <string name="affirmation_remove">Remove</string>
+
+    <string name="breathing_open">Breathing</string>
+    <string name="breathing_title">Breathing exercise</string>
+    <string name="breathing_478">4-7-8</string>
+    <string name="breathing_box">Box</string>
+    <string name="breathing_slow">Slow</string>
+    <string name="breathing_478_description">Breathe in for 4, hold for 7, breathe out for 8. Many people find the long exhale calming before sleep.</string>
+    <string name="breathing_box_description">Breathe in, hold, breathe out and hold, 4 counts each. Helps to focus and steady the breath.</string>
+    <string name="breathing_slow_description">About six breaths a minute with a longer exhale. Some people find it relaxing during cramps.</string>
+    <string name="breathing_inhale">Breathe in</string>
+    <string name="breathing_hold">Hold</string>
+    <string name="breathing_exhale">Breathe out</string>
+    <string name="breathing_remaining">%1$d:%2$02d left</string>
+    <string name="breathing_start">Start</string>
+    <string name="breathing_pause">Pause</string>
+    <string name="breathing_reset">Restart</string>
+    <string name="breathing_done">Done. How do you feel?</string>
+    <string name="breathing_note">If you feel dizzy or uncomfortable, go back to normal breathing. This exercise is not a treatment: see a doctor about severe pain.</string>
+    <plurals name="breathing_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+</resources>

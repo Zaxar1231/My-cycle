@@ -86,6 +86,7 @@ dependencies {
     implementation(project(":feature:calendar"))
     implementation(project(":feature:stats"))
     implementation(project(":feature:insights"))
+    implementation(project(":feature:wellness"))
     implementation(project(":feature:daylog"))
     implementation(project(":feature:pet"))
     implementation(project(":feature:settings"))

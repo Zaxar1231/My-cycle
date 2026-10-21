@@ -49,9 +49,15 @@ import java.time.temporal.ChronoUnit
 @Serializable
 data object CalendarRoute
 
-fun NavGraphBuilder.calendarScreen(onOpenDayLog: (LocalDate) -> Unit, onOpenPhases: () -> Unit, onOpenHormones: () -> Unit) {
+/** [homeExtras] are cards from other features shown under the calendar, such as the affirmation. */
+fun NavGraphBuilder.calendarScreen(
+    onOpenDayLog: (LocalDate) -> Unit,
+    onOpenPhases: () -> Unit,
+    onOpenHormones: () -> Unit,
+    homeExtras: @Composable () -> Unit = {},
+) {
     composable<CalendarRoute> {
-        CalendarScreen(onOpenDayLog = onOpenDayLog, onOpenPhases = onOpenPhases, onOpenHormones = onOpenHormones)
+        CalendarScreen(onOpenDayLog = onOpenDayLog, onOpenPhases = onOpenPhases, onOpenHormones = onOpenHormones, homeExtras = homeExtras)
     }
 }
 
@@ -61,6 +67,7 @@ fun CalendarScreen(
     onOpenPhases: () -> Unit,
     onOpenHormones: () -> Unit,
     modifier: Modifier = Modifier,
+    homeExtras: @Composable () -> Unit = {},
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -117,6 +124,7 @@ fun CalendarScreen(
                 onOpenPhases = onOpenPhases,
                 onOpenHormones = onOpenHormones,
             )
+            homeExtras()
         }
     }
 

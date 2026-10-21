@@ -96,3 +96,25 @@ interface ProfileDao {
     @Upsert
     suspend fun upsert(profile: ProfileEntity)
 }
+
+@Dao
+interface AffirmationDao {
+    @Query("SELECT * FROM affirmations WHERE is_favorite = 1 ORDER BY id DESC")
+    fun observeFavorites(): Flow<List<AffirmationEntity>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM affirmations WHERE text = :text AND is_favorite = 1)")
+    fun observeIsFavorite(text: String): Flow<Boolean>
+
+    @Insert
+    suspend fun insert(affirmation: AffirmationEntity): Long
+
+    @Query("DELETE FROM affirmations WHERE text = :text")
+    suspend fun deleteByText(text: String)
+
+    /** Favourites are unique by text: adding one twice keeps a single row. */
+    @Transaction
+    suspend fun setFavorite(text: String, favorite: Boolean) {
+        deleteByText(text)
+        if (favorite) insert(AffirmationEntity(text = text, isFavorite = true))
+    }
+}

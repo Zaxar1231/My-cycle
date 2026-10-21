@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wellness_back">Назад</string>
+
+    <string name="affirmation_title">Аффирмация дня</string>
+    <string name="affirmation_quote">«%1$s»</string>
+    <string name="affirmation_more">Ещё</string>
+    <string name="affirmation_save">В избранное</string>
+    <string name="affirmation_saved">В избранном</string>
+    <string name="affirmation_share">Поделиться</string>
+    <string name="affirmation_favorites">Избранное</string>
+    <string name="affirmation_favorites_empty">Здесь будут аффирмации, которые вы сохраните.</string>
+    <string name="affirmation_remove">Убрать</string>
+
+    <string name="breathing_open">Дыхание</string>
+    <string name="breathing_title">Дыхательная практика</string>
+    <string name="breathing_478">4-7-8</string>
+    <string name="breathing_box">Квадрат</string>
+    <string name="breathing_slow">Медленное</string>
+    <string name="breathing_478_description">Вдох на 4 счёта, задержка на 7, выдох на 8. Длинный выдох многим помогает успокоиться и заснуть.</string>
+    <string name="breathing_box_description">Вдох, задержка, выдох и задержка — по 4 счёта. Помогает собраться и выровнять дыхание.</string>
+    <string name="breathing_slow_description">Около шести вдохов в минуту с удлинённым выдохом. Некоторым это помогает расслабиться при спазмах.</string>
+    <string name="breathing_inhale">Вдох</string>
+    <string name="breathing_hold">Задержка</string>
+    <string name="breathing_exhale">Выдох</string>
+    <string name="breathing_remaining">Осталось %1$d:%2$02d</string>
+    <string name="breathing_start">Начать</string>
+    <string name="breathing_pause">Пауза</string>
+    <string name="breathing_reset">Сначала</string>
+    <string name="breathing_done">Готово. Как вы себя чувствуете?</string>
+    <string name="breathing_note">Если кружится голова или становится неприятно, дышите как обычно. Практика не заменяет лечение: при сильной боли обратитесь к врачу.</string>
+    <plurals name="breathing_minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минуты</item>
+    </plurals>
+</resources>

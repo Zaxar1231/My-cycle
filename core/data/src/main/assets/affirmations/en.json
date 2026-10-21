@@ -1,0 +1,109 @@
+{
+  "templates": {
+    "MENSTRUAL": [
+      "Today I allow myself to {rest}.",
+      "My body is doing important work, and I treat it {care}.",
+      "I can move {pace}: rest is part of the journey too.",
+      "I deserve {care_noun}, especially on days like this."
+    ],
+    "FOLLICULAR": [
+      "{energy_cap} is waking up in me, and the world feels open.",
+      "Today is a good day to {start}.",
+      "I notice {energy} and {strength} in me.",
+      "New ideas come easily, and I try them {pace}."
+    ],
+    "OVULATORY": [
+      "My voice matters, and today I {express}.",
+      "I feel {strength} and share warmth with the people around me.",
+      "Today it is easy for me to {connect}.",
+      "I have enough {strength} to {start}."
+    ],
+    "LUTEAL": [
+      "My feelings matter, and I treat them {care}.",
+      "Today I choose to {rest} and not ask too much of myself.",
+      "I can slow down and move {pace}.",
+      "I respect my boundaries and {express}."
+    ],
+    "SUPPORT": [
+      "I don't need to be perfect to deserve {care_noun}.",
+      "This feeling will pass, and I treat myself {care}.",
+      "Small steps are enough today; I go {pace}.",
+      "I have the right to {rest}."
+    ],
+    "UPLIFT": [
+      "I am glad to feel {energy} in me.",
+      "Today I notice the good things and {connect}.",
+      "My mood is a resource, and I use it to {start}."
+    ],
+    "ANY": [
+      "I deserve {care_noun}.",
+      "I have enough {strength} for today.",
+      "I listen to my body and treat it {care}.",
+      "I move {pace}, and that is enough."
+    ]
+  },
+  "words": {
+    "rest": [
+      "rest without guilt",
+      "go to bed early",
+      "say no to extra tasks",
+      "enjoy some quiet",
+      "ask for help"
+    ],
+    "care": [
+      "gently",
+      "with warmth",
+      "with care",
+      "kindly",
+      "with respect"
+    ],
+    "care_noun": [
+      "care",
+      "warmth",
+      "rest",
+      "kindness",
+      "support"
+    ],
+    "pace": [
+      "at my own pace",
+      "step by step",
+      "without rushing",
+      "calmly"
+    ],
+    "energy": [
+      "energy",
+      "curiosity",
+      "inspiration",
+      "lightness"
+    ],
+    "energy_cap": [
+      "Energy",
+      "Curiosity",
+      "Inspiration",
+      "Lightness"
+    ],
+    "strength": [
+      "strength",
+      "calm",
+      "confidence",
+      "clarity"
+    ],
+    "start": [
+      "start something new",
+      "take the first step",
+      "try what I have wanted to try",
+      "set myself a small goal"
+    ],
+    "express": [
+      "say what I need",
+      "ask for what matters",
+      "speak honestly about my feelings"
+    ],
+    "connect": [
+      "share warmth",
+      "laugh",
+      "spend time with loved ones",
+      "notice the beauty around me"
+    ]
+  }
+}
