@@ -17,10 +17,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -30,6 +32,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -51,6 +54,10 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val todayContent by viewModel.todayContent.collectAsStateWithLifecycle()
+    val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
+    val language = LocalConfiguration.current.locales[0].language
+    LaunchedEffect(language) { viewModel.setLanguage(language) }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshToday()
         onPauseOrDispose {}
@@ -75,6 +82,7 @@ fun CalendarScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         TodayCard(prediction, onPeriodStarted = viewModel::markPeriodStartedToday)
+        todayContent?.let { PhaseContentCard(it, state.today) }
         MonthCalendar(
             month = state.month,
             today = state.today,
@@ -92,6 +100,8 @@ fun CalendarScreen(
             day = day,
             today = state.today,
             prediction = prediction,
+            // Shown only once it belongs to this day, never the previous selection's text.
+            content = selectedContent?.takeIf { it.day == day }?.content,
             onDismiss = { viewModel.select(null) },
             onLog = {
                 viewModel.select(null)
@@ -107,6 +117,7 @@ private fun DayDetailsSheet(
     day: LocalDate,
     today: LocalDate,
     prediction: CyclePrediction,
+    content: PhaseContent?,
     onDismiss: () -> Unit,
     onLog: () -> Unit,
 ) {
@@ -116,6 +127,7 @@ private fun DayDetailsSheet(
         Column(
             Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -133,6 +145,7 @@ private fun DayDetailsSheet(
                     Text(stringResource(R.string.day_predicted_note), style = MaterialTheme.typography.bodySmall)
                 }
             }
+            content?.let { PhaseContentCard(it, day) }
             if (!day.isAfter(today)) {
                 Button(onClick = onLog, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.day_log_button)) }
             }

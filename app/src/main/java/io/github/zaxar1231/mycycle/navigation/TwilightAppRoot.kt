@@ -28,7 +28,9 @@ import io.github.zaxar1231.mycycle.R
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
 import io.github.zaxar1231.mycycle.feature.calendar.calendarScreen
 import io.github.zaxar1231.mycycle.feature.daylog.DayLogRoute
+import io.github.zaxar1231.mycycle.feature.daylog.MedicationsRoute
 import io.github.zaxar1231.mycycle.feature.daylog.dayLogScreen
+import io.github.zaxar1231.mycycle.feature.daylog.medicationsScreen
 import io.github.zaxar1231.mycycle.feature.onboarding.OnboardingRoute
 import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
@@ -75,7 +77,11 @@ fun TwilightAppRoot(
             statsScreen()
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)
-            dayLogScreen(onBack = { navController.navigateUp() })
+            dayLogScreen(
+                onBack = { navController.navigateUp() },
+                onManageMedications = { navController.navigate(MedicationsRoute) { launchSingleTop = true } },
+            )
+            medicationsScreen(onBack = { navController.navigateUp() })
         }
     }
 }
