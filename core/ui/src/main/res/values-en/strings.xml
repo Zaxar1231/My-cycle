@@ -81,6 +81,7 @@
     <string name="font_lora">Lora</string>
     <string name="font_caveat">Caveat</string>
     <string name="font_custom">Own file…</string>
-    <string name="font_custom_hint">A font from a file. It stays inside the app; tap "Own file…" again to change it.</string>
+    <string name="font_custom_hint">A font from a file. It stays inside the app; tap “Own file…” again to change it.</string>
     <string name="font_custom_failed">Could not open the font. .ttf and .otf files up to 15 MB work.</string>
+    <string name="font_custom_missing">The font file is missing, the system font is used for now. Pick the file again.</string>
 </resources>

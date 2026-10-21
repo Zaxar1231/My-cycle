@@ -28,7 +28,8 @@ private fun variable(resId: Int) = FontFamily(
     },
 )
 
-private val WEIGHTS = listOf(300, 400, 500, 600, 700)
+/** The weights of the Material type scale; Lora and Caveat start at 400 anyway. */
+private val WEIGHTS = listOf(400, 500, 600, 700)
 
 internal fun AppFont.family(context: Context, customFile: String?): FontFamily? = when (this) {
     AppFont.SYSTEM -> null
@@ -37,8 +38,12 @@ internal fun AppFont.family(context: Context, customFile: String?): FontFamily? 
     AppFont.COMFORTAA -> variable(R.font.comfortaa)
     AppFont.LORA -> variable(R.font.lora)
     AppFont.CAVEAT -> variable(R.font.caveat)
-    // A missing or broken file falls back to the system font instead of failing.
-    AppFont.CUSTOM -> customFile?.let { CustomFonts.file(context, it) }?.takeIf { it.exists() }?.let { FontFamily(Font(it)) }
+    // Loaded once into a Typeface: a missing or unreadable file falls back to the system font
+    // here instead of failing later inside text layout, which would crash on every start.
+    AppFont.CUSTOM -> customFile?.let { CustomFonts.file(context, it) }
+        ?.takeIf { it.exists() }
+        ?.let { runCatching { Typeface.Builder(it).build() }.getOrNull() }
+        ?.let { FontFamily(it) }
 }
 
 /** The Material type scale with every style in [family]. */
@@ -65,8 +70,14 @@ object CustomFonts {
 
     internal fun file(context: Context, name: String) = File(File(context.filesDir, DIRECTORY), name)
 
-    /** Copies and checks the font. Returns the stored file name, or null if it is not a usable font. */
-    suspend fun import(context: Context, uri: Uri): String? = withContext(Dispatchers.IO) {
+    fun exists(context: Context, name: String) = file(context, name).exists()
+
+    /**
+     * Copies and checks the font. Returns the stored file name, or null if it is not a usable
+     * font. Files other than the new one and [keep] (the one the settings still point to) are
+     * removed, so the saved choice never loses its file before the new one is saved.
+     */
+    suspend fun import(context: Context, uri: Uri, keep: String?): String? = withContext(Dispatchers.IO) {
         val dir = File(context.filesDir, DIRECTORY).apply { mkdirs() }
         val name = "custom_${System.currentTimeMillis()}.ttf"
         val target = File(dir, name)
@@ -91,7 +102,7 @@ object CustomFonts {
             target.delete()
             return@withContext null
         }
-        dir.listFiles()?.filter { it.name != name }?.forEach { it.delete() }
+        dir.listFiles()?.filter { it.name != name && it.name != keep }?.forEach { it.delete() }
         name
     }
 

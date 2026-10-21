@@ -83,4 +83,5 @@
     <string name="font_custom">Свой файл…</string>
     <string name="font_custom_hint">Шрифт из файла. Он хранится только внутри приложения; чтобы сменить, нажмите «Свой файл…» ещё раз.</string>
     <string name="font_custom_failed">Не удалось открыть шрифт. Подойдут файлы .ttf и .otf размером до 15 МБ.</string>
+    <string name="font_custom_missing">Файл шрифта не найден, сейчас используется системный шрифт. Выберите файл заново.</string>
 </resources>

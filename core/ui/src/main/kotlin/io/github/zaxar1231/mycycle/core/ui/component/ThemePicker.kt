@@ -41,6 +41,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 import io.github.zaxar1231.mycycle.core.ui.R
 import io.github.zaxar1231.mycycle.core.ui.theme.CustomFonts
 import io.github.zaxar1231.mycycle.core.ui.theme.family
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
@@ -100,15 +101,20 @@ fun ThemePicker(
 @Composable
 private fun FontChips(settings: ThemeSettings, onChange: (ThemeSettings) -> Unit) {
     val context = LocalContext.current
+    val appContext = context.applicationContext
     val scope = rememberCoroutineScope()
     var failed by rememberSaveable { mutableStateOf(false) }
+    val missing = remember(settings.font, settings.customFontFile) {
+        settings.font == AppFont.CUSTOM && settings.customFontFile?.let { CustomFonts.exists(context, it) } != true
+    }
     val latestSettings by rememberUpdatedState(settings)
     val latestOnChange by rememberUpdatedState(onChange)
     // The picker returns a content URI; nothing but the chosen file is read.
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
-            scope.launch {
-                val name = CustomFonts.import(context, uri)
+            // Finishes even if the sheet closes meanwhile, so the copied file is always saved.
+            scope.launch(NonCancellable) {
+                val name = CustomFonts.import(appContext, uri, keep = latestSettings.customFontFile)
                 failed = name == null
                 if (name != null) latestOnChange(latestSettings.copy(font = AppFont.CUSTOM, customFontFile = name))
             }
@@ -119,18 +125,28 @@ private fun FontChips(settings: ThemeSettings, onChange: (ThemeSettings) -> Unit
             val family = remember(font) { font.family(context, null) }
             FilterChip(
                 selected = settings.font == font,
-                onClick = { onChange(settings.copy(font = font)) },
+                onClick = {
+                    failed = false
+                    onChange(settings.copy(font = font))
+                },
                 label = { Text(stringResource(font.labelRes()), fontFamily = family) },
             )
         }
         FilterChip(
             selected = settings.font == AppFont.CUSTOM,
-            onClick = { pick.launch(FONT_TYPES) },
+            onClick = {
+                failed = false
+                pick.launch(FONT_TYPES)
+            },
             label = { Text(stringResource(R.string.font_custom)) },
         )
     }
-    if (failed) {
-        Text(stringResource(R.string.font_custom_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+    if (failed || missing) {
+        Text(
+            stringResource(if (failed) R.string.font_custom_failed else R.string.font_custom_missing),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
     } else if (settings.font == AppFont.CUSTOM) {
         Hint(R.string.font_custom_hint)
     }
