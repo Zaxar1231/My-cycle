@@ -31,8 +31,8 @@ create unique index if not exists partner_links_partner_key on public.partner_li
 create table if not exists public.partner_shares (
     link_id uuid primary key references public.partner_links (id) on delete cascade,
     owner uuid not null default auth.uid() references auth.users (id) on delete cascade,
-    payload text not null,
-    updated_at timestamptz not null default now()
+    -- No timestamp: the snapshot's date is inside the ciphertext, and upload times stay unrecorded.
+    payload text not null
 );
 
 alter table public.partner_invites enable row level security;

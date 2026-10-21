@@ -20,12 +20,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.io.IOException
@@ -49,12 +49,42 @@ class SupabasePartnerRepository @Inject constructor(
 ) : PartnerRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val lock = Mutex()
-    private val stored = MutableStateFlow(store.read())
-    private val orphaned = MutableStateFlow(false)
-    private val ended = MutableStateFlow(false)
 
-    override val state: StateFlow<PartnerState> = combine(accounts.account, stored, orphaned, ended) { a, l, o, e -> stateOf(a, l, o, e) }
-        .stateIn(scope, SharingStarted.Eagerly, stateOf(accounts.account.value, stored.value, orphaned.value, ended.value))
+    // Changed only under [lock]; every change publishes [state] at once, so a read right after a
+    // call already sees its result. [generation] counts changes, so a slow server answer that
+    // started before one is not applied on top of it.
+    @Volatile private var stored: Map<String, StoredLink> = store.read()
+        set(value) {
+            field = value
+            changed()
+        }
+    private var orphaned = false
+        set(value) {
+            field = value
+            changed()
+        }
+    private var ended = false
+        set(value) {
+            field = value
+            changed()
+        }
+    private var generation = 0L
+
+    private val _state = MutableStateFlow(stateOf(accounts.account.value, stored, orphaned, ended))
+    override val state: StateFlow<PartnerState> = _state.asStateFlow()
+
+    init {
+        scope.launch { accounts.account.collect { publish() } }
+    }
+
+    private fun changed() {
+        generation++
+        publish()
+    }
+
+    private fun publish() {
+        _state.value = stateOf(accounts.account.value, stored, orphaned, ended)
+    }
 
     private fun stateOf(account: Account?, links: Map<String, StoredLink>, orphan: Boolean, endedByOther: Boolean): PartnerState {
         if (!http.isConfigured) return PartnerState.Unavailable
@@ -70,28 +100,31 @@ class SupabasePartnerRepository @Inject constructor(
     }
 
     override suspend fun refresh(): PartnerResult = call {
+        val before = lock.withLock { generation }
         val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
         val response = http.request("GET", "/rest/v1/partner_links?select=id,partner", bearer = bearer)
         if (!response.ok) return@call failed(response)
         val partnersById = PartnerErrors.column(response.body, "id").zip(PartnerErrors.column(response.body, "partner")).toMap()
         val links = partnersById.keys
         lock.withLock {
+            // Something changed while the request was out (joined, unlinked): this answer is stale.
+            if (generation != before) return@withLock Unit
             val link = current()
             when {
-                link == null -> orphaned.value = links.isNotEmpty()
+                link == null -> orphaned = links.isNotEmpty()
                 link.role == Role.INVITING -> when {
                     // Accepted: nothing is shared until the owner compares the verification codes.
                     link.linkId in links -> save(link.copy(role = Role.CONFIRMING, partnerId = partnersById[link.linkId]))
                     // An old link of this account blocks the invitation; it has to be removed first.
                     links.isNotEmpty() -> {
                         save(null)
-                        orphaned.value = true
+                        orphaned = true
                     }
                     System.currentTimeMillis() > link.expiresAt -> save(null)
                 }
                 link.linkId !in links -> {
                     save(null)
-                    ended.value = true
+                    ended = true
                 }
             }
             Unit
@@ -120,8 +153,8 @@ class SupabasePartnerRepository @Inject constructor(
                     expiresAt = System.currentTimeMillis() + INVITE_LIFETIME_MILLIS,
                 ),
             )
-            orphaned.value = false
-            ended.value = false
+            orphaned = false
+            ended = false
             PartnerResult.Done
         }
     }
@@ -131,9 +164,13 @@ class SupabasePartnerRepository @Inject constructor(
             val link = current()?.takeIf { it.role == Role.INVITING } ?: return
             save(null)
             // Best effort: the server refuses an invitation older than a day and clears such rows on the next accept.
-            runCatching {
+            try {
                 val bearer = accounts.accessToken() ?: return
                 http.request("DELETE", "/rest/v1/partner_invites?id=eq.${link.linkId}", bearer = bearer)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Offline: the invitation runs out on its own.
             }
         }
     }
@@ -155,8 +192,8 @@ class SupabasePartnerRepository @Inject constructor(
                     key = Base64.getEncoder().encodeToString(invite.key),
                 ),
             )
-            orphaned.value = false
-            ended.value = false
+            orphaned = false
+            ended = false
             PartnerResult.Done
         }
     }
@@ -178,8 +215,8 @@ class SupabasePartnerRepository @Inject constructor(
             val response = http.request("DELETE", "/rest/v1/partner_links?$filter", bearer = bearer)
             if (!response.ok) return@call failed(response)
             if (current() != null) save(null)
-            orphaned.value = false
-            ended.value = false
+            orphaned = false
+            ended = false
             PartnerResult.Done
         }
     }
@@ -235,15 +272,16 @@ class SupabasePartnerRepository @Inject constructor(
     /** The stored link of the signed-in account. */
     private fun current(): StoredLink? {
         val account = accounts.account.value ?: return null
-        return stored.value[account.userId]
+        return stored[account.userId]
     }
 
     /** Replaces (or with null removes) the signed-in account's link; other accounts' links stay. */
-    private fun save(link: StoredLink?) {
+    private suspend fun save(link: StoredLink?) {
         val account = accounts.account.value ?: return
-        val links = if (link == null) stored.value - account.userId else stored.value + (account.userId to link)
-        store.write(links)
-        stored.value = links
+        val links = if (link == null) stored - account.userId else stored + (account.userId to link)
+        // Keystore and file work stays off the main thread.
+        withContext(Dispatchers.IO) { store.write(links) }
+        stored = links
     }
 
     private fun StoredLink.isLinked() = role == Role.CONFIRMING || role == Role.SHARING || role == Role.FOLLOWING
@@ -251,7 +289,13 @@ class SupabasePartnerRepository @Inject constructor(
     private suspend fun update(role: Role, change: (StoredLink) -> StoredLink) {
         lock.withLock {
             val link = current()?.takeIf { it.role == role } ?: return
-            runCatching { save(change(link)) }
+            try {
+                save(change(link))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // A Keystore failure: the setting stays as it was.
+            }
         }
     }
 

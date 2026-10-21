@@ -70,4 +70,7 @@ class PartnerCycleViewModel @Inject constructor(
 @HiltViewModel
 class PartnerInviteViewModel @Inject constructor(inbox: PartnerInviteInbox) : ViewModel() {
     val code: StateFlow<String?> = inbox.code
+
+    /** The code settings were last opened for; kept across rotation so one link opens them once. */
+    var handled: String? = null
 }

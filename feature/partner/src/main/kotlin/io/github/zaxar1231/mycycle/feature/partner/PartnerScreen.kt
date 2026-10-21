@@ -214,5 +214,11 @@ fun PartnerHomeCard(onOpen: () -> Unit, viewModel: PartnerCycleViewModel = hiltV
 @Composable
 fun PartnerInviteNavigator(onInvite: () -> Unit, viewModel: PartnerInviteViewModel = hiltViewModel()) {
     val code by viewModel.code.collectAsStateWithLifecycle()
-    LaunchedEffect(code) { if (code != null) onInvite() }
+    LaunchedEffect(code) {
+        val incoming = code ?: return@LaunchedEffect
+        if (incoming != viewModel.handled) {
+            viewModel.handled = incoming
+            onInvite()
+        }
+    }
 }

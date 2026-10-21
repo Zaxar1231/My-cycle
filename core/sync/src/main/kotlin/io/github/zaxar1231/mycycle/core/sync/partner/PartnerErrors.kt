@@ -2,9 +2,10 @@ package io.github.zaxar1231.mycycle.core.sync.partner
 
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerError
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 /** Reads PostgREST answers: error bodies to [PartnerError] and rows to plain values. */
 internal object PartnerErrors {
@@ -25,6 +26,8 @@ internal object PartnerErrors {
 
     /** The values of [field] in a JSON array of rows; empty when the body is not one. */
     fun column(body: String, field: String): List<String> = runCatching {
-        Json.parseToJsonElement(body).jsonArray.mapNotNull { row -> row.jsonObject[field]?.jsonPrimitive?.content }
+        Json.parseToJsonElement(body).jsonArray.mapNotNull { row ->
+            (row.jsonObject[field] as? JsonPrimitive)?.takeUnless { it is JsonNull }?.content
+        }
     }.getOrDefault(emptyList())
 }

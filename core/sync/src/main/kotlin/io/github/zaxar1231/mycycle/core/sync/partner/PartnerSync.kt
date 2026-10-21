@@ -41,12 +41,15 @@ import javax.inject.Singleton
 @Singleton
 class PartnerSync @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val partners: PartnerRepository,
+    // Lazy: the repository reads its Keystore-encrypted file when created, which must not happen
+    // on the main thread during app start.
+    private val partnerRepository: dagger.Lazy<PartnerRepository>,
     private val observePrediction: ObserveCyclePredictionUseCase,
     private val dayLogs: DayLogRepository,
     private val dates: DateProvider,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val partners: PartnerRepository get() = partnerRepository.get()
 
     fun start() {
         scope.launch {
