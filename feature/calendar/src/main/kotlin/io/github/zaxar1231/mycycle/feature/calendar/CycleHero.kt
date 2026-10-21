@@ -48,15 +48,17 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
-/** One page of the ring: a big value, what it means and an optional small note. */
-private class HeroPage(val value: String, val label: String, val note: String? = null)
+internal enum class PageKind { PERIOD, FERTILE, CYCLE_DAY, CHANCE }
+
+/** One fact about today: a big value, what it means and an optional small note. */
+internal class HeroPage(val kind: PageKind, val value: String, val label: String, val note: String? = null)
 
 /**
- * The top of the home screen: a large ring over decorative flowers. Swiping the ring shows days
+ * The "Ring" home picture: a large ring over decorative flowers. Swiping the ring shows days
  * until the period, days until the fertile window, the cycle day and the chance to conceive.
  */
 @Composable
-fun CycleHero(
+internal fun RingHero(
     prediction: CyclePrediction,
     today: LocalDate,
     onEditPeriod: () -> Unit,
@@ -115,23 +117,25 @@ fun CycleHero(
                 }
             }
         }
-        Surface(
-            onClick = onOpenTheme,
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.background.copy(alpha = PALETTE_ALPHA),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-                .size(PALETTE_SIZE),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    painterResource(UiR.drawable.ic_palette),
-                    contentDescription = stringResource(R.string.hero_theme),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
+        PaletteButton(onOpenTheme, Modifier.align(Alignment.TopEnd).padding(16.dp))
+    }
+}
+
+@Composable
+internal fun PaletteButton(onOpenTheme: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onOpenTheme,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.background.copy(alpha = PALETTE_ALPHA),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = modifier.size(PALETTE_SIZE),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painterResource(UiR.drawable.ic_palette),
+                contentDescription = stringResource(R.string.hero_theme),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
@@ -183,38 +187,44 @@ private fun PageDots(count: Int, current: Int) {
 
 /** Empty when there is no current cycle to describe. */
 @Composable
-private fun heroPages(prediction: CyclePrediction, today: LocalDate): List<HeroPage> {
+internal fun heroPages(prediction: CyclePrediction, today: LocalDate): List<HeroPage> {
     val s = prediction.today ?: return emptyList()
     val due = s.daysLate > 0 || s.daysUntilNextPeriod == 0
     val todayWord = stringResource(R.string.hero_today)
     return buildList {
         add(
             when {
-                s.daysLate > 0 -> HeroPage(s.daysLate.toString(), pluralStringResource(R.plurals.hero_days_late, s.daysLate))
-                s.daysUntilNextPeriod == 0 -> HeroPage(todayWord, stringResource(R.string.hero_period_expected))
-                s.phase == CyclePhase.MENSTRUAL -> HeroPage(s.cycleDay.toString(), stringResource(R.string.hero_period_day))
-                else -> HeroPage(s.daysUntilNextPeriod.toString(), pluralStringResource(R.plurals.hero_until_period, s.daysUntilNextPeriod))
+                s.daysLate > 0 -> HeroPage(PageKind.PERIOD, s.daysLate.toString(), pluralStringResource(R.plurals.hero_days_late, s.daysLate))
+                s.daysUntilNextPeriod == 0 -> HeroPage(PageKind.PERIOD, todayWord, stringResource(R.string.hero_period_expected))
+                s.phase == CyclePhase.MENSTRUAL -> HeroPage(PageKind.PERIOD, s.cycleDay.toString(), stringResource(R.string.hero_period_day))
+                else -> HeroPage(
+                    PageKind.PERIOD,
+                    s.daysUntilNextPeriod.toString(),
+                    pluralStringResource(R.plurals.hero_until_period, s.daysUntilNextPeriod),
+                )
             },
         )
         if (!due) {
             val untilFertile = ChronoUnit.DAYS.between(today, s.fertileWindow.start).toInt()
             add(
                 when {
-                    untilFertile > 0 -> HeroPage(untilFertile.toString(), pluralStringResource(R.plurals.hero_until_fertile, untilFertile))
+                    untilFertile > 0 -> HeroPage(PageKind.FERTILE, untilFertile.toString(), pluralStringResource(R.plurals.hero_until_fertile, untilFertile))
                     s.daysUntilOvulation > 0 -> HeroPage(
+                        PageKind.FERTILE,
                         s.daysUntilOvulation.toString(),
                         pluralStringResource(R.plurals.hero_until_ovulation, s.daysUntilOvulation),
                         stringResource(R.string.hero_fertile_now),
                     )
-                    else -> HeroPage(todayWord, stringResource(R.string.hero_ovulation))
+                    else -> HeroPage(PageKind.FERTILE, todayWord, stringResource(R.string.hero_ovulation))
                 },
             )
         }
-        add(HeroPage(s.cycleDay.toString(), stringResource(R.string.hero_cycle_day), stringResource(s.phase.labelRes())))
+        add(HeroPage(PageKind.CYCLE_DAY, s.cycleDay.toString(), stringResource(R.string.hero_cycle_day), stringResource(s.phase.labelRes())))
         if (!due) {
             PregnancyChanceModel.on(today, prediction)?.let { chance ->
                 add(
                     HeroPage(
+                        PageKind.CHANCE,
                         stringResource(R.string.hero_percent, chance.percent),
                         stringResource(R.string.hero_chance),
                         stringResource(R.string.chance_not_contraception),

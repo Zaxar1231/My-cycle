@@ -107,10 +107,14 @@ class CalendarViewModel @Inject constructor(
         .map { it.theme }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
-    fun setTheme(theme: ThemeSettings) {
+    fun setSeedColor(seed: Int) = saveTheme { settings.setSeedColor(seed) }
+
+    fun setTheme(theme: ThemeSettings) = saveTheme { settings.setTheme(theme) }
+
+    private fun saveTheme(save: suspend () -> Unit) {
         viewModelScope.launch {
             try {
-                settings.setTheme(theme)
+                save()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

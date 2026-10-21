@@ -65,6 +65,9 @@ interface SettingsRepository {
     val settings: Flow<UserSettings>
     suspend fun update(transform: (UserSettings) -> UserSettings)
     suspend fun setTheme(theme: ThemeSettings) = update { it.copy(theme = theme) }
+
+    /** Only the seed, on top of the latest saved theme, so a change made meanwhile is kept. */
+    suspend fun setSeedColor(seed: Int) = update { it.copy(theme = it.theme.copy(seedColor = seed)) }
 }
 
 enum class DataAccessStatus { READY, KEY_LOST }

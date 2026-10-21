@@ -49,6 +49,8 @@ class AffirmationTemplates(
 
     companion object {
         const val ANY = "ANY"
-        private val SLOT = Regex("""\{(\w+)}""")
+        // Both braces escaped: Android's ICU regex rejects a bare "}" that the JVM accepts,
+        // and the error at class init crashed the home screen.
+        private val SLOT = Regex("""\{(\w+)\}""")
     }
 }

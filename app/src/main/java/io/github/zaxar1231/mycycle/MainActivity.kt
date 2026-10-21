@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                         AppLockGate(lock, biometricUnlock = settings.security.biometricUnlock) {
                             TwilightAppRoot(
                                 startWithOnboarding = !settings.onboardingCompleted,
-                                appearanceSection = { ThemePicker(settings.theme, main::setTheme) },
+                                appearanceSection = { ThemePicker(settings.theme, main::setTheme, onSeedChange = main::setSeedColor) },
                                 updatesSection = {
                                     UpdatesCard(
                                         state = updateState,

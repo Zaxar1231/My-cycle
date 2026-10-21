@@ -32,9 +32,19 @@ data class ThemeSettings(
     val mode: ThemeMode = ThemeMode.SYSTEM,
     /** Decorative flowers around the cycle ring on the home screen. */
     val flowers: Boolean = true,
-)
+    val home: HomeStyle = HomeStyle.MOON,
+    /** ARGB seed of the [ThemeStyle.CUSTOM] scheme, picked on the colour wheel. */
+    val seedColor: Int = DEFAULT_SEED_COLOR,
+) {
+    companion object {
+        const val DEFAULT_SEED_COLOR: Int = 0xFF8E6BBF.toInt()
+    }
+}
 
-/** [ROSE] is the default look: dark background, rose accents. */
-enum class ThemeStyle { ROSE, MATERIAL_YOU, TWILIGHT }
+/** [ROSE] is the default look: dark background, rose accents. [CUSTOM] is built from [ThemeSettings.seedColor]. */
+enum class ThemeStyle { ROSE, MATERIAL_YOU, TWILIGHT, CUSTOM }
+
+/** The picture at the top of the home screen. */
+enum class HomeStyle { MOON, ORBIT, WAVE, MOSAIC, RING }
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }

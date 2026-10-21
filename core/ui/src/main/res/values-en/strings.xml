@@ -6,6 +6,16 @@
     <string name="theme_style_material_you">Material You</string>
     <string name="theme_style_twilight">Twilight</string>
     <string name="theme_material_you_unsupported">Wallpaper colors need Android 12 or newer, this device will use the Twilight palette.</string>
+    <string name="theme_style_custom">Own colour</string>
+    <string name="theme_custom_hint">Pick a colour on the wheel: every colour of the interface, light and dark, is built from it.</string>
+    <string name="color_wheel_description">Colour wheel: the angle sets the hue, the distance from the centre the saturation</string>
+    <string name="color_wheel_brightness">Brightness</string>
+    <string name="theme_home">Home screen</string>
+    <string name="home_moon">Moon</string>
+    <string name="home_orbit">Orbit</string>
+    <string name="home_wave">Wave</string>
+    <string name="home_mosaic">Mosaic</string>
+    <string name="home_ring">Ring</string>
     <string name="theme_mode">Mode</string>
     <string name="theme_mode_system">System</string>
     <string name="theme_mode_light">Light</string>
@@ -52,4 +62,8 @@
     <string name="content_cons">Downsides</string>
     <string name="content_bullet">• %1$s</string>
     <string name="content_pill_count">%1$s · %2$d</string>
+    <string name="color_wheel_hue_next">Next hue</string>
+    <string name="color_wheel_hue_previous">Previous hue</string>
+    <string name="color_wheel_more_saturated">More saturated</string>
+    <string name="color_wheel_less_saturated">Less saturated</string>
 </resources>

@@ -49,7 +49,7 @@ fun TodayCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
             Text(stringResource(R.string.today_cycle_day, status.cycleDay), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(status.phase.labelRes()), style = MaterialTheme.typography.bodyLarge)
