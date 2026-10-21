@@ -1,14 +1,23 @@
 package io.github.zaxar1231.mycycle.core.domain.partner
 
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
 import kotlinx.coroutines.flow.StateFlow
 import java.time.Instant
 import java.time.LocalDate
 
 /** What the person who tracks the cycle lets the partner see. Notes, sex and weight are never shared. */
-enum class PartnerPermission { PHASE, MOOD, SYMPTOMS, FERTILITY }
+enum class PartnerPermission {
+    PHASE,
+    MOOD,
+    SYMPTOMS,
+    FERTILITY,
 
-/** Shared by default: only the phase and the period forecast; everything else is opt-in. */
-val DEFAULT_PARTNER_PERMISSIONS: Set<PartnerPermission> = setOf(PartnerPermission.PHASE)
+    /** The shared pet: its look and level (which grows with logging), never the logs themselves. */
+    PET,
+}
+
+/** Shared by default: the phase with the period forecast, and the pet; everything else is opt-in. */
+val DEFAULT_PARTNER_PERMISSIONS: Set<PartnerPermission> = setOf(PartnerPermission.PHASE, PartnerPermission.PET)
 
 sealed interface PartnerState {
     /** The build has no server configured. */
@@ -32,8 +41,16 @@ sealed interface PartnerState {
     /** This phone tracks the cycle and shares it with a partner. */
     data class Sharing(val permissions: Set<PartnerPermission>) : PartnerState
 
-    /** This phone follows the cycle of the person who invited it; [verification] is shown to compare. */
-    data class Following(val notify: Boolean, val verification: String) : PartnerState
+    /**
+     * This phone follows the cycle of the person who invited it; [verification] is shown to compare.
+     * [lastFed] and [lastGift] are this phone's care for the shared pet.
+     */
+    data class Following(
+        val notify: Boolean,
+        val verification: String,
+        val lastFed: LocalDate? = null,
+        val lastGift: LocalDate? = null,
+    ) : PartnerState
 
     /**
      * The server has a link for this account but this phone has no key for it (reinstall, another
@@ -98,6 +115,15 @@ interface PartnerRepository {
 
     /** Partner: downloads and decrypts the shared snapshot. */
     suspend fun fetchShared(): SharedCycle
+
+    /** Partner: sends care for the shared pet, encrypted like everything else. */
+    suspend fun sendCare(care: PetCare): PartnerResult
+
+    /**
+     * Owner: downloads the partner's care for the pet and hands it to [apply]; it is removed from
+     * the server only when [apply] returns true, so nothing is lost if applying fails.
+     */
+    suspend fun takeCare(apply: suspend (List<PetCare>) -> Boolean)
 
     /** Partner: the period start the last reminder was about, so each period is announced once. */
     suspend fun lastNotice(): LocalDate?

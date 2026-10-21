@@ -28,6 +28,7 @@
     <string name="partner_share_phase">Фаза и прогноз месячных</string>
     <string name="partner_share_mood">Настроение за сегодня</string>
     <string name="partner_share_symptoms">Симптомы за сегодня</string>
+    <string name="partner_share_pet">Общий питомец (уровень и вещи)</string>
     <string name="partner_share_fertility">Фертильное окно</string>
     <string name="partner_never_shared">Заметки, секс, вес, температура и препараты не передаются никогда.</string>
     <string name="partner_linked_partner">Вы видите цикл человека, который вас пригласил.</string>
@@ -104,4 +105,14 @@
     <string name="partner_disclaimer">Прогноз приблизительный. Это не медицинская консультация и не метод контрацепции.</string>
     <string name="partner_home_title">Цикл партнёра</string>
     <string name="partner_separator">" · "</string>
+    <string name="partner_pet_title">Общий питомец</string>
+    <string name="partner_pet_description">%1$s, уровень %2$d</string>
+    <string name="partner_pet_level">%1$s · уровень %2$d</string>
+    <string name="partner_pet_feed">Покормить</string>
+    <string name="partner_pet_fed">Накормлен сегодня</string>
+    <string name="partner_pet_gift">Подарить вещь</string>
+    <string name="partner_pet_gift_later">Подарок можно дарить раз в %1$d дней.</string>
+    <string name="partner_pet_no_gifts">Сейчас подарить нечего: всё доступное уже есть.</string>
+    <string name="partner_pet_choose">Выберите подарок:</string>
+    <string name="partner_pet_note">Корм и подарки приходят зашифрованными и появятся у питомца, когда телефон партнёра выйдет в интернет. Подарок дойдёт, если такой вещи у питомца ещё нет.</string>
 </resources>

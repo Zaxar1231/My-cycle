@@ -81,6 +81,22 @@ class PetRulesTest {
     }
 
     @Test
+    fun `the partner feeds once a day and gives a gift once a week`() {
+        val fed = PetRules.partnerFeed(pet, today)!!.pet
+        assertEquals(PetConstants.PARTNER_FEED_COINS, fed.coins)
+        assertNull(PetRules.partnerFeed(fed, today))
+        assertNull(PetRules.partnerFeed(fed, today.minusDays(1)))
+        val bow = PetItems.byId("bow")!!
+        val gifted = PetRules.partnerGift(fed, bow, today)!!
+        assertTrue("bow" in gifted.ownedItems)
+        assertEquals(fed.coins, gifted.coins)
+        val scarf = PetItems.byId("scarf")!!
+        assertNull(PetRules.partnerGift(gifted, scarf, today.plusDays(PetConstants.PARTNER_GIFT_DAYS - 1L)))
+        assertTrue("scarf" in PetRules.partnerGift(gifted, scarf, today.plusDays(PetConstants.PARTNER_GIFT_DAYS.toLong()))!!.ownedItems)
+        assertNull(PetRules.partnerGift(pet, PetItems.byId("crown")!!, today))
+    }
+
+    @Test
     fun `item ids are unique`() {
         assertEquals(PetItems.ALL.size, PetItems.ALL.map { it.id }.toSet().size)
     }

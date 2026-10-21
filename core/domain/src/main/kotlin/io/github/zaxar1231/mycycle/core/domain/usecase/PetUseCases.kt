@@ -1,7 +1,10 @@
 package io.github.zaxar1231.mycycle.core.domain.usecase
 
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
+import io.github.zaxar1231.mycycle.core.domain.pet.PetConstants
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItem
+import io.github.zaxar1231.mycycle.core.domain.pet.PetItems
 import io.github.zaxar1231.mycycle.core.domain.pet.PetReward
 import io.github.zaxar1231.mycycle.core.domain.pet.PetRules
 import io.github.zaxar1231.mycycle.core.domain.pet.PetShop
@@ -35,6 +38,39 @@ class RewardPetUseCase @Inject constructor(
             val pet = pets.pet() ?: return@inTransaction null
             rule(pet)?.also { pets.update(it.pet) }
         }
+}
+
+/** Applies what the partner did for the shared pet; limits are checked here, on the owner's phone. */
+class ApplyPetCareUseCase @Inject constructor(
+    private val pets: PetRepository,
+    private val transactions: TransactionRunner,
+    private val dates: DateProvider,
+) {
+    /**
+     * How many of [cares] changed the pet. The limits count by this phone's date, not the one the
+     * partner's phone sent: care dated far away is dropped, and a batch brings at most one feeding
+     * and one gift. Null when there is no pet yet, so the care stays queued.
+     */
+    suspend operator fun invoke(cares: List<PetCare>): Int? = transactions.inTransaction {
+        var pet = pets.pet() ?: return@inTransaction null
+        val today = dates.today()
+        val window = today.minusDays(PetConstants.PARTNER_CARE_MAX_AGE_DAYS)..today.plusDays(1)
+        val accepted = cares.filter { it.date in window }.sortedBy { it.date }
+        val batch = listOfNotNull(accepted.lastOrNull { it is PetCare.Feed }, accepted.lastOrNull { it is PetCare.Gift })
+        var applied = 0
+        batch.forEach { care ->
+            val next = when (care) {
+                is PetCare.Feed -> PetRules.partnerFeed(pet, today)?.pet
+                is PetCare.Gift -> PetItems.byId(care.itemId)?.let { PetRules.partnerGift(pet, it, today) }
+            }
+            if (next != null) {
+                pet = next
+                applied++
+            }
+        }
+        if (applied > 0) pets.update(pet)
+        applied
+    }
 }
 
 /** Buying and wearing clothes and accessories. */

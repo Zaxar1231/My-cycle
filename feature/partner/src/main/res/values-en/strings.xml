@@ -28,6 +28,7 @@
     <string name="partner_share_phase">Phase and period forecast</string>
     <string name="partner_share_mood">Today\'s mood</string>
     <string name="partner_share_symptoms">Today\'s symptoms</string>
+    <string name="partner_share_pet">Shared pet (level and items)</string>
     <string name="partner_share_fertility">Fertile window</string>
     <string name="partner_never_shared">Notes, sex, weight, temperature and medications are never shared.</string>
     <string name="partner_linked_partner">You see the cycle of the person who invited you.</string>
@@ -98,4 +99,14 @@
     <string name="partner_disclaimer">The forecast is approximate. It is not medical advice and not a method of contraception.</string>
     <string name="partner_home_title">Partner\'s cycle</string>
     <string name="partner_separator">" · "</string>
+    <string name="partner_pet_title">Shared pet</string>
+    <string name="partner_pet_description">%1$s, level %2$d</string>
+    <string name="partner_pet_level">%1$s · level %2$d</string>
+    <string name="partner_pet_feed">Feed</string>
+    <string name="partner_pet_fed">Fed today</string>
+    <string name="partner_pet_gift">Give a gift</string>
+    <string name="partner_pet_gift_later">A gift can be given once every %1$d days.</string>
+    <string name="partner_pet_no_gifts">Nothing to give right now: the pet has everything available.</string>
+    <string name="partner_pet_choose">Choose a gift:</string>
+    <string name="partner_pet_note">Food and gifts travel encrypted and reach the pet once your partner\'s phone is online. A gift arrives if the pet does not have it yet.</string>
 </resources>

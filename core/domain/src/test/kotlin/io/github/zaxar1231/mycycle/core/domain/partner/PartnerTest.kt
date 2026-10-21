@@ -5,6 +5,9 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
+import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.model.PetType
+import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
 import io.github.zaxar1231.mycycle.core.domain.model.SexActivity
 import io.github.zaxar1231.mycycle.core.domain.model.Symptom
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -91,6 +94,28 @@ class PartnerTest {
         assertEquals(setOf(Symptom.CRAMPS), snapshot.symptoms)
         assertEquals(start.plusDays(13), snapshot.ovulation)
         assertEquals(start.plusDays(8), snapshot.fertileStart)
+    }
+
+    @Test
+    fun `the shared pet does not give away a hidden period`() {
+        val pet = Pet(PetType.FOX, level = 2, equippedItems = setOf("bow"), ownedItems = setOf("bow"))
+        val hidden = PartnerShare.snapshot(prediction, log, setOf(PartnerPermission.PET), today, pet)
+        assertEquals(PetMood.CALM, hidden.pet!!.mood)
+        assertEquals(setOf("bow"), hidden.pet!!.worn)
+        val shared = PartnerShare.snapshot(prediction, log, DEFAULT_PARTNER_PERMISSIONS, today, pet)
+        assertEquals(PetMood.COZY, shared.pet!!.mood)
+    }
+
+    @Test
+    fun `the pet needs its own permission and mixes no hidden data into its mood`() {
+        val pet = Pet(PetType.FOX)
+        assertNull(PartnerShare.snapshot(prediction, log, setOf(PartnerPermission.PHASE), today, pet).pet)
+        val sad = log.copy(moods = setOf(Mood.SAD))
+        // Phase without mood: the sad day stays hidden, the period shows.
+        assertEquals(PetMood.COZY, PartnerShare.snapshot(prediction, sad, setOf(PartnerPermission.PHASE, PartnerPermission.PET), today, pet).pet!!.mood)
+        // Mood without phase: no hot water bottle.
+        assertEquals(PetMood.SAD, PartnerShare.snapshot(prediction, sad, setOf(PartnerPermission.MOOD, PartnerPermission.PET), today, pet).pet!!.mood)
+        assertEquals(PetMood.CALM, PartnerShare.snapshot(prediction, sad, setOf(PartnerPermission.FERTILITY, PartnerPermission.PET), today, pet).pet!!.mood)
     }
 
     @Test

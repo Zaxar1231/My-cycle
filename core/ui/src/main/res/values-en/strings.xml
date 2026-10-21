@@ -85,4 +85,24 @@
     <string name="font_custom_hint">A font from a file. It stays inside the app; tap “Own file…” again to change it.</string>
     <string name="font_custom_failed">Could not open the font. .ttf and .otf files up to 15 MB work.</string>
     <string name="font_custom_missing">The font file is missing, the system font is used for now. Pick the file again.</string>
+    <string name="pet_name_cat">Kitty</string>
+    <string name="pet_name_fox">Fox cub</string>
+    <string name="pet_name_bunny">Bunny</string>
+    <string name="pet_name_panda">Panda</string>
+    <string name="pet_name_penguin">Penguin</string>
+    <string name="pet_item_tuft">Tuft</string>
+    <string name="pet_item_bangs">Bangs</string>
+    <string name="pet_item_bow">Bow</string>
+    <string name="pet_item_flower_crown">Flower crown</string>
+    <string name="pet_item_beret">Beret</string>
+    <string name="pet_item_party_hat">Party hat</string>
+    <string name="pet_item_crown">Crown</string>
+    <string name="pet_item_glasses">Glasses</string>
+    <string name="pet_item_heart_glasses">Heart glasses</string>
+    <string name="pet_item_scarf">Scarf</string>
+    <string name="pet_item_bowtie">Bow tie</string>
+    <string name="pet_item_bell">Bell</string>
+    <string name="pet_item_sweater">Sweater</string>
+    <string name="pet_item_cape">Cape</string>
+    <string name="pet_item_unknown">Item</string>
 </resources>

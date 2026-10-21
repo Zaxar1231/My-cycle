@@ -5,6 +5,9 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
+import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.pet.PetRules
+import io.github.zaxar1231.mycycle.core.domain.pet.SharedPet
 import io.github.zaxar1231.mycycle.core.domain.model.Symptom
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -26,6 +29,11 @@ data class PartnerSnapshot(
     /** Logged on [date]. */
     val moods: Set<Mood> = emptySet(),
     val symptoms: Set<Symptom> = emptySet(),
+    /**
+     * The shared pet, with [PartnerPermission.PET]; its mood is worked out only from what the
+     * permissions share. The owner's clock is left out (the partner's phone shows night itself).
+     */
+    val pet: SharedPet? = null,
 )
 
 /** The snapshot as the partner sees it today. */
@@ -45,11 +53,30 @@ data class PartnerView(
 )
 
 object PartnerShare {
-    fun snapshot(prediction: CyclePrediction, todayLog: DayLog?, permissions: Set<PartnerPermission>, today: LocalDate): PartnerSnapshot {
+    private const val NOON = 12
+
+    fun snapshot(
+        prediction: CyclePrediction,
+        todayLog: DayLog?,
+        permissions: Set<PartnerPermission>,
+        today: LocalDate,
+        pet: Pet? = null,
+    ): PartnerSnapshot {
         val status = prediction.today
         val phase = PartnerPermission.PHASE in permissions && status != null
         val fertility = PartnerPermission.FERTILITY in permissions && status != null
         val log = todayLog?.takeIf { it.date == today }
+        val moods = if (PartnerPermission.MOOD in permissions) log?.moods.orEmpty() else emptySet()
+        // A hot water bottle would tell the period, so the pet only knows what the partner may see.
+        val sharedPet = pet?.takeIf { PartnerPermission.PET in permissions }?.let {
+            SharedPet(
+                type = it.type,
+                level = it.level,
+                worn = it.equippedItems,
+                ownedItems = it.ownedItems,
+                mood = PetRules.mood(status?.phase?.takeIf { phase }, moods, NOON),
+            )
+        }
         return PartnerSnapshot(
             date = today,
             cycleDay = status?.cycleDay?.takeIf { phase },
@@ -59,8 +86,9 @@ object PartnerShare {
             ovulation = status?.ovulation?.takeIf { fertility },
             fertileStart = status?.fertileWindow?.start?.takeIf { fertility },
             fertileEnd = status?.fertileWindow?.endInclusive?.takeIf { fertility },
-            moods = if (PartnerPermission.MOOD in permissions) log?.moods.orEmpty() else emptySet(),
+            moods = moods,
             symptoms = if (PartnerPermission.SYMPTOMS in permissions) log?.symptoms.orEmpty() else emptySet(),
+            pet = sharedPet,
         )
     }
 

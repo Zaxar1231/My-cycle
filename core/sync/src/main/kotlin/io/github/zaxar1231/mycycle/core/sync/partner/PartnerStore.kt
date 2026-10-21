@@ -22,6 +22,9 @@ data class StoredLink(
     val permissions: List<String> = emptyList(),
     val notify: Boolean = true,
     val lastNotice: String? = null,
+    /** Partner: this phone's last feeding and gift for the shared pet. */
+    val lastFed: String? = null,
+    val lastGift: String? = null,
     /** Owner: the account that accepted the invitation, for the verification code. */
     val partnerId: String? = null,
 ) {

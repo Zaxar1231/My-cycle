@@ -17,6 +17,14 @@ object PetConstants {
     const val STREAK_BONUS_DAYS = 7
     const val STREAK_BONUS_COINS = 15
 
+    /** Partner mode: feeding once a day, a gift once per [PARTNER_GIFT_DAYS] days. */
+    const val PARTNER_FEED_COINS = 3
+    const val PARTNER_FEED_XP = 10
+    const val PARTNER_GIFT_DAYS = 7
+
+    /** Care older than this many days, or dated after tomorrow, is not applied. */
+    const val PARTNER_CARE_MAX_AGE_DAYS = 7L
+
     /** From this hour until [WAKE_HOUR] the pet sleeps. */
     const val SLEEP_HOUR = 23
     const val WAKE_HOUR = 6
@@ -72,6 +80,23 @@ object PetRules {
         if (pet.lastBreathingReward == today) return null
         return grant(pet.copy(lastBreathingReward = today), PetConstants.BREATHING_COINS, PetConstants.BREATHING_XP, streakBonus = false)
     }
+
+    /** The partner fed the pet on [date]; once a day, later dates only. */
+    fun partnerFeed(pet: Pet, date: LocalDate): PetReward? {
+        val last = pet.lastPartnerFeed
+        if (last != null && !date.isAfter(last)) return null
+        return grant(pet.copy(lastPartnerFeed = date), PetConstants.PARTNER_FEED_COINS, PetConstants.PARTNER_FEED_XP, streakBonus = false)
+    }
+
+    /** The partner gave [item] on [date]: free, once a week, only what the pet's level allows and it lacks. */
+    fun partnerGift(pet: Pet, item: PetItem, date: LocalDate): Pet? {
+        if (!canGift(pet.lastPartnerGift, date)) return null
+        if (item.id in pet.ownedItems || pet.level < item.minLevel) return null
+        return pet.copy(ownedItems = pet.ownedItems + item.id, lastPartnerGift = date)
+    }
+
+    fun canGift(lastGift: LocalDate?, today: LocalDate): Boolean =
+        lastGift == null || !today.isBefore(lastGift.plusDays(PetConstants.PARTNER_GIFT_DAYS.toLong()))
 
     /** The streak shown today: it lapses once a whole day passed without a log. */
     fun currentStreak(pet: Pet, today: LocalDate): Int {

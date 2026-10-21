@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerError
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerRepository
+import io.github.zaxar1231.mycycle.core.domain.partner.PartnerResult
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerShare
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerSnapshot
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerState
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerView
 import io.github.zaxar1231.mycycle.core.domain.partner.SharedCycle
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
+import io.github.zaxar1231.mycycle.core.domain.pet.PetItem
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 sealed interface PartnerCycleUi {
@@ -40,6 +44,26 @@ class PartnerCycleViewModel @Inject constructor(
         .map { it is PartnerState.Following }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, partners.state.value is PartnerState.Following)
+
+    /** This phone's care for the shared pet: when it last fed it and gave a gift. */
+    val care: StateFlow<PartnerState.Following?> = partners.state
+        .map { it as? PartnerState.Following }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, partners.state.value as? PartnerState.Following)
+
+    private val _careError = MutableStateFlow<PartnerError?>(null)
+    val careError: StateFlow<PartnerError?> = _careError.asStateFlow()
+
+    fun today(): LocalDate = dates.today()
+
+    fun feed() = sendCare(PetCare.Feed(dates.today()))
+
+    fun gift(item: PetItem) = sendCare(PetCare.Gift(item.id, dates.today()))
+
+    private fun sendCare(care: PetCare) {
+        viewModelScope.launch {
+            _careError.value = (partners.sendCare(care) as? PartnerResult.Failed)?.error
+        }
+    }
 
     private val _cycle = MutableStateFlow<PartnerCycleUi>(PartnerCycleUi.Loading)
     val cycle: StateFlow<PartnerCycleUi> = _cycle.asStateFlow()

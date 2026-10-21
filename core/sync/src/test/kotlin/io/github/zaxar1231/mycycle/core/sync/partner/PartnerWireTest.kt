@@ -2,9 +2,13 @@ package io.github.zaxar1231.mycycle.core.sync.partner
 
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
+import io.github.zaxar1231.mycycle.core.domain.model.PetType
 import io.github.zaxar1231.mycycle.core.domain.model.Symptom
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerError
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerSnapshot
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
+import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
+import io.github.zaxar1231.mycycle.core.domain.pet.SharedPet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -53,6 +57,17 @@ class PartnerWireTest {
         bytes[bytes.size - 1] = (bytes[bytes.size - 1].toInt() xor 1).toByte()
         assertNull(PartnerCrypto.open(key, "link-1", java.util.Base64.getEncoder().encodeToString(bytes)))
         assertNull(PartnerCrypto.open(key, "link-1", "not base64!"))
+    }
+
+    @Test
+    fun `the shared pet and the partner's care survive a round trip`() {
+        val withPet = snapshot.copy(pet = SharedPet(PetType.BUNNY, 3, setOf("bow"), setOf("bow", "scarf"), PetMood.PLAYFUL))
+        assertEquals(withPet, PartnerCodec.decode(PartnerCodec.encode(withPet)))
+        val feed = PetCare.Feed(LocalDate.of(2026, 10, 21))
+        val gift = PetCare.Gift("scarf", LocalDate.of(2026, 10, 21))
+        assertEquals(feed, PartnerCodec.decodeCare(PartnerCodec.encodeCare(feed)))
+        assertEquals(gift, PartnerCodec.decodeCare(PartnerCodec.encodeCare(gift)))
+        assertNull(PartnerCodec.decodeCare("""{"kind":"dance","date":"2026-10-21"}""".toByteArray()))
     }
 
     @Test

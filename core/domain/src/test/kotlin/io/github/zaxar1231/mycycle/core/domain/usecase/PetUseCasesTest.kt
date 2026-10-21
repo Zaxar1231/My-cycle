@@ -2,6 +2,7 @@ package io.github.zaxar1231.mycycle.core.domain.usecase
 
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
 import io.github.zaxar1231.mycycle.core.domain.model.PetType
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
 import io.github.zaxar1231.mycycle.core.domain.pet.PetConstants
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItems
 import io.github.zaxar1231.mycycle.core.domain.pet.PurchaseResult
@@ -64,6 +65,21 @@ class PetUseCasesTest {
         val none = FakePets(null)
         assertNull(RewardPetUseCase(none, transactions) { today }.dayLogged(today))
         assertEquals(PurchaseResult.FAILED, PetWardrobeUseCase(none, transactions).buy(PetItems.ALL.first()))
+    }
+
+    @Test
+    fun `partner care counts by this phone's date and one of each per batch`() = runTest {
+        val apply = ApplyPetCareUseCase(pets, transactions) { today }
+        val far = PetCare.Feed(LocalDate.of(2099, 1, 1))
+        assertEquals(0, apply(listOf(far)))
+        val batch = listOf(PetCare.Feed(today.minusDays(2)), PetCare.Feed(today.minusDays(1)), PetCare.Feed(today), PetCare.Gift("bow", today))
+        assertEquals(2, apply(batch))
+        val pet = pets.pet()!!
+        assertEquals(PetConstants.PARTNER_FEED_COINS, pet.coins)
+        assertEquals(today, pet.lastPartnerFeed)
+        assertEquals(setOf("bow"), pet.ownedItems)
+        assertEquals(0, apply(listOf(PetCare.Feed(today), PetCare.Gift("scarf", today))))
+        assertNull(ApplyPetCareUseCase(FakePets(null), transactions) { today }(listOf(PetCare.Feed(today))))
     }
 
     private class FakePets(initial: Pet?) : PetRepository {

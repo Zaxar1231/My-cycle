@@ -55,6 +55,9 @@ data class PetEntity(
     @ColumnInfo(name = "last_log_reward") val lastLogReward: LocalDate? = null,
     @ColumnInfo(name = "log_streak", defaultValue = "0") val logStreak: Int = 0,
     @ColumnInfo(name = "last_breathing_reward") val lastBreathingReward: LocalDate? = null,
+    // Added in schema version 3 (care from the partner).
+    @ColumnInfo(name = "last_partner_feed") val lastPartnerFeed: LocalDate? = null,
+    @ColumnInfo(name = "last_partner_gift") val lastPartnerGift: LocalDate? = null,
 ) {
     companion object {
         const val SINGLE_PET_ID = 1

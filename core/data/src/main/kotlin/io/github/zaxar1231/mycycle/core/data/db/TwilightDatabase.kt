@@ -33,7 +33,7 @@ abstract class TwilightDatabase : RoomDatabase() {
     abstract fun affirmationDao(): AffirmationDao
 
     companion object {
-        const val VERSION = 2
+        const val VERSION = 3
         const val NAME = "twilight.db"
     }
 }
@@ -49,5 +49,13 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2)
+    /** Partner mode: when the partner last fed the pet and gave it a gift. */
+    val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE pet ADD COLUMN last_partner_feed INTEGER")
+            db.execSQL("ALTER TABLE pet ADD COLUMN last_partner_gift INTEGER")
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
 }

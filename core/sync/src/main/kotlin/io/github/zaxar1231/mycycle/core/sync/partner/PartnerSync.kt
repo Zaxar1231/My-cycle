@@ -11,8 +11,12 @@ import io.github.zaxar1231.mycycle.core.domain.partner.PartnerSnapshot
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerState
 import io.github.zaxar1231.mycycle.core.domain.partner.SharedCycle
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
+import io.github.zaxar1231.mycycle.core.domain.usecase.ApplyPetCareUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,15 +45,23 @@ import javax.inject.Singleton
 @Singleton
 class PartnerSync @Inject constructor(
     @ApplicationContext private val context: Context,
-    // Lazy: the repository reads its Keystore-encrypted file when created, which must not happen
-    // on the main thread during app start.
+    // Lazy: the partner repository reads its Keystore-encrypted file when created, which must not
+    // happen on the main thread during app start, and the others open the database, which must
+    // wait for the key check (a lost key would otherwise crash the app before it can say so).
     private val partnerRepository: dagger.Lazy<PartnerRepository>,
-    private val observePrediction: ObserveCyclePredictionUseCase,
-    private val dayLogs: DayLogRepository,
+    private val predictionUseCase: dagger.Lazy<ObserveCyclePredictionUseCase>,
+    private val dayLogRepository: dagger.Lazy<DayLogRepository>,
+    private val petRepository: dagger.Lazy<PetRepository>,
+    private val applyCareUseCase: dagger.Lazy<ApplyPetCareUseCase>,
     private val dates: DateProvider,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    // An unreadable database (lost key) must not take the app down from a background job.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> })
     private val partners: PartnerRepository get() = partnerRepository.get()
+    private val observePrediction get() = predictionUseCase.get()
+    private val dayLogs get() = dayLogRepository.get()
+    private val pets get() = petRepository.get()
+    private val applyCare get() = applyCareUseCase.get()
 
     fun start() {
         scope.launch {
@@ -69,6 +81,24 @@ class PartnerSync @Inject constructor(
         }
         // Notices an accepted invitation or a link the other side removed while the app was closed.
         scope.launch { partners.refresh() }
+        // The partner's care is picked up when the owner starts sharing or opens the app, and by the
+        // background worker; no constant polling, so the server learns little about app use.
+        scope.launch {
+            partners.state.map { it is PartnerState.Sharing }.distinctUntilChanged().collect { sharing -> if (sharing) takeCare() }
+        }
+    }
+
+    private suspend fun takeCare() {
+        partners.takeCare { cares ->
+            try {
+                applyCare(cares) != null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Kept on the server for the next try.
+                false
+            }
+        }
     }
 
     /** One background pass; false asks the worker to retry later (no network). */
@@ -77,6 +107,7 @@ class PartnerSync @Inject constructor(
         if (refreshed is PartnerResult.Failed && refreshed.error == PartnerError.NETWORK) return false
         return when (val state = partners.state.value) {
             is PartnerState.Sharing -> {
+                takeCare()
                 val today = dates.today()
                 val result = partners.share(snapshotOn(today, state.permissions))
                 !(result is PartnerResult.Failed && result.error == PartnerError.NETWORK)
@@ -100,12 +131,12 @@ class PartnerSync @Inject constructor(
     }
 
     private suspend fun snapshotOn(today: LocalDate, permissions: Set<PartnerPermission>): PartnerSnapshot =
-        PartnerShare.snapshot(observePrediction(today).first(), dayLogs.get(today), permissions, today)
+        PartnerShare.snapshot(observePrediction(today).first(), dayLogs.get(today), permissions, today, pets.pet())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun snapshots(permissions: Set<PartnerPermission>): Flow<PartnerSnapshot> = todays().flatMapLatest { today ->
-        combine(observePrediction(today), dayLogs.observe(today)) { prediction, log ->
-            PartnerShare.snapshot(prediction, log, permissions, today)
+        combine(observePrediction(today), dayLogs.observe(today), pets.observePet()) { prediction, log, pet ->
+            PartnerShare.snapshot(prediction, log, permissions, today, pet)
         }
     }
 

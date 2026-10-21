@@ -47,7 +47,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
-import io.github.zaxar1231.mycycle.core.domain.model.PetType
 import io.github.zaxar1231.mycycle.core.domain.pet.PetConstants
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItem
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItems
@@ -56,6 +55,9 @@ import io.github.zaxar1231.mycycle.core.domain.pet.PetRules
 import io.github.zaxar1231.mycycle.core.domain.pet.PetShop
 import io.github.zaxar1231.mycycle.core.domain.pet.PurchaseResult
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
+import io.github.zaxar1231.mycycle.core.ui.pet.PetLook
+import io.github.zaxar1231.mycycle.core.ui.pet.PetPicture
+import io.github.zaxar1231.mycycle.core.ui.pet.nameRes
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -118,14 +120,14 @@ private fun PetContent(pet: Pet, state: PetUiState, look: PetLook, viewModel: Pe
             PetPicture(look, stringResource(R.string.pet_description, stringResource(pet.type.nameRes()), stringResource(state.mood.textRes())), Modifier.size(PET_SIZE))
         }
         Text(stringResource(R.string.pet_stroke_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Stats(pet, state.streak)
+        Stats(pet, state.streak, partnerFedToday = pet.lastPartnerFeed != null && pet.lastPartnerFeed == state.today)
         HowToEarn()
         Wardrobe(pet, state.tryOn, viewModel)
     }
 }
 
 @Composable
-private fun Stats(pet: Pet, streak: Int) {
+private fun Stats(pet: Pet, streak: Int, partnerFedToday: Boolean) {
     val (current, needed) = PetRules.progress(pet.xp)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,6 +138,7 @@ private fun Stats(pet: Pet, streak: Int) {
             LinearProgressIndicator(progress = { current.toFloat() / needed }, modifier = Modifier.fillMaxWidth())
             Text(stringResource(R.string.pet_xp, current, needed), style = MaterialTheme.typography.bodySmall)
             if (streak > 0) Text(pluralStringResource(R.plurals.pet_streak, streak, streak), style = MaterialTheme.typography.bodyMedium)
+            if (partnerFedToday) Text(stringResource(R.string.pet_partner_fed), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -229,14 +232,6 @@ fun PetHomeCard(onOpen: () -> Unit, viewModel: PetViewModel = hiltViewModel()) {
     }
 }
 
-private fun PetType.nameRes() = when (this) {
-    PetType.CAT -> R.string.pet_name_cat
-    PetType.FOX -> R.string.pet_name_fox
-    PetType.BUNNY -> R.string.pet_name_bunny
-    PetType.PANDA -> R.string.pet_name_panda
-    PetType.PENGUIN -> R.string.pet_name_penguin
-}
-
 private fun PetMood.textRes() = when (this) {
     PetMood.SLEEPY -> R.string.pet_mood_sleepy
     PetMood.HAPPY -> R.string.pet_mood_happy
@@ -252,24 +247,6 @@ private fun PurchaseResult.messageRes() = when (this) {
     PurchaseResult.LEVEL_TOO_LOW -> R.string.pet_need_level
     PurchaseResult.ALREADY_OWNED -> R.string.pet_owned
     PurchaseResult.FAILED -> R.string.pet_failed
-}
-
-private fun PetItem.nameRes() = when (id) {
-    "tuft" -> R.string.pet_item_tuft
-    "bangs" -> R.string.pet_item_bangs
-    "bow" -> R.string.pet_item_bow
-    "flower_crown" -> R.string.pet_item_flower_crown
-    "beret" -> R.string.pet_item_beret
-    "party_hat" -> R.string.pet_item_party_hat
-    "crown" -> R.string.pet_item_crown
-    "glasses" -> R.string.pet_item_glasses
-    "heart_glasses" -> R.string.pet_item_heart_glasses
-    "scarf" -> R.string.pet_item_scarf
-    "bowtie" -> R.string.pet_item_bowtie
-    "bell" -> R.string.pet_item_bell
-    "sweater" -> R.string.pet_item_sweater
-    "cape" -> R.string.pet_item_cape
-    else -> R.string.pet_item_unknown
 }
 
 private val PET_SIZE = 260.dp
