@@ -6,15 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
-import io.github.zaxar1231.mycycle.core.domain.model.Cycle
-import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
-import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
-import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
+import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.SaveDayLogUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,10 +48,9 @@ data class CalendarUiState(
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    cycles: CycleRepository,
     private val settings: SettingsRepository,
     private val dayLogs: DayLogRepository,
-    private val predictor: CyclePredictor,
+    private val observePrediction: ObserveCyclePredictionUseCase,
     private val saveDayLog: SaveDayLogUseCase,
     private val dateProvider: DateProvider,
     private val phaseContent: PhaseContentRepository,
@@ -65,30 +61,7 @@ class CalendarViewModel @Inject constructor(
     private val selected = MutableStateFlow<LocalDate?>(null)
     private val saveFailed = MutableStateFlow(false)
 
-    private val prediction = today.flatMapLatest { day ->
-        combine(
-            cycles.observeCycles(),
-            settings.settings,
-            dayLogs.observeRange(day.minusDays(TEMPERATURE_LOOKBACK_DAYS), day),
-        ) { cycleList, s, logs -> predict(day, cycleList, s, logs) }
-    }
-
-    private fun predict(
-        day: LocalDate,
-        cycleList: List<Cycle>,
-        s: UserSettings,
-        logs: List<DayLog>,
-    ): CyclePrediction =
-        predictor.predict(
-            CyclePredictor.Input(
-                cycles = cycleList,
-                usualCycleLength = s.usualCycleLength,
-                usualPeriodLength = s.usualPeriodLength,
-                usualLengthsEstimated = s.usualLengthsEstimated,
-                temperatures = logs.mapNotNull { log -> log.temperatureCelsius?.let { log.date to it } }.toMap(),
-                today = day,
-            ),
-        )
+    private val prediction = today.flatMapLatest { day -> observePrediction(day) }
 
     private val loggedDays = month.flatMapLatest { m ->
         dayLogs.observeRange(m.atDay(1), m.atEndOfMonth()).map { logs -> logs.map { it.date }.toSet() }
@@ -174,8 +147,6 @@ class CalendarViewModel @Inject constructor(
     }
 
     private companion object {
-        /** Enough days to cover the current cycle when looking for a temperature shift. */
-        const val TEMPERATURE_LOOKBACK_DAYS = 60L
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }

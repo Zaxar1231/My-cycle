@@ -79,7 +79,7 @@ fun TwilightAppRoot(
                 navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } }
             })
             calendarScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
-            statsScreen()
+            statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)
             dayLogScreen(

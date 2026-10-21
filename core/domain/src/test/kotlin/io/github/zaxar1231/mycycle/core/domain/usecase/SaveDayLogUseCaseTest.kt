@@ -158,7 +158,9 @@ class SaveDayLogUseCaseTest {
         val items = mutableMapOf<LocalDate, DayLog>()
         private val flow = MutableStateFlow(0)
         override fun observe(date: LocalDate) = flow.map { items[date] }
-        override fun observeRange(from: LocalDate, to: LocalDate) = flow.map { items.values.toList() }
+        override fun observeRange(from: LocalDate, to: LocalDate) =
+            flow.map { items.values.filter { it.date in from..to }.sortedBy { it.date } }
+        override fun observeAll() = flow.map { items.values.sortedBy { it.date } }
         override suspend fun save(log: DayLog) {
             items[log.date] = log
         }

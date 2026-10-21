@@ -37,6 +37,9 @@ interface DayLogRepository {
     suspend fun get(date: LocalDate): DayLog? = observe(date).first()
     suspend fun range(from: LocalDate, to: LocalDate): List<DayLog> = observeRange(from, to).first()
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLog>>
+
+    /** Every log, oldest first. */
+    fun observeAll(): Flow<List<DayLog>>
     suspend fun save(log: DayLog)
     suspend fun delete(date: LocalDate)
 }

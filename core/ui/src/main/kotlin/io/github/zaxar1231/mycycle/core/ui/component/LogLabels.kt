@@ -1,10 +1,11 @@
-package io.github.zaxar1231.mycycle.feature.daylog
+package io.github.zaxar1231.mycycle.core.ui.component
 
 import io.github.zaxar1231.mycycle.core.domain.model.Flow
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
 import io.github.zaxar1231.mycycle.core.domain.model.PeriodEvent
 import io.github.zaxar1231.mycycle.core.domain.model.SexActivity
 import io.github.zaxar1231.mycycle.core.domain.model.Symptom
+import io.github.zaxar1231.mycycle.core.ui.R
 
 fun PeriodEvent.labelRes() = when (this) {
     PeriodEvent.STARTED -> R.string.period_started

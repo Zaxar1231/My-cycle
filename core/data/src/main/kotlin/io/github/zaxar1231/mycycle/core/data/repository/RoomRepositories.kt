@@ -35,6 +35,7 @@ class RoomDayLogRepository @Inject constructor(private val dao: DayLogDao) : Day
     override suspend fun range(from: LocalDate, to: LocalDate): List<DayLog> = dao.range(from, to).map { it.toDomain() }
     override fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLog>> =
         dao.observeRange(from, to).map { list -> list.map { it.toDomain() } }
+    override fun observeAll(): Flow<List<DayLog>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
     override suspend fun save(log: DayLog) = dao.upsert(log.toEntity())
     override suspend fun delete(date: LocalDate) = dao.delete(date)
 }

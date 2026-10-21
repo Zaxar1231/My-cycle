@@ -1,5 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stats_title">Статистика</string>
-    <string name="stats_placeholder">Здесь будут история циклов, сводки и графики (этап 5).</string>
+    <string name="stats_tab_cycles">Циклы</string>
+    <string name="stats_tab_records">Записи</string>
+    <string name="stats_tab_chronology">Хронология</string>
+    <!-- Short dates in cycle cards and chart labels, java.time pattern -->
+    <string name="stats_date_pattern" translatable="false">d MMM</string>
+    <string name="stats_range">%1$s – %2$s</string>
+    <string name="stats_pill">%1$s · %2$s</string>
+
+    <!-- Cycles tab -->
+    <string name="stats_empty_cycles">Пока нет ни одного цикла. Отметьте начало месячных в календаре или кнопкой «+», и здесь появится история.</string>
+    <string name="stats_summary">Сводка</string>
+    <string name="stats_current">Текущий цикл</string>
+    <string name="stats_current_day">%1$d-й день</string>
+    <string name="stats_current_details">Начался %1$s. Сейчас %2$d-й день, месячные — %3$s.</string>
+    <string name="stats_last">Последний цикл</string>
+    <string name="stats_last_details">%1$s: цикл — %2$s, месячные — %3$s.</string>
+    <string name="stats_average">Средний цикл</string>
+    <string name="stats_average_value">%1$.1f дн.</string>
+    <string name="stats_average_details">Средняя длина цикла — %1$.1f дн., месячных — %2$.1f дн. Самый короткий цикл — %3$s, самый длинный — %4$s. Посчитано по завершённым циклам: %5$d.</string>
+    <string name="stats_regularity">Регулярность</string>
+    <string name="stats_regular">Регулярный</string>
+    <string name="stats_irregular">Нерегулярный</string>
+    <string name="stats_regularity_unknown">Мало данных</string>
+    <string name="stats_regular_details">Длина последних циклов отличается не больше чем на %1$d дн. Обычно такой цикл называют регулярным.</string>
+    <string name="stats_irregular_details">Длина последних циклов отличается больше чем на %1$d дн. Так бывает из-за стресса, болезни, смены режима. Если это вас беспокоит, обсудите с врачом.</string>
+    <string name="stats_regularity_unknown_details">Чтобы оценить регулярность, нужно хотя бы %1$d завершённых цикла.</string>
+    <string name="stats_history">История циклов</string>
+    <string name="stats_cycle_caption">%1$s — месячные, %2$s — цикл</string>
+    <string name="stats_current_caption">%1$s — месячные, идёт %2$d-й день</string>
+    <string name="stats_edit">Редактировать</string>
+    <string name="stats_strip_description">Дни цикла: месячные, фертильное окно и овуляция выделены цветом</string>
+
+    <!-- Edit dialog -->
+    <string name="stats_edit_title">Цикл</string>
+    <string name="stats_edit_start">Начало месячных: %1$s</string>
+    <string name="stats_edit_change_date">Изменить дату</string>
+    <string name="stats_edit_period_length">Длительность месячных</string>
+    <string name="stats_edit_save">Сохранить</string>
+    <string name="stats_edit_cancel">Отмена</string>
+    <string name="stats_edit_delete">Удалить цикл</string>
+    <string name="stats_edit_ok">Готово</string>
+    <string name="stats_delete_title">Удалить цикл?</string>
+    <string name="stats_delete_text">Цикл исчезнет из истории и прогнозов, предыдущий цикл продлится до следующего. Записи дней останутся, снимутся только отметки начала и конца месячных.</string>
+    <string name="stats_delete_confirm">Удалить</string>
+    <string name="stats_error_date">Дата начала не может быть в будущем.</string>
+    <string name="stats_error_period_length">Месячные могут длиться от 1 до 14 дней.</string>
+    <string name="stats_error_overlap">Даты пересекаются с соседним циклом.</string>
+    <string name="stats_error_save">Не удалось сохранить. Попробуйте ещё раз.</string>
+
+    <!-- Records tab -->
+    <string name="stats_empty_records">Пока нет записей. Отмечайте самочувствие кнопкой «+», и здесь появятся графики и закономерности.</string>
+    <string name="stats_patterns">Закономерности</string>
+    <string name="stats_patterns_empty">Закономерности появятся, когда накопится больше записей.</string>
+    <string name="stats_pattern_days">%1$d–%2$d д. ц.</string>
+    <string name="stats_pattern_details">«%1$s» отмечено %2$d раз из %3$d на %4$d–%5$d день цикла. Это наблюдение по вашим записям, а не диагноз.</string>
+    <string name="stats_cycle_lengths">Длина циклов</string>
+    <string name="stats_cycle_lengths_empty">График появится после первого завершённого цикла.</string>
+    <string name="stats_cycle_lengths_description">Длина завершённых циклов в днях</string>
+    <string name="stats_symptoms">Частота симптомов</string>
+    <string name="stats_symptoms_empty">Симптомы ещё не отмечались.</string>
+    <string name="stats_moods">Настроение по фазам</string>
+    <string name="stats_moods_empty">Настроение ещё не отмечалось.</string>
+    <string name="stats_mood_count">%1$s %2$s · %3$d</string>
+    <string name="stats_temperature">Базальная температура</string>
+    <string name="stats_temperature_value">%1$.2f °C</string>
+    <string name="stats_temperature_description">График базальной температуры</string>
+    <string name="stats_weight">Вес</string>
+    <string name="stats_weight_value">%1$.1f кг</string>
+    <string name="stats_weight_description">График веса</string>
+
+    <!-- Chronology tab -->
+    <string name="stats_empty_chronology">Здесь будут все записи по дням, от новых к старым.</string>
+    <string name="stats_chronology_place">%1$d-й день · %2$s</string>
+
+    <plurals name="stats_days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
 </resources>

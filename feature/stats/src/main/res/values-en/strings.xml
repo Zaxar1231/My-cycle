@@ -1,5 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stats_title">Insights</string>
-    <string name="stats_placeholder">Cycle history, summaries and charts will appear here (stage 5).</string>
+    <string name="stats_tab_cycles">Cycles</string>
+    <string name="stats_tab_records">Records</string>
+    <string name="stats_tab_chronology">Timeline</string>
+    <string name="stats_range">%1$s – %2$s</string>
+    <string name="stats_pill">%1$s · %2$s</string>
+
+    <string name="stats_empty_cycles">No cycles yet. Mark the start of your period in the calendar or with the + button and the history will appear here.</string>
+    <string name="stats_summary">Summary</string>
+    <string name="stats_current">Current cycle</string>
+    <string name="stats_current_day">day %1$d</string>
+    <string name="stats_current_details">Started %1$s. Today is day %2$d, period — %3$s.</string>
+    <string name="stats_last">Last cycle</string>
+    <string name="stats_last_details">%1$s: cycle — %2$s, period — %3$s.</string>
+    <string name="stats_average">Average cycle</string>
+    <string name="stats_average_value">%1$.1f d</string>
+    <string name="stats_average_details">Average cycle length is %1$.1f days, period %2$.1f days. Shortest cycle: %3$s, longest: %4$s. Based on %5$d completed cycles.</string>
+    <string name="stats_regularity">Regularity</string>
+    <string name="stats_regular">Regular</string>
+    <string name="stats_irregular">Irregular</string>
+    <string name="stats_regularity_unknown">Not enough data</string>
+    <string name="stats_regular_details">Your recent cycles differ by no more than %1$d days. A cycle like this is usually called regular.</string>
+    <string name="stats_irregular_details">Your recent cycles differ by more than %1$d days. Stress, illness or a change of routine can do that. If it worries you, talk to a doctor.</string>
+    <string name="stats_regularity_unknown_details">At least %1$d completed cycles are needed to judge regularity.</string>
+    <string name="stats_history">Cycle history</string>
+    <string name="stats_cycle_caption">%1$s — period, %2$s — cycle</string>
+    <string name="stats_current_caption">%1$s — period, day %2$d now</string>
+    <string name="stats_edit">Edit</string>
+    <string name="stats_strip_description">Cycle days: period, fertile window and ovulation are highlighted</string>
+
+    <string name="stats_edit_title">Cycle</string>
+    <string name="stats_edit_start">Period started: %1$s</string>
+    <string name="stats_edit_change_date">Change date</string>
+    <string name="stats_edit_period_length">Period length</string>
+    <string name="stats_edit_save">Save</string>
+    <string name="stats_edit_cancel">Cancel</string>
+    <string name="stats_edit_delete">Delete cycle</string>
+    <string name="stats_edit_ok">Done</string>
+    <string name="stats_delete_title">Delete this cycle?</string>
+    <string name="stats_delete_text">The cycle disappears from the history and predictions, and the previous cycle extends to the next one. Day logs stay; only their period start and end marks are removed.</string>
+    <string name="stats_delete_confirm">Delete</string>
+    <string name="stats_error_date">The start date cannot be in the future.</string>
+    <string name="stats_error_period_length">A period can last from 1 to 14 days.</string>
+    <string name="stats_error_overlap">The dates overlap a neighbouring cycle.</string>
+    <string name="stats_error_save">Could not save. Please try again.</string>
+
+    <string name="stats_empty_records">No records yet. Log how you feel with the + button and charts and patterns will appear here.</string>
+    <string name="stats_patterns">Patterns</string>
+    <string name="stats_patterns_empty">Patterns will appear once there are more records.</string>
+    <string name="stats_pattern_days">days %1$d–%2$d</string>
+    <string name="stats_pattern_details">“%1$s” was logged %2$d of %3$d times on cycle days %4$d–%5$d. This is an observation from your records, not a diagnosis.</string>
+    <string name="stats_cycle_lengths">Cycle length</string>
+    <string name="stats_cycle_lengths_empty">The chart appears after the first completed cycle.</string>
+    <string name="stats_cycle_lengths_description">Length of completed cycles in days</string>
+    <string name="stats_symptoms">Symptom frequency</string>
+    <string name="stats_symptoms_empty">No symptoms logged yet.</string>
+    <string name="stats_moods">Mood by phase</string>
+    <string name="stats_moods_empty">No moods logged yet.</string>
+    <string name="stats_mood_count">%1$s %2$s · %3$d</string>
+    <string name="stats_temperature">Basal temperature</string>
+    <string name="stats_temperature_value">%1$.2f °C</string>
+    <string name="stats_temperature_description">Basal temperature chart</string>
+    <string name="stats_weight">Weight</string>
+    <string name="stats_weight_value">%1$.1f kg</string>
+    <string name="stats_weight_description">Weight chart</string>
+
+    <string name="stats_empty_chronology">All your day logs will be here, newest first.</string>
+    <string name="stats_chronology_place">Day %1$d · %2$s</string>
+
+    <plurals name="stats_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
 </resources>

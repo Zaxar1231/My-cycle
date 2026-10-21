@@ -52,6 +52,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
+import io.github.zaxar1231.mycycle.core.ui.component.emoji
+import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 
 /** Log for one day. The date travels as epoch day, a plain Long works with type-safe routes. */
 @Serializable
