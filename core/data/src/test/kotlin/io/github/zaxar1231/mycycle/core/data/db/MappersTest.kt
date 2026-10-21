@@ -51,6 +51,7 @@ class MappersTest {
         val pet = Pet(
             PetType.PANDA, level = 3, xp = 40, coins = 12, equippedItems = setOf("hat"), ownedItems = setOf("hat", "scarf"),
             lastLogReward = LocalDate.of(2026, 10, 20), logStreak = 4, lastBreathingReward = LocalDate.of(2026, 10, 19),
+            lastPartnerFeed = LocalDate.of(2026, 10, 18), lastPartnerGift = LocalDate.of(2026, 10, 17),
         )
         assertEquals(pet, pet.toEntity().toDomain())
     }

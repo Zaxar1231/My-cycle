@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.core.domain.partner
 
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
 import kotlinx.coroutines.flow.StateFlow
 import java.time.Instant
 import java.time.LocalDate
@@ -32,8 +33,16 @@ sealed interface PartnerState {
     /** This phone tracks the cycle and shares it with a partner. */
     data class Sharing(val permissions: Set<PartnerPermission>) : PartnerState
 
-    /** This phone follows the cycle of the person who invited it; [verification] is shown to compare. */
-    data class Following(val notify: Boolean, val verification: String) : PartnerState
+    /**
+     * This phone follows the cycle of the person who invited it; [verification] is shown to compare.
+     * [lastFed] and [lastGift] are this phone's care for the shared pet.
+     */
+    data class Following(
+        val notify: Boolean,
+        val verification: String,
+        val lastFed: LocalDate? = null,
+        val lastGift: LocalDate? = null,
+    ) : PartnerState
 
     /**
      * The server has a link for this account but this phone has no key for it (reinstall, another
@@ -98,6 +107,12 @@ interface PartnerRepository {
 
     /** Partner: downloads and decrypts the shared snapshot. */
     suspend fun fetchShared(): SharedCycle
+
+    /** Partner: sends care for the shared pet, encrypted like everything else. */
+    suspend fun sendCare(care: PetCare): PartnerResult
+
+    /** Owner: downloads the partner's care for the pet and removes it from the server. */
+    suspend fun takeCare(): List<PetCare>
 
     /** Partner: the period start the last reminder was about, so each period is announced once. */
     suspend fun lastNotice(): LocalDate?

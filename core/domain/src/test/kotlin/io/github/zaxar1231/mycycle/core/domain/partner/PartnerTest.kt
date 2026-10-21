@@ -5,6 +5,9 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
+import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.model.PetType
+import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
 import io.github.zaxar1231.mycycle.core.domain.model.SexActivity
 import io.github.zaxar1231.mycycle.core.domain.model.Symptom
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -91,6 +94,16 @@ class PartnerTest {
         assertEquals(setOf(Symptom.CRAMPS), snapshot.symptoms)
         assertEquals(start.plusDays(13), snapshot.ovulation)
         assertEquals(start.plusDays(8), snapshot.fertileStart)
+    }
+
+    @Test
+    fun `the shared pet does not give away a hidden period`() {
+        val pet = Pet(PetType.FOX, level = 2, equippedItems = setOf("bow"), ownedItems = setOf("bow"))
+        val hidden = PartnerShare.snapshot(prediction, log, emptySet(), today, pet)
+        assertEquals(PetMood.CALM, hidden.pet!!.mood)
+        assertEquals(setOf("bow"), hidden.pet!!.worn)
+        val shared = PartnerShare.snapshot(prediction, log, DEFAULT_PARTNER_PERMISSIONS, today, pet)
+        assertEquals(PetMood.COZY, shared.pet!!.mood)
     }
 
     @Test

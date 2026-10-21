@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +30,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,9 +48,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerView
+import io.github.zaxar1231.mycycle.core.domain.pet.PetConstants
+import io.github.zaxar1231.mycycle.core.domain.pet.PetItems
+import io.github.zaxar1231.mycycle.core.domain.pet.PetRules
+import io.github.zaxar1231.mycycle.core.domain.pet.SharedPet
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
 import io.github.zaxar1231.mycycle.core.ui.component.emoji
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
+import io.github.zaxar1231.mycycle.core.ui.pet.PetLook
+import io.github.zaxar1231.mycycle.core.ui.pet.PetPicture
+import io.github.zaxar1231.mycycle.core.ui.pet.nameRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -89,7 +102,10 @@ fun PartnerScreen(onBack: () -> Unit, viewModel: PartnerCycleViewModel = hiltVie
                     Message(stringResource(c.error.messageRes()))
                     OutlinedButton(onClick = viewModel::load) { Text(stringResource(R.string.partner_retry)) }
                 }
-                is PartnerCycleUi.Shown -> SharedCycleContent(c.view, c.snapshot.date)
+                is PartnerCycleUi.Shown -> {
+                    SharedCycleContent(c.view, c.snapshot.date)
+                    c.snapshot.pet?.let { SharedPetCard(it, viewModel) }
+                }
             }
         }
     }
@@ -140,6 +156,55 @@ private fun SharedCycleContent(view: PartnerView, sharedOn: LocalDate) {
     }
     view.phase?.let { Tips(it) }
     Text(stringResource(R.string.partner_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** The owner's pet, which this phone can feed once a day and give a gift once a week. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SharedPetCard(pet: SharedPet, viewModel: PartnerCycleViewModel) {
+    val care by viewModel.care.collectAsStateWithLifecycle()
+    val error by viewModel.careError.collectAsStateWithLifecycle()
+    val today = viewModel.today()
+    val fedToday = care?.lastFed == today
+    val canGift = PetRules.canGift(care?.lastGift, today)
+    var choosing by rememberSaveable { mutableStateOf(false) }
+    val worn = pet.worn.mapNotNull(PetItems::byId).associateBy { it.slot }
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.partner_pet_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.fillMaxWidth())
+            val name = stringResource(pet.type.nameRes())
+            PetPicture(PetLook(pet.type, pet.mood, worn), stringResource(R.string.partner_pet_description, name, pet.level), Modifier.size(PET_SIZE))
+            Text(stringResource(R.string.partner_pet_level, name, pet.level), style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = viewModel::feed, enabled = !fedToday) {
+                    Text(stringResource(if (fedToday) R.string.partner_pet_fed else R.string.partner_pet_feed))
+                }
+                OutlinedButton(onClick = { choosing = !choosing }, enabled = canGift) { Text(stringResource(R.string.partner_pet_gift)) }
+            }
+            if (!canGift) Text(stringResource(R.string.partner_pet_gift_later, PetConstants.PARTNER_GIFT_DAYS), style = MaterialTheme.typography.bodySmall)
+            val gifts = PetItems.ALL.filter { it.id !in pet.ownedItems && it.minLevel <= pet.level }
+            if (choosing && canGift) {
+                if (gifts.isEmpty()) {
+                    Text(stringResource(R.string.partner_pet_no_gifts), style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text(stringResource(R.string.partner_pet_choose), style = MaterialTheme.typography.bodySmall)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        gifts.forEach { item ->
+                            AssistChip(
+                                onClick = {
+                                    choosing = false
+                                    viewModel.gift(item)
+                                },
+                                label = { Text(stringResource(item.nameRes())) },
+                            )
+                        }
+                    }
+                }
+            }
+            error?.let { Text(stringResource(it.messageRes()), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+            Text(stringResource(R.string.partner_pet_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
 @Composable
@@ -222,3 +287,5 @@ fun PartnerInviteNavigator(onInvite: () -> Unit, viewModel: PartnerInviteViewMod
         }
     }
 }
+
+private val PET_SIZE = 180.dp

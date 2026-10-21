@@ -85,4 +85,24 @@
     <string name="font_custom_hint">Шрифт из файла. Он хранится только внутри приложения; чтобы сменить, нажмите «Свой файл…» ещё раз.</string>
     <string name="font_custom_failed">Не удалось открыть шрифт. Подойдут файлы .ttf и .otf размером до 15 МБ.</string>
     <string name="font_custom_missing">Файл шрифта не найден, сейчас используется системный шрифт. Выберите файл заново.</string>
+    <string name="pet_name_cat">Котик</string>
+    <string name="pet_name_fox">Лисёнок</string>
+    <string name="pet_name_bunny">Зайка</string>
+    <string name="pet_name_panda">Панда</string>
+    <string name="pet_name_penguin">Пингвин</string>
+    <string name="pet_item_tuft">Хохолок</string>
+    <string name="pet_item_bangs">Чёлка</string>
+    <string name="pet_item_bow">Бантик</string>
+    <string name="pet_item_flower_crown">Венок</string>
+    <string name="pet_item_beret">Берет</string>
+    <string name="pet_item_party_hat">Праздничный колпак</string>
+    <string name="pet_item_crown">Корона</string>
+    <string name="pet_item_glasses">Очки</string>
+    <string name="pet_item_heart_glasses">Очки-сердечки</string>
+    <string name="pet_item_scarf">Шарфик</string>
+    <string name="pet_item_bowtie">Бабочка</string>
+    <string name="pet_item_bell">Колокольчик</string>
+    <string name="pet_item_sweater">Свитер</string>
+    <string name="pet_item_cape">Плащ</string>
+    <string name="pet_item_unknown">Вещь</string>
 </resources>

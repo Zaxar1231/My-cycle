@@ -12,6 +12,7 @@ import io.github.zaxar1231.mycycle.core.domain.partner.PartnerResult
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerSnapshot
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerState
 import io.github.zaxar1231.mycycle.core.domain.partner.PartnerVerification
+import io.github.zaxar1231.mycycle.core.domain.pet.PetCare
 import io.github.zaxar1231.mycycle.core.domain.partner.SharedCycle
 import io.github.zaxar1231.mycycle.core.sync.SupabaseHttp
 import io.github.zaxar1231.mycycle.core.sync.partner.StoredLink.Role
@@ -94,7 +95,12 @@ class SupabasePartnerRepository @Inject constructor(
             Role.INVITING -> PartnerState.Inviting(InviteCode.format(mine.invite()), Instant.ofEpochMilli(mine.expiresAt))
             Role.CONFIRMING -> PartnerState.Confirming(PartnerVerification.code(mine.keyBytes(), mine.partnerId.orEmpty()))
             Role.SHARING -> PartnerState.Sharing(mine.permissionSet())
-            Role.FOLLOWING -> PartnerState.Following(mine.notify, PartnerVerification.code(mine.keyBytes(), account.userId))
+            Role.FOLLOWING -> PartnerState.Following(
+                notify = mine.notify,
+                verification = PartnerVerification.code(mine.keyBytes(), account.userId),
+                lastFed = mine.lastFed.toDate(),
+                lastGift = mine.lastGift.toDate(),
+            )
             null -> if (orphan) PartnerState.Orphaned else PartnerState.None(endedByOther)
         }
     }
@@ -264,8 +270,48 @@ class SupabasePartnerRepository @Inject constructor(
         }
     }
 
-    override suspend fun lastNotice(): LocalDate? =
-        lock.withLock { current() }?.lastNotice?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    override suspend fun sendCare(care: PetCare): PartnerResult = call {
+        val link = lock.withLock { current() }?.takeIf { it.role == Role.FOLLOWING } ?: return@call PartnerResult.Failed(PartnerError.UNKNOWN)
+        val bearer = accounts.accessToken() ?: return@call PartnerResult.Failed(PartnerError.SIGNED_OUT)
+        val payload = PartnerCrypto.seal(link.keyBytes(), careAad(link.linkId), PartnerCodec.encodeCare(care))
+        val body = buildJsonObject {
+            put("link_id", link.linkId)
+            put("payload", payload)
+        }.toString()
+        val response = http.request("POST", "/rest/v1/partner_pet_care", body, bearer, mapOf(PREFER to RETURN_MINIMAL))
+        if (!response.ok) return@call failed(response)
+        when (care) {
+            is PetCare.Feed -> update(Role.FOLLOWING) { it.copy(lastFed = care.date.toString()) }
+            is PetCare.Gift -> update(Role.FOLLOWING) { it.copy(lastGift = care.date.toString()) }
+        }
+        PartnerResult.Done
+    }
+
+    override suspend fun takeCare(): List<PetCare> = try {
+        val link = lock.withLock { current() }?.takeIf { it.role == Role.SHARING }
+        val bearer = if (link != null) accounts.accessToken() else null
+        if (link == null || bearer == null) {
+            emptyList()
+        } else {
+            val response = http.request("GET", "/rest/v1/partner_pet_care?select=id,payload&link_id=eq.${link.linkId}", bearer = bearer)
+            val ids = if (response.ok) PartnerErrors.column(response.body, "id") else emptyList()
+            val payloads = if (response.ok) PartnerErrors.column(response.body, "payload") else emptyList()
+            val cares = payloads.mapNotNull { payload ->
+                PartnerCrypto.open(link.keyBytes(), careAad(link.linkId), payload)?.let(PartnerCodec::decodeCare)
+            }
+            // Taken care goes away; the limits are checked again on this phone when it is applied.
+            if (ids.isNotEmpty()) {
+                http.request("DELETE", "/rest/v1/partner_pet_care?id=in.(${ids.joinToString(",")})", bearer = bearer)
+            }
+            cares
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    override suspend fun lastNotice(): LocalDate? = lock.withLock { current() }?.lastNotice.toDate()
 
     override suspend fun setLastNotice(date: LocalDate) = update(Role.FOLLOWING) { it.copy(lastNotice = date.toString()) }
 
@@ -314,6 +360,11 @@ class SupabasePartnerRepository @Inject constructor(
             PartnerResult.Failed(PartnerError.UNKNOWN)
         }
     }
+
+    private fun String?.toDate(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
+    /** Care messages are bound to their own context, so a snapshot can never pass for one. */
+    private fun careAad(linkId: String) = "$linkId/care"
 
     private fun StoredLink.keyBytes(): ByteArray = Base64.getDecoder().decode(key)
 

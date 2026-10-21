@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="pet_none">Питомец ещё не выбран.</string>
-    <string name="pet_name_cat">Котик</string>
-    <string name="pet_name_fox">Лисёнок</string>
-    <string name="pet_name_bunny">Зайка</string>
-    <string name="pet_name_panda">Панда</string>
-    <string name="pet_name_penguin">Пингвин</string>
     <string name="pet_mood_sleepy">Сладко спит</string>
     <string name="pet_mood_happy">Радуется вместе с вами</string>
     <string name="pet_mood_playful">Полон сил и хочет играть</string>
@@ -44,19 +39,5 @@
     <string name="pet_need_level">Откроется на более высоком уровне.</string>
     <string name="pet_failed">Не получилось. Попробуйте ещё раз.</string>
     <string name="pet_owned">Эта вещь уже есть в гардеробе.</string>
-    <string name="pet_item_tuft">Хохолок</string>
-    <string name="pet_item_bangs">Чёлка</string>
-    <string name="pet_item_bow">Бантик</string>
-    <string name="pet_item_flower_crown">Венок</string>
-    <string name="pet_item_beret">Берет</string>
-    <string name="pet_item_party_hat">Праздничный колпак</string>
-    <string name="pet_item_crown">Корона</string>
-    <string name="pet_item_glasses">Очки</string>
-    <string name="pet_item_heart_glasses">Очки-сердечки</string>
-    <string name="pet_item_scarf">Шарфик</string>
-    <string name="pet_item_bowtie">Бабочка</string>
-    <string name="pet_item_bell">Колокольчик</string>
-    <string name="pet_item_sweater">Свитер</string>
-    <string name="pet_item_cape">Плащ</string>
-    <string name="pet_item_unknown">Вещь</string>
+    <string name="pet_partner_fed">Партнёр сегодня покормил питомца ❤</string>
 </resources>

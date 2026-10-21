@@ -15,6 +15,9 @@ data class Pet(
     /** Days in a row with a log, counted on rewards. */
     val logStreak: Int = 0,
     val lastBreathingReward: LocalDate? = null,
+    /** Partner mode: the partner's phone may feed the pet once a day and give a gift once a week. */
+    val lastPartnerFeed: LocalDate? = null,
+    val lastPartnerGift: LocalDate? = null,
 )
 
 enum class PetType { CAT, FOX, BUNNY, PANDA, PENGUIN }

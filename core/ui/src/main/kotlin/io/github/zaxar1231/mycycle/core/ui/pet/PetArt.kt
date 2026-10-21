@@ -1,4 +1,4 @@
-package io.github.zaxar1231.mycycle.feature.pet
+package io.github.zaxar1231.mycycle.core.ui.pet
 
 import android.provider.Settings
 import androidx.compose.foundation.layout.Spacer

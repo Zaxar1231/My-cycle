@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pet_none">No pet chosen yet.</string>
-    <string name="pet_name_cat">Kitty</string>
-    <string name="pet_name_fox">Fox cub</string>
-    <string name="pet_name_bunny">Bunny</string>
-    <string name="pet_name_panda">Panda</string>
-    <string name="pet_name_penguin">Penguin</string>
     <string name="pet_mood_sleepy">Fast asleep</string>
     <string name="pet_mood_happy">Happy with you</string>
     <string name="pet_mood_playful">Full of energy and up for a game</string>
@@ -42,19 +37,5 @@
     <string name="pet_need_level">Unlocks at a higher level.</string>
     <string name="pet_failed">Something went wrong. Please try again.</string>
     <string name="pet_owned">Already in the wardrobe.</string>
-    <string name="pet_item_tuft">Tuft</string>
-    <string name="pet_item_bangs">Bangs</string>
-    <string name="pet_item_bow">Bow</string>
-    <string name="pet_item_flower_crown">Flower crown</string>
-    <string name="pet_item_beret">Beret</string>
-    <string name="pet_item_party_hat">Party hat</string>
-    <string name="pet_item_crown">Crown</string>
-    <string name="pet_item_glasses">Glasses</string>
-    <string name="pet_item_heart_glasses">Heart glasses</string>
-    <string name="pet_item_scarf">Scarf</string>
-    <string name="pet_item_bowtie">Bow tie</string>
-    <string name="pet_item_bell">Bell</string>
-    <string name="pet_item_sweater">Sweater</string>
-    <string name="pet_item_cape">Cape</string>
-    <string name="pet_item_unknown">Item</string>
+    <string name="pet_partner_fed">Your partner fed the pet today ❤</string>
 </resources>

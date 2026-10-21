@@ -15,6 +15,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.PetWardrobeUseCase
+import io.github.zaxar1231.mycycle.core.ui.pet.PetLook
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -41,6 +42,7 @@ data class PetUiState(
     /** An item tried on from the shop or wardrobe, drawn on the pet but not saved. */
     val tryOn: PetItem? = null,
     val pettedAt: Long = 0L,
+    val today: LocalDate? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +75,7 @@ class PetViewModel @Inject constructor(
             streak = pet?.let { PetRules.currentStreak(it, today) } ?: 0,
             tryOn = trying,
             pettedAt = petted,
+            today = today,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PetUiState())
 
