@@ -14,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.zaxar1231.mycycle.core.data.content.AssetPhaseContentRepository
 import io.github.zaxar1231.mycycle.core.data.db.Migrations
 import io.github.zaxar1231.mycycle.core.data.db.TwilightDatabase
 import io.github.zaxar1231.mycycle.core.data.repository.RoomCycleRepository
@@ -28,6 +29,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.DataAccess
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
@@ -81,4 +83,6 @@ interface RepositoryModule {
     @Binds fun settings(impl: DataStoreSettingsRepository): SettingsRepository
 
     @Binds fun dataAccess(impl: EncryptedDataAccess): DataAccess
+
+    @Binds fun phaseContent(impl: AssetPhaseContentRepository): PhaseContentRepository
 }

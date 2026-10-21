@@ -1,0 +1,100 @@
+{
+  "MENSTRUAL": {
+    "symptoms": [
+      "Lower abdominal cramps",
+      "Tiredness and sleepiness",
+      "Lower back pain",
+      "Bloating",
+      "Headache"
+    ],
+    "pros": [
+      "Many feel relief as premenstrual tension fades",
+      "A good time to slow down and listen to yourself",
+      "Hormone levels are low, which some people find calming"
+    ],
+    "cons": [
+      "Energy may be lower than usual",
+      "Cramps and discomfort are possible",
+      "More sensitive to cold and stress"
+    ],
+    "tips": [
+      "A warm heat pad on the belly eases cramps for many",
+      "Drink more water and warm drinks",
+      "Gentle stretching or a walk may help more than an intense workout",
+      "Iron-rich foods like greens, beans and meat help replace losses",
+      "Let yourself go to bed earlier"
+    ]
+  },
+  "FOLLICULAR": {
+    "symptoms": [
+      "A rise in energy",
+      "Better mood",
+      "Skin often looks fresher"
+    ],
+    "pros": [
+      "Estrogen rises and many feel stronger",
+      "A good time for new tasks and plans",
+      "Workouts usually feel easier and recovery is faster"
+    ],
+    "cons": [
+      "It is easy to overestimate yourself and take on too much",
+      "Appetite can be uneven for some"
+    ],
+    "tips": [
+      "Try a new activity or a harder workout",
+      "Plan important meetings and creative work",
+      "Protein and fresh vegetables support the energy boost",
+      "A good time to tidy up and organise things"
+    ]
+  },
+  "OVULATORY": {
+    "symptoms": [
+      "Clear, stretchy discharge",
+      "Mild one-sided abdominal pain",
+      "Higher libido",
+      "Breast tenderness"
+    ],
+    "pros": [
+      "Peak energy and confidence for many",
+      "Socialising feels easier",
+      "Libido is usually higher"
+    ],
+    "cons": [
+      "Brief one-sided pain is possible",
+      "Chance of pregnancy is highest on these days"
+    ],
+    "tips": [
+      "If you are not planning a pregnancy, take care of contraception",
+      "A good time for conversations and presentations",
+      "Drink enough water",
+      "Log discharge and temperature to refine predictions"
+    ]
+  },
+  "LUTEAL": {
+    "symptoms": [
+      "Bloating and water retention",
+      "Sugar cravings",
+      "Mood swings",
+      "Breast tenderness",
+      "Acne",
+      "Tiredness closer to the period"
+    ],
+    "pros": [
+      "Early in the phase many feel calm and steady",
+      "Routine, quiet tasks go well",
+      "Attention to detail is often higher"
+    ],
+    "cons": [
+      "PMS is possible closer to the period",
+      "Irritability and anxiety for some",
+      "Sleep may be lighter"
+    ],
+    "tips": [
+      "Complex carbs and magnesium (nuts, grains, dark chocolate) help with cravings",
+      "Less salt means less water retention",
+      "Yoga and calm walks help release tension",
+      "Go to bed at the same time every day",
+      "If PMS seriously affects your life, it is worth discussing with a doctor"
+    ]
+  }
+}

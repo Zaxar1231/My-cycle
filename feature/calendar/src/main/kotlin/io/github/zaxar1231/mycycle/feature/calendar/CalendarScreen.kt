@@ -30,6 +30,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -51,6 +52,7 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val content by viewModel.content.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
         viewModel.refreshToday()
         onPauseOrDispose {}
@@ -75,6 +77,7 @@ fun CalendarScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         TodayCard(prediction, onPeriodStarted = viewModel::markPeriodStartedToday)
+        if (state.selectedDay == null) content?.let { PhaseContentCard(it, state.today) }
         MonthCalendar(
             month = state.month,
             today = state.today,
@@ -92,6 +95,7 @@ fun CalendarScreen(
             day = day,
             today = state.today,
             prediction = prediction,
+            content = content,
             onDismiss = { viewModel.select(null) },
             onLog = {
                 viewModel.select(null)
@@ -107,6 +111,7 @@ private fun DayDetailsSheet(
     day: LocalDate,
     today: LocalDate,
     prediction: CyclePrediction,
+    content: PhaseContent?,
     onDismiss: () -> Unit,
     onLog: () -> Unit,
 ) {
@@ -116,6 +121,7 @@ private fun DayDetailsSheet(
         Column(
             Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -133,6 +139,7 @@ private fun DayDetailsSheet(
                     Text(stringResource(R.string.day_predicted_note), style = MaterialTheme.typography.bodySmall)
                 }
             }
+            content?.let { PhaseContentCard(it, day) }
             if (!day.isAfter(today)) {
                 Button(onClick = onLog, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.day_log_button)) }
             }

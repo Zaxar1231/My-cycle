@@ -40,4 +40,10 @@ object CycleConstants {
     const val HIGH_CONFIDENCE_MIN_CYCLES = 4
     const val HIGH_CONFIDENCE_MAX_DEVIATION_DAYS = 2.0
     const val MEDIUM_CONFIDENCE_MAX_DEVIATION_DAYS = 4.0
+
+    /** Accepted ranges for manual input in the day log. */
+    const val MIN_TEMPERATURE_CELSIUS = 34.0
+    const val MAX_TEMPERATURE_CELSIUS = 42.0
+    const val MIN_WEIGHT_KG = 20.0
+    const val MAX_WEIGHT_KG = 300.0
 }

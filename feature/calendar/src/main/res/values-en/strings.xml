@@ -27,6 +27,11 @@
     <string name="today_ovulation_confirmed">Ovulation this cycle confirmed by temperature</string>
     <string name="save_failed">Could not save. Please try again.</string>
     <string name="ok">OK</string>
+    <string name="content_tip">Tip of the day</string>
+    <string name="content_symptoms">Possible symptoms</string>
+    <string name="content_pros">Upsides</string>
+    <string name="content_cons">Downsides</string>
+    <string name="content_bullet">• %1$s</string>
     <plurals name="today_until_period">
         <item quantity="one">Period in %1$d day</item>
         <item quantity="other">Period in %1$d days</item>

@@ -4,6 +4,8 @@ import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Medication
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
+import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
@@ -51,4 +53,9 @@ interface DataAccess {
 
     /** Deletes data that can no longer be decrypted. Only after the user explicitly agreed. */
     suspend fun resetUnreadableData()
+}
+
+interface PhaseContentRepository {
+    /** Content in the requested language, falling back to Russian. */
+    suspend fun content(phase: CyclePhase, language: String): PhaseContent
 }

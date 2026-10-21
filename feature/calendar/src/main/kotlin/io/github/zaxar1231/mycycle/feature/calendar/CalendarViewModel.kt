@@ -7,6 +7,8 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
+import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -26,6 +29,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+import java.util.Locale
 import javax.inject.Inject
 
 data class CalendarUiState(
@@ -48,6 +53,7 @@ class CalendarViewModel @Inject constructor(
     private val predictor: CyclePredictor,
     private val recordPeriodStart: RecordPeriodStartUseCase,
     private val dateProvider: DateProvider,
+    private val phaseContent: PhaseContentRepository,
 ) : ViewModel() {
     // "Today" is refreshed whenever the screen resumes: the ViewModel can outlive midnight.
     private val today = MutableStateFlow(dateProvider.today())
@@ -92,6 +98,18 @@ class CalendarViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
             CalendarUiState(today.value, YearMonth.from(today.value)),
         )
+
+    /** Content for today's phase, or for the selected day's phase while the day sheet is open. */
+    val content: StateFlow<PhaseContent?> = state
+        .map { s ->
+            val day = s.selectedDay ?: s.today
+            s.prediction?.segmentFor(day)?.let { segment ->
+                CyclePredictor.phaseOf(ChronoUnit.DAYS.between(segment.start, day).toInt() + 1, segment)
+            }
+        }
+        .distinctUntilChanged()
+        .map { phase -> phase?.let { phaseContent.content(it, Locale.getDefault().language) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
     fun refreshToday() {
         val now = dateProvider.today()
