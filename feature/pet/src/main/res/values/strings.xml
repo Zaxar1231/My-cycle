@@ -1,5 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="pet_title">Питомец</string>
-    <string name="pet_placeholder">Здесь будет ваш питомец-маскот (этап 10).</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="pet_none">Питомец ещё не выбран.</string>
+    <string name="pet_name_cat">Котик</string>
+    <string name="pet_name_fox">Лисёнок</string>
+    <string name="pet_name_bunny">Зайка</string>
+    <string name="pet_name_panda">Панда</string>
+    <string name="pet_name_penguin">Пингвин</string>
+    <string name="pet_mood_sleepy">Сладко спит</string>
+    <string name="pet_mood_happy">Радуется вместе с вами</string>
+    <string name="pet_mood_playful">Полон сил и хочет играть</string>
+    <string name="pet_mood_calm">Спокойно отдыхает рядом</string>
+    <string name="pet_mood_sad">Грустит вместе с вами. Можно записать, что на душе, или подышать вместе.</string>
+    <string name="pet_mood_cozy">Обнимает грелку и бережёт вас</string>
+    <string name="pet_description">%1$s: %2$s</string>
+    <string name="pet_stroke">Погладить</string>
+    <string name="pet_stroke_hint">Коснитесь, чтобы погладить</string>
+    <string name="pet_open">Открыть питомца</string>
+    <string name="pet_level">Уровень %1$d</string>
+    <string name="pet_coins">Монетки: %1$d</string>
+    <string name="pet_level_coins">Уровень %1$d · монетки: %2$d</string>
+    <string name="pet_xp">Опыт: %1$d из %2$d до следующего уровня</string>
+    <plurals name="pet_streak" tools:ignore="ImpliedQuantity">
+        <item quantity="one">%d день подряд с записью</item>
+        <item quantity="few">%d дня подряд с записью</item>
+        <item quantity="many">%d дней подряд с записью</item>
+        <item quantity="other">%d дня подряд с записью</item>
+    </plurals>
+    <string name="pet_earn_title">Как получить монетки</string>
+    <string name="pet_earn_log">Запись за сегодня: +%1$d (раз в день)</string>
+    <string name="pet_earn_breathing">Дыхательная практика до конца: +%1$d (раз в день)</string>
+    <string name="pet_earn_streak">Каждые %1$d дней подряд с записью: ещё +%2$d</string>
+    <string name="pet_shop">Магазин</string>
+    <string name="pet_wardrobe">Гардероб</string>
+    <string name="pet_shop_empty">Вы купили всё. Красота!</string>
+    <string name="pet_wardrobe_empty">Пока пусто. Загляните в магазин.</string>
+    <string name="pet_price">Цена: %1$d монеток · с уровня %2$d</string>
+    <string name="pet_buy">Купить и надеть</string>
+    <string name="pet_take_back">Снять примерку</string>
+    <string name="pet_put_on">Надеть</string>
+    <string name="pet_take_off">Снять</string>
+    <string name="pet_bought">Готово! Вещь уже на питомце.</string>
+    <string name="pet_need_coins">Пока не хватает монеток.</string>
+    <string name="pet_need_level">Откроется на более высоком уровне.</string>
+    <string name="pet_owned">Эта вещь уже есть в гардеробе.</string>
+    <string name="pet_item_tuft">Хохолок</string>
+    <string name="pet_item_bangs">Чёлка</string>
+    <string name="pet_item_bow">Бантик</string>
+    <string name="pet_item_flower_crown">Венок</string>
+    <string name="pet_item_beret">Берет</string>
+    <string name="pet_item_party_hat">Праздничный колпак</string>
+    <string name="pet_item_crown">Корона</string>
+    <string name="pet_item_glasses">Очки</string>
+    <string name="pet_item_heart_glasses">Очки-сердечки</string>
+    <string name="pet_item_scarf">Шарфик</string>
+    <string name="pet_item_bowtie">Бабочка</string>
+    <string name="pet_item_bell">Колокольчик</string>
+    <string name="pet_item_sweater">Свитер</string>
+    <string name="pet_item_cape">Плащ</string>
+    <string name="pet_item_unknown">Вещь</string>
 </resources>

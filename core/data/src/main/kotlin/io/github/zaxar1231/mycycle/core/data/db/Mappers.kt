@@ -45,7 +45,7 @@ fun MedicationEntity.toDomain() = Medication(id, name, dosage, reminderTime, isA
 fun Medication.toEntity() = MedicationEntity(id, name, dosage, reminderTime, isActive)
 
 fun PetEntity.toDomain(): Pet? = enumOrNull<PetType>(type)?.let {
-    Pet(it, level, xp, coins, split(equippedItems).toSet(), split(ownedItems).toSet())
+    Pet(it, level, xp, coins, split(equippedItems).toSet(), split(ownedItems).toSet(), lastLogReward, logStreak, lastBreathingReward)
 }
 
 fun Pet.toEntity() = PetEntity(
@@ -55,4 +55,7 @@ fun Pet.toEntity() = PetEntity(
     coins = coins,
     equippedItems = join(equippedItems),
     ownedItems = join(ownedItems),
+    lastLogReward = lastLogReward,
+    logStreak = logStreak,
+    lastBreathingReward = lastBreathingReward,
 )

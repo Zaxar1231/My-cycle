@@ -103,7 +103,7 @@ private fun WellnessScaffold(title: Int, onBack: () -> Unit, content: @Composabl
  * a session timer and a light haptic tick when the step changes. The screen stays on meanwhile.
  */
 @Composable
-private fun BreathingScreen(onBack: () -> Unit) {
+private fun BreathingScreen(onBack: () -> Unit, viewModel: BreathingViewModel = hiltViewModel()) {
     var technique by rememberSaveable { mutableStateOf(BreathingTechnique.RELAX_478) }
     var minutes by rememberSaveable { mutableIntStateOf(BreathingPlan.SESSION_MINUTES[1]) }
     var running by rememberSaveable { mutableStateOf(false) }
@@ -129,6 +129,8 @@ private fun BreathingScreen(onBack: () -> Unit) {
                 if (step != lastStep) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 lastStep = step
             }
+            // The loop ends only when the whole session was breathed through.
+            viewModel.sessionFinished()
             running = false
         }
         DisposableEffect(Unit) {

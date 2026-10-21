@@ -16,7 +16,9 @@ import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.usecase.InvalidDayLogException
+import io.github.zaxar1231.mycycle.core.domain.usecase.RewardPetUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.SaveDayLogUseCase
+import io.github.zaxar1231.mycycle.core.domain.usecase.isEmpty
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,6 +54,7 @@ class DayLogViewModel @Inject constructor(
     medications: MedicationRepository,
     private val settings: SettingsRepository,
     private val saveDayLog: SaveDayLogUseCase,
+    private val rewardPet: RewardPetUseCase,
 ) : ViewModel() {
     private val date = savedStateHandle.toRoute<DayLogRoute>().date
     private val _state = MutableStateFlow(DayLogUiState(date))
@@ -107,7 +110,9 @@ class DayLogViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val periodLength = settings.settings.first().usualPeriodLength
-                saveDayLog(form.log.copy(temperatureCelsius = temperature.value, weightKg = weight.value), periodLength)
+                val log = form.log.copy(temperatureCelsius = temperature.value, weightKg = weight.value)
+                saveDayLog(log, periodLength)
+                if (!log.isEmpty()) rewardQuietly(log.date)
                 _state.update { it.copy(saving = false, saved = true) }
             } catch (e: CancellationException) {
                 throw e
@@ -120,6 +125,17 @@ class DayLogViewModel @Inject constructor(
     }
 
     private fun fail(field: InvalidDayLogException.Field) = _state.update { it.copy(error = field) }
+
+    /** The log is saved already; a failed pet reward must not report the save as failed. */
+    private suspend fun rewardQuietly(date: LocalDate) {
+        try {
+            rewardPet.dayLogged(date)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // No coins this time; the next log pays as usual.
+        }
+    }
 
     /** Wrapper so "empty field" (null value) differs from "cannot parse" (null wrapper). */
     private class Parsed(val value: Double?)

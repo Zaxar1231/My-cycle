@@ -105,6 +105,7 @@
     <string name="block_calendar">Календарь</string>
     <string name="block_today">Сегодня</string>
     <string name="block_affirmation">Аффирмация и дыхание</string>
+    <string name="block_pet">Питомец</string>
     <string name="look_none">Без фона</string>
     <string name="look_filled">Заливка</string>
     <string name="look_tonal">Тональная</string>

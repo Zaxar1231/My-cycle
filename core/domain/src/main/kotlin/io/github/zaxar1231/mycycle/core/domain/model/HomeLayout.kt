@@ -1,7 +1,7 @@
 package io.github.zaxar1231.mycycle.core.domain.model
 
 /** Blocks of the home screen the user can reorder, hide and restyle. */
-enum class HomeBlock { HERO, KEY_DATES, CALENDAR, TODAY, AFFIRMATION }
+enum class HomeBlock { HERO, KEY_DATES, CALENDAR, TODAY, AFFIRMATION, PET }
 
 /** How a block's container looks. [NONE] draws the content without a container. */
 enum class BlockLook { NONE, FILLED, TONAL, OUTLINED, GLASS }
@@ -49,7 +49,7 @@ data class HomeLayout(val order: List<HomeBlock>, val styles: Map<HomeBlock, Blo
         /** The picture and the calendar sit on the background; the rest are cards. */
         fun defaultStyle(block: HomeBlock) = when (block) {
             HomeBlock.HERO, HomeBlock.CALENDAR -> BlockStyle(look = BlockLook.NONE)
-            HomeBlock.KEY_DATES, HomeBlock.TODAY, HomeBlock.AFFIRMATION -> BlockStyle()
+            HomeBlock.KEY_DATES, HomeBlock.TODAY, HomeBlock.AFFIRMATION, HomeBlock.PET -> BlockStyle()
         }
     }
 }

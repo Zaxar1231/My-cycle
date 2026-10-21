@@ -48,7 +48,10 @@ class MappersTest {
 
     @Test
     fun `pet survives a round trip`() {
-        val pet = Pet(PetType.PANDA, level = 3, xp = 40, coins = 12, equippedItems = setOf("hat"), ownedItems = setOf("hat", "scarf"))
+        val pet = Pet(
+            PetType.PANDA, level = 3, xp = 40, coins = 12, equippedItems = setOf("hat"), ownedItems = setOf("hat", "scarf"),
+            lastLogReward = LocalDate.of(2026, 10, 20), logStreak = 4, lastBreathingReward = LocalDate.of(2026, 10, 19),
+        )
         assertEquals(pet, pet.toEntity().toDomain())
     }
 
