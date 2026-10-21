@@ -19,16 +19,15 @@ data class PregnancyChance(
 )
 
 object PregnancyChanceModel {
-    /** Null when [date] is outside the timeline, for example before the first logged period. */
+    /**
+     * Null when [date] is outside the timeline, for example before the first logged period. Callers
+     * should not ask while the period is late: the ovulation of that cycle is unknown then.
+     * Period days are not special-cased: in a short cycle the fertile window can start during the period.
+     */
     fun on(date: LocalDate, prediction: CyclePrediction): PregnancyChance? {
         val segment = prediction.segmentFor(date) ?: return null
         val offset = ChronoUnit.DAYS.between(segment.ovulation, date).toInt()
-        val inPeriod = !segment.isPredicted && !date.isAfter(segment.periodEnd)
-        val percent = if (inPeriod) {
-            CycleConstants.CONCEPTION_CHANCE_OUTSIDE_WINDOW
-        } else {
-            CycleConstants.CONCEPTION_CHANCE_BY_DAY[offset] ?: CycleConstants.CONCEPTION_CHANCE_OUTSIDE_WINDOW
-        }
+        val percent = CycleConstants.CONCEPTION_CHANCE_BY_DAY[offset] ?: CycleConstants.CONCEPTION_CHANCE_OUTSIDE_WINDOW
         val level = when {
             percent >= CycleConstants.HIGH_CHANCE_MIN_PERCENT -> ChanceLevel.HIGH
             percent >= CycleConstants.MEDIUM_CHANCE_MIN_PERCENT -> ChanceLevel.MEDIUM

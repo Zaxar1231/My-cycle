@@ -86,7 +86,7 @@ fun TwilightAppRoot(
                 onOpenPhases = { navController.navigate(PhasesRoute) { launchSingleTop = true } },
                 onOpenHormones = { navController.navigate(HormonesRoute) { launchSingleTop = true } },
             )
-            insightsScreens(onBack = { navController.popBackStack() })
+            insightsScreens(onBack = { navController.navigateUp() })
             statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)

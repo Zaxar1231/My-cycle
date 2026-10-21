@@ -33,7 +33,7 @@
     <string name="hormone_progesterone_role">Progesterone is produced after ovulation: it prepares the uterine lining, slightly raises body temperature and makes many people calmer and sleepier.</string>
     <string name="hormone_lh_role">Luteinizing hormone (LH) surges just before ovulation, and that surge releases the egg. Ovulation tests detect it.</string>
     <string name="hormone_fsh_role">Follicle-stimulating hormone (FSH) helps follicles mature early in the cycle and also rises a little at ovulation.</string>
-    <string name="hormone_testosterone_role">Small amounts of testosterone are normal; around ovulation many people link it to higher libido and confidence.</string>
+    <string name="hormone_testosterone_role">Everyone produces small amounts of testosterone; around ovulation many people link it to higher libido and confidence.</string>
     <string name="hormone_now_estradiol_menstrual">Low, so energy may be lower than usual.</string>
     <string name="hormone_now_estradiol_follicular">Rising; many people feel better and more energetic.</string>
     <string name="hormone_now_estradiol_ovulatory">Near its peak, often a time of energy and sociability.</string>
@@ -54,4 +54,10 @@
     <string name="hormone_now_testosterone_follicular">Rising gradually.</string>
     <string name="hormone_now_testosterone_ovulatory">Near its peak; many people notice higher libido.</string>
     <string name="hormone_now_testosterone_luteal">Falling.</string>
+    <string name="insights_cycle_in_future">The logged cycle starts after today. Check the date and time on your phone.</string>
+    <string name="insights_period_today">Your period is expected today. Phases and hormones of the new cycle appear once you mark its start.</string>
+    <plurals name="insights_period_late">
+        <item quantity="one">Your period is %d day late. When a cycle runs longer than usual, the phase and hormone model is not accurate: mark the start of your period when it comes. If the delay worries you, take a test or see a doctor.</item>
+        <item quantity="other">Your period is %d days late. When a cycle runs longer than usual, the phase and hormone model is not accurate: mark the start of your period when it comes. If the delay worries you, take a test or see a doctor.</item>
+    </plurals>
 </resources>

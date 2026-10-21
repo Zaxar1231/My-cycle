@@ -84,7 +84,13 @@ fun TodayCard(
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            PregnancyChanceModel.on(today, prediction)?.let { chance -> ExpandablePills(listOf(chancePill(chance))) }
+            // While the period is due or late the ovulation of this cycle is unknown, so no estimate.
+            if (status.daysLate == 0 && status.daysUntilNextPeriod > 0) {
+                PregnancyChanceModel.on(today, prediction)?.let { chance ->
+                    ExpandablePills(listOf(chancePill(chance)))
+                    Text(stringResource(R.string.chance_not_contraception), style = MaterialTheme.typography.labelMedium)
+                }
+            }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AssistChip(onClick = onOpenPhases, label = { Text(stringResource(R.string.today_open_phases)) })
                 AssistChip(onClick = onOpenHormones, label = { Text(stringResource(R.string.today_open_hormones)) })

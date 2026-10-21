@@ -37,6 +37,21 @@ class InsightsTest {
     }
 
     @Test
+    fun `a short cycle can be fertile during the period`() {
+        val short = CyclePredictor().predict(
+            CyclePredictor.Input(
+                cycles = listOf(Cycle(id = 1, startDate = start, periodLength = 7)),
+                usualCycleLength = 21,
+                usualPeriodLength = 7,
+                usualLengthsEstimated = false,
+                today = start.plusDays(1),
+            ),
+        )
+        // Ovulation on day 7: day 5 of the period is two days before it.
+        assertEquals(ChanceLevel.HIGH, PregnancyChanceModel.on(start.plusDays(4), short)!!.level)
+    }
+
+    @Test
     fun `hormone curves peak where expected and stretch with the cycle`() {
         for (length in listOf(24, 28, 35)) {
             val ovulationDay = length - 14

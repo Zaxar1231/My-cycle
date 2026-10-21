@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -79,12 +80,22 @@ private fun InsightsScaffold(
             InsightsUiState.Loading -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            InsightsUiState.NoData -> Text(
-                stringResource(R.string.insights_no_data),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(padding).padding(24.dp),
+            InsightsUiState.NoData -> Message(stringResource(R.string.insights_no_data), padding)
+            InsightsUiState.CycleInFuture -> Message(stringResource(R.string.insights_cycle_in_future), padding)
+            is InsightsUiState.PeriodDue -> Message(
+                if (s.daysLate > 0) {
+                    pluralStringResource(R.plurals.insights_period_late, s.daysLate, s.daysLate)
+                } else {
+                    stringResource(R.string.insights_period_today)
+                },
+                padding,
             )
             is InsightsUiState.Ready -> body(s.now, content, padding)
         }
     }
+}
+
+@Composable
+private fun Message(text: String, padding: PaddingValues) {
+    Text(text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(padding).padding(24.dp))
 }

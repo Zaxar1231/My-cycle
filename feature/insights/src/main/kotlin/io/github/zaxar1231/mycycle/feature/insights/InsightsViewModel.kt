@@ -37,6 +37,12 @@ data class CycleNow(
 sealed interface InsightsUiState {
     data object Loading : InsightsUiState
     data object NoData : InsightsUiState
+
+    /** The logged cycle starts after today, for example after the device clock moved back. */
+    data object CycleInFuture : InsightsUiState
+
+    /** The period is expected today or late. */
+    data class PeriodDue(val daysLate: Int) : InsightsUiState
     data class Ready(val now: CycleNow) : InsightsUiState
 }
 
@@ -52,7 +58,10 @@ class InsightsViewModel @Inject constructor(
 
     val state: StateFlow<InsightsUiState> = today.flatMapLatest { day ->
         observePrediction(day).map<CyclePrediction, InsightsUiState> { prediction ->
-            // While the period is late, today already lies in the first predicted segment.
+            val status = prediction.today
+                ?: return@map if (prediction.timeline.isEmpty()) InsightsUiState.NoData else InsightsUiState.CycleInFuture
+            // From the expected day on, today lies in a predicted segment: the real cycle is unknown until a new start.
+            if (status.daysLate > 0 || status.daysUntilNextPeriod == 0) return@map InsightsUiState.PeriodDue(status.daysLate)
             val segment = prediction.segmentFor(day) ?: return@map InsightsUiState.NoData
             val cycleDay = ChronoUnit.DAYS.between(segment.start, day).toInt() + 1
             InsightsUiState.Ready(

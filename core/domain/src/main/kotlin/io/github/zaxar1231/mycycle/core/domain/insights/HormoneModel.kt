@@ -18,6 +18,7 @@ object HormoneModel {
     private const val TEMPLATE_LUTEAL_DAYS = LUTEAL_PHASE_LENGTH.toDouble()
     private const val HIGH_LEVEL = 0.66
     private const val MEDIUM_LEVEL = 0.33
+    private const val MIN_CYCLE_LENGTH = 3
 
     /** Key points (template day to level), interpolated linearly. Day 1 is the first day of the period. */
     private val templates: Map<Hormone, List<Pair<Double, Double>>> = mapOf(
@@ -43,6 +44,7 @@ object HormoneModel {
     }
 
     private fun templateDay(cycleDay: Int, cycleLength: Int, ovulationDay: Int): Double {
+        require(cycleLength >= MIN_CYCLE_LENGTH) { "cycle of $cycleLength days is too short for the hormone model" }
         val ovulation = ovulationDay.coerceIn(2, cycleLength - 1).toDouble()
         val day = cycleDay.coerceIn(1, cycleLength).toDouble()
         return if (day <= ovulation) {
