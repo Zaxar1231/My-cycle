@@ -15,7 +15,7 @@
     <string name="reminders_ovulation">День овуляции</string>
     <string name="reminders_log">Напоминать о записи дня</string>
     <string name="reminders_medications">Приём препаратов (время задаётся у каждого препарата)</string>
-    <string name="reminders_note">Напоминания создаются на телефоне, без интернета. На заблокированном экране виден только нейтральный текст. Прогнозы приблизительные и не являются методом контрацепции.</string>
+    <string name="reminders_note">Напоминания создаются на телефоне, без интернета. Если в настройках телефона скрыт конфиденциальный контент, на заблокированном экране виден только нейтральный текст. Прогнозы приблизительные и не являются методом контрацепции.</string>
     <plurals name="reminder_period_soon_title" tools:ignore="ImpliedQuantity">
         <item quantity="one">Месячные примерно через %d день</item>
         <item quantity="few">Месячные примерно через %d дня</item>

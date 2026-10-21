@@ -13,6 +13,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -40,9 +41,9 @@ class RemindersViewModel @Inject constructor(private val settings: SettingsRepos
     val reminders: StateFlow<ReminderSettings?> = settings.settings.map { it.reminders }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
+    /** Applied to the stored value under the settings lock, so quick taps do not undo each other. */
     fun change(transform: (ReminderSettings) -> ReminderSettings) {
-        val current = reminders.value ?: return
-        viewModelScope.launch { settings.setReminders(transform(current)) }
+        viewModelScope.launch { settings.update { it.copy(reminders = transform(it.reminders)) } }
     }
 
     private companion object {
@@ -73,7 +74,7 @@ fun RemindersSection(viewModel: RemindersViewModel = hiltViewModel()) {
         SwitchRow(stringResource(R.string.reminders_ovulation), r.ovulation) { on -> viewModel.change { it.copy(ovulation = on) } }
         SwitchRow(stringResource(R.string.reminders_log), r.dailyLog) { on -> viewModel.change { it.copy(dailyLog = on) } }
         if (r.dailyLog) {
-            val format = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+            val format = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ReminderSettings.LOG_TIME_OPTIONS.forEach { time ->
                     FilterChip(

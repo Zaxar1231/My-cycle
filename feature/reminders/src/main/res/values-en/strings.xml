@@ -13,7 +13,7 @@
     <string name="reminders_ovulation">Ovulation day</string>
     <string name="reminders_log">Remind me to log the day</string>
     <string name="reminders_medications">Medications (the time is set on each medication)</string>
-    <string name="reminders_note">Reminders are made on the phone, without the internet. The lock screen shows only a neutral line. Forecasts are approximate and not a method of contraception.</string>
+    <string name="reminders_note">Reminders are made on the phone, without the internet. If the phone hides sensitive content, the lock screen shows only a neutral line. Forecasts are approximate and not a method of contraception.</string>
     <plurals name="reminder_period_soon_title">
         <item quantity="one">Period expected in about %d day</item>
         <item quantity="other">Period expected in about %d days</item>

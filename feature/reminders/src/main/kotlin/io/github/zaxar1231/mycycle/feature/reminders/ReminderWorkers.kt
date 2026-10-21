@@ -31,25 +31,28 @@ interface ReminderDependencies {
 private fun Context.reminderDependencies() = EntryPointAccessors.fromApplication(applicationContext, ReminderDependencies::class.java)
 
 /** Runs [block]; a database that cannot be read (for example after data loss) skips the reminder. */
-private suspend fun quietly(block: suspend () -> Unit) {
-    try {
-        block()
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        // Nothing to remind about this time.
-    }
+private suspend fun quietly(block: suspend () -> Unit): Boolean = try {
+    block()
+    true
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    // Nothing to remind about this time.
+    false
 }
 
-/** Once a day in the morning: the period soon, the fertile window, ovulation. */
+/** Once a day in the morning: the period soon, the fertile window, ovulation. Schedules the next morning itself. */
 class CycleReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val deps = applicationContext.reminderDependencies()
         val today = deps.dates().today()
         // A periodic run can land twice on one day; only the first one reminds.
         val prefs = applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getString(LAST_RUN, null) == today.toString()) return Result.success()
-        quietly {
+        if (prefs.getString(LAST_RUN, null) == today.toString()) {
+            deps.scheduler().scheduleNextCycle()
+            return Result.success()
+        }
+        val done = quietly {
             val settings = deps.settings().settings.first().reminders
             val prediction = deps.prediction()(today).first()
             Reminders.dueOn(prediction, today, settings).forEach { reminder ->
@@ -57,7 +60,9 @@ class CycleReminderWorker(context: Context, params: WorkerParameters) : Coroutin
                 ReminderNotifications.post(applicationContext, ReminderNotifications.CHANNEL_CYCLE, idOf(reminder), title, text)
             }
         }
-        prefs.edit().putString(LAST_RUN, today.toString()).apply()
+        // A failed read leaves the day open, so a later run can still remind.
+        if (done) prefs.edit().putString(LAST_RUN, today.toString()).apply()
+        deps.scheduler().scheduleNextCycle()
         return Result.success()
     }
 
@@ -106,7 +111,7 @@ class DailyLogWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 )
             }
         }
-        deps.scheduler().scheduleDailyLog()
+        quietly { deps.scheduler().scheduleNextDailyLog() }
         return Result.success()
     }
 
@@ -134,7 +139,7 @@ class MedicationWorker(context: Context, params: WorkerParameters) : CoroutineWo
                     applicationContext.getString(R.string.reminder_medication_title),
                     text,
                 )
-                deps.scheduler().scheduleMedication(medication)
+                deps.scheduler().scheduleNextMedication(medication)
             }
         }
         return Result.success()
