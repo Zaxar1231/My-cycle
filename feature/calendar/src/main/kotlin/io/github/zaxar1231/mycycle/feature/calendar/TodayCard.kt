@@ -2,8 +2,10 @@ package io.github.zaxar1231.mycycle.feature.calendar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -20,13 +22,26 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.PredictionConfidence
 import io.github.zaxar1231.mycycle.core.domain.cycle.PredictionSource
+import io.github.zaxar1231.mycycle.core.domain.insights.ChanceLevel
+import io.github.zaxar1231.mycycle.core.domain.insights.PregnancyChance
+import io.github.zaxar1231.mycycle.core.domain.insights.PregnancyChanceModel
+import io.github.zaxar1231.mycycle.core.ui.component.ExpandablePills
+import io.github.zaxar1231.mycycle.core.ui.component.Pill
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
 @Composable
-fun TodayCard(prediction: CyclePrediction, onPeriodStarted: () -> Unit, modifier: Modifier = Modifier) {
+fun TodayCard(
+    prediction: CyclePrediction,
+    today: LocalDate,
+    onPeriodStarted: () -> Unit,
+    onOpenPhases: () -> Unit,
+    onOpenHormones: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val hasCycles = prediction.timeline.isNotEmpty()
     val status = prediction.today
     Card(
@@ -69,6 +84,17 @@ fun TodayCard(prediction: CyclePrediction, onPeriodStarted: () -> Unit, modifier
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            // While the period is due or late the ovulation of this cycle is unknown, so no estimate.
+            if (status.daysLate == 0 && status.daysUntilNextPeriod > 0) {
+                PregnancyChanceModel.on(today, prediction)?.let { chance ->
+                    ExpandablePills(listOf(chancePill(chance)))
+                    Text(stringResource(R.string.chance_not_contraception), style = MaterialTheme.typography.labelMedium)
+                }
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AssistChip(onClick = onOpenPhases, label = { Text(stringResource(R.string.today_open_phases)) })
+                AssistChip(onClick = onOpenHormones, label = { Text(stringResource(R.string.today_open_hormones)) })
+            }
             Text(stringResource(prediction.confidence.labelRes()), style = MaterialTheme.typography.labelLarge)
             if (status.currentOvulationConfirmed) {
                 Text(stringResource(R.string.today_ovulation_confirmed), style = MaterialTheme.typography.labelLarge)
@@ -89,6 +115,21 @@ fun TodayCard(prediction: CyclePrediction, onPeriodStarted: () -> Unit, modifier
 }
 
 private const val DISCLAIMER_ALPHA = 0.7f
+
+/** "Chance to conceive · high"; opens the model estimate and the contraception warning. */
+@Composable
+private fun chancePill(chance: PregnancyChance): Pill {
+    val level = stringResource(
+        when (chance.level) {
+            ChanceLevel.LOW -> R.string.chance_low
+            ChanceLevel.MEDIUM -> R.string.chance_medium
+            ChanceLevel.HIGH -> R.string.chance_high
+        },
+    )
+    return Pill("chance", stringResource(R.string.chance_pill, level)) {
+        Text(stringResource(R.string.chance_details, chance.percent), style = MaterialTheme.typography.bodyMedium)
+    }
+}
 
 private fun PredictionConfidence.labelRes() = when (this) {
     PredictionConfidence.LOW -> R.string.confidence_low

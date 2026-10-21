@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_back">Back</string>
+    <string name="insights_no_data">Mark the start of your period and your cycle will appear here.</string>
+    <string name="insights_you_are_here">You are here · day %1$d</string>
+    <string name="insights_days">Days %1$d–%2$d</string>
+    <string name="insights_day">Day %1$d</string>
+    <string name="insights_current">Now</string>
+    <string name="insights_pill">%1$s · %2$s</string>
+    <string name="insights_bullet">• %1$s</string>
+    <string name="insights_symptoms">Symptoms</string>
+    <string name="insights_symptoms_heading">Many people notice in this phase</string>
+    <string name="insights_pros">Upsides</string>
+    <string name="insights_cons">Downsides</string>
+    <string name="insights_tips">Tips</string>
+
+    <string name="phases_title">Cycle phases</string>
+    <string name="phases_bar_description">The phases of your cycle; the mark shows today</string>
+
+    <string name="hormones_title">Hormones</string>
+    <string name="hormones_chart_description">Approximate levels of estrogen, progesterone, LH, FSH and testosterone across the cycle</string>
+    <string name="hormones_now">Now, cycle day %1$d</string>
+    <string name="hormones_model_note">The curves are a typical model stretched to your cycle length. They are not test results: real levels differ from person to person.</string>
+    <string name="hormone_level_low">low</string>
+    <string name="hormone_level_medium">medium</string>
+    <string name="hormone_level_high">high</string>
+    <string name="hormone_estradiol">Estrogen</string>
+    <string name="hormone_progesterone">Progesterone</string>
+    <string name="hormone_lh">LH</string>
+    <string name="hormone_fsh">FSH</string>
+    <string name="hormone_testosterone">Testosterone</string>
+    <string name="hormone_estradiol_role">Estrogen (estradiol) rises in the first half of the cycle: it thickens the uterine lining and affects mood, energy and skin.</string>
+    <string name="hormone_progesterone_role">Progesterone is produced after ovulation: it prepares the uterine lining, slightly raises body temperature and makes many people calmer and sleepier.</string>
+    <string name="hormone_lh_role">Luteinizing hormone (LH) surges just before ovulation, and that surge releases the egg. Ovulation tests detect it.</string>
+    <string name="hormone_fsh_role">Follicle-stimulating hormone (FSH) helps follicles mature early in the cycle and also rises a little at ovulation.</string>
+    <string name="hormone_testosterone_role">Everyone produces small amounts of testosterone; around ovulation many people link it to higher libido and confidence.</string>
+    <string name="hormone_now_estradiol_menstrual">Low, so energy may be lower than usual.</string>
+    <string name="hormone_now_estradiol_follicular">Rising; many people feel better and more energetic.</string>
+    <string name="hormone_now_estradiol_ovulatory">Near its peak, often a time of energy and sociability.</string>
+    <string name="hormone_now_estradiol_luteal">A second, smaller rise, falling towards the end of the phase.</string>
+    <string name="hormone_now_progesterone_menstrual">Low.</string>
+    <string name="hormone_now_progesterone_follicular">Stays low until ovulation.</string>
+    <string name="hormone_now_progesterone_ovulatory">Starts to rise after the egg is released.</string>
+    <string name="hormone_now_progesterone_luteal">The main hormone of this phase: sleepiness, appetite and tender breasts are possible.</string>
+    <string name="hormone_now_lh_menstrual">Low.</string>
+    <string name="hormone_now_lh_follicular">Still low; it peaks just before ovulation.</string>
+    <string name="hormone_now_lh_ovulatory">LH surge: an ovulation test may be positive these days.</string>
+    <string name="hormone_now_lh_luteal">Low again.</string>
+    <string name="hormone_now_fsh_menstrual">Rising a little as follicles start to mature.</string>
+    <string name="hormone_now_fsh_follicular">Helps a follicle mature, then falls.</string>
+    <string name="hormone_now_fsh_ovulatory">A small rise together with LH.</string>
+    <string name="hormone_now_fsh_luteal">Low, starting to rise towards the end of the phase.</string>
+    <string name="hormone_now_testosterone_menstrual">Steady.</string>
+    <string name="hormone_now_testosterone_follicular">Rising gradually.</string>
+    <string name="hormone_now_testosterone_ovulatory">Near its peak; many people notice higher libido.</string>
+    <string name="hormone_now_testosterone_luteal">Falling.</string>
+    <string name="insights_cycle_in_future">The logged cycle starts after today. Check the date and time on your phone.</string>
+    <string name="insights_period_today">Your period is expected today. Phases and hormones of the new cycle appear once you mark its start.</string>
+    <plurals name="insights_period_late">
+        <item quantity="one">Your period is %d day late. When a cycle runs longer than usual, the phase and hormone model is not accurate: mark the start of your period when it comes. If the delay worries you, take a test or see a doctor.</item>
+        <item quantity="other">Your period is %d days late. When a cycle runs longer than usual, the phase and hormone model is not accurate: mark the start of your period when it comes. If the delay worries you, take a test or see a doctor.</item>
+    </plurals>
+</resources>

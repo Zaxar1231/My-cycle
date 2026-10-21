@@ -43,13 +43,17 @@ import java.time.temporal.ChronoUnit
 @Serializable
 data object CalendarRoute
 
-fun NavGraphBuilder.calendarScreen(onOpenDayLog: (LocalDate) -> Unit) {
-    composable<CalendarRoute> { CalendarScreen(onOpenDayLog = onOpenDayLog) }
+fun NavGraphBuilder.calendarScreen(onOpenDayLog: (LocalDate) -> Unit, onOpenPhases: () -> Unit, onOpenHormones: () -> Unit) {
+    composable<CalendarRoute> {
+        CalendarScreen(onOpenDayLog = onOpenDayLog, onOpenPhases = onOpenPhases, onOpenHormones = onOpenHormones)
+    }
 }
 
 @Composable
 fun CalendarScreen(
     onOpenDayLog: (LocalDate) -> Unit,
+    onOpenPhases: () -> Unit,
+    onOpenHormones: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
@@ -81,7 +85,13 @@ fun CalendarScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        TodayCard(prediction, onPeriodStarted = viewModel::markPeriodStartedToday)
+        TodayCard(
+            prediction = prediction,
+            today = state.today,
+            onPeriodStarted = viewModel::markPeriodStartedToday,
+            onOpenPhases = onOpenPhases,
+            onOpenHormones = onOpenHormones,
+        )
         todayContent?.let { PhaseContentCard(it, state.today) }
         MonthCalendar(
             month = state.month,

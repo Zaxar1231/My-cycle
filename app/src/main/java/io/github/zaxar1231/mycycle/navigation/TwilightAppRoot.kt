@@ -36,6 +36,9 @@ import io.github.zaxar1231.mycycle.feature.daylog.DayLogRoute
 import io.github.zaxar1231.mycycle.feature.daylog.MedicationsRoute
 import io.github.zaxar1231.mycycle.feature.daylog.dayLogScreen
 import io.github.zaxar1231.mycycle.feature.daylog.medicationsScreen
+import io.github.zaxar1231.mycycle.feature.insights.HormonesRoute
+import io.github.zaxar1231.mycycle.feature.insights.PhasesRoute
+import io.github.zaxar1231.mycycle.feature.insights.insightsScreens
 import io.github.zaxar1231.mycycle.feature.onboarding.OnboardingRoute
 import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
@@ -78,7 +81,12 @@ fun TwilightAppRoot(
             onboardingScreen(onFinished = {
                 navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } }
             })
-            calendarScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
+            calendarScreen(
+                onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } },
+                onOpenPhases = { navController.navigate(PhasesRoute) { launchSingleTop = true } },
+                onOpenHormones = { navController.navigate(HormonesRoute) { launchSingleTop = true } },
+            )
+            insightsScreens(onBack = { navController.navigateUp() })
             statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)

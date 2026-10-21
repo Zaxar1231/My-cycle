@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_back">Назад</string>
+    <string name="insights_no_data">Отметьте начало месячных, и здесь появится ваш цикл.</string>
+    <string name="insights_you_are_here">Вы здесь · %1$d-й день</string>
+    <string name="insights_days">Дни %1$d–%2$d</string>
+    <string name="insights_day">День %1$d</string>
+    <string name="insights_current">Сейчас</string>
+    <string name="insights_pill">%1$s · %2$s</string>
+    <string name="insights_bullet">• %1$s</string>
+    <string name="insights_symptoms">Симптомы</string>
+    <string name="insights_symptoms_heading">У многих в этой фазе бывает</string>
+    <string name="insights_pros">Плюсы</string>
+    <string name="insights_cons">Минусы</string>
+    <string name="insights_tips">Советы</string>
+
+    <!-- Phases -->
+    <string name="phases_title">Анализ фаз цикла</string>
+    <string name="phases_bar_description">Фазы вашего цикла, отметка показывает сегодняшний день</string>
+
+    <!-- Hormones -->
+    <string name="hormones_title">Гормоны</string>
+    <string name="hormones_chart_description">Примерные уровни эстрогена, прогестерона, ЛГ, ФСГ и тестостерона по дням цикла</string>
+    <string name="hormones_now">Сейчас, %1$d-й день цикла</string>
+    <string name="hormones_model_note">Кривые — типовая модель, растянутая под длину вашего цикла. Это не результаты анализов: настоящие уровни у каждого свои.</string>
+    <string name="hormone_level_low">низкий</string>
+    <string name="hormone_level_medium">средний</string>
+    <string name="hormone_level_high">высокий</string>
+    <string name="hormone_estradiol">Эстроген</string>
+    <string name="hormone_progesterone">Прогестерон</string>
+    <string name="hormone_lh">ЛГ</string>
+    <string name="hormone_fsh">ФСГ</string>
+    <string name="hormone_testosterone">Тестостерон</string>
+    <string name="hormone_estradiol_role">Эстроген (эстрадиол) растёт в первой половине цикла: утолщает слизистую матки, влияет на настроение, энергию, кожу.</string>
+    <string name="hormone_progesterone_role">Прогестерон вырабатывается после овуляции: готовит слизистую матки, немного повышает температуру тела, у многих успокаивает и вызывает сонливость.</string>
+    <string name="hormone_lh_role">Лютеинизирующий гормон (ЛГ) резко поднимается перед овуляцией — этот пик и запускает выход яйцеклетки. Его ловят тесты на овуляцию.</string>
+    <string name="hormone_fsh_role">Фолликулостимулирующий гормон (ФСГ) помогает фолликулам созревать в начале цикла и тоже немного поднимается к овуляции.</string>
+    <string name="hormone_testosterone_role">Тестостерон в небольших количествах вырабатывается у всех; ближе к овуляции у многих связан с подъёмом либидо и уверенности.</string>
+    <string name="hormone_now_estradiol_menstrual">Уровень низкий — энергии может быть меньше обычного.</string>
+    <string name="hormone_now_estradiol_follicular">Растёт — у многих улучшаются настроение и энергия.</string>
+    <string name="hormone_now_estradiol_ovulatory">Около пика — часто это время подъёма сил и общительности.</string>
+    <string name="hormone_now_estradiol_luteal">Второй, меньший подъём, к концу фазы снижается.</string>
+    <string name="hormone_now_progesterone_menstrual">Уровень низкий.</string>
+    <string name="hormone_now_progesterone_follicular">Остаётся низким до овуляции.</string>
+    <string name="hormone_now_progesterone_ovulatory">Начинает расти после выхода яйцеклетки.</string>
+    <string name="hormone_now_progesterone_luteal">Главный гормон фазы: возможны сонливость, аппетит, чувствительность груди.</string>
+    <string name="hormone_now_lh_menstrual">Уровень низкий.</string>
+    <string name="hormone_now_lh_follicular">Пока низкий, пик будет перед овуляцией.</string>
+    <string name="hormone_now_lh_ovulatory">Пик ЛГ — в эти дни тест на овуляцию может быть положительным.</string>
+    <string name="hormone_now_lh_luteal">Снова низкий.</string>
+    <string name="hormone_now_fsh_menstrual">Немного растёт — начинается созревание фолликулов.</string>
+    <string name="hormone_now_fsh_follicular">Помогает фолликулу созреть, затем снижается.</string>
+    <string name="hormone_now_fsh_ovulatory">Небольшой подъём вместе с ЛГ.</string>
+    <string name="hormone_now_fsh_luteal">Низкий, к концу фазы начинает расти.</string>
+    <string name="hormone_now_testosterone_menstrual">Уровень ровный.</string>
+    <string name="hormone_now_testosterone_follicular">Постепенно растёт.</string>
+    <string name="hormone_now_testosterone_ovulatory">Около пика — у многих выше либидо.</string>
+    <string name="hormone_now_testosterone_luteal">Снижается.</string>
+    <string name="insights_cycle_in_future">Записанный цикл начинается позже сегодняшней даты. Проверьте дату и время на телефоне.</string>
+    <string name="insights_period_today">Месячные ожидаются сегодня. Фазы и гормоны нового цикла появятся, когда вы отметите его начало.</string>
+    <plurals name="insights_period_late">
+        <item quantity="one">Месячные задерживаются на %d день. Когда цикл идёт дольше обычного, модель фаз и гормонов неточна: отметьте начало месячных, когда они придут. Если задержка вас беспокоит, сделайте тест или обратитесь к врачу.</item>
+        <item quantity="few">Месячные задерживаются на %d дня. Когда цикл идёт дольше обычного, модель фаз и гормонов неточна: отметьте начало месячных, когда они придут. Если задержка вас беспокоит, сделайте тест или обратитесь к врачу.</item>
+        <item quantity="many">Месячные задерживаются на %d дней. Когда цикл идёт дольше обычного, модель фаз и гормонов неточна: отметьте начало месячных, когда они придут. Если задержка вас беспокоит, сделайте тест или обратитесь к врачу.</item>
+        <item quantity="other">Месячные задерживаются на %d дня. Когда цикл идёт дольше обычного, модель фаз и гормонов неточна: отметьте начало месячных, когда они придут. Если задержка вас беспокоит, сделайте тест или обратитесь к врачу.</item>
+    </plurals>
+</resources>

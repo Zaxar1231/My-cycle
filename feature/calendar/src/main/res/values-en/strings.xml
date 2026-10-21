@@ -46,4 +46,12 @@
         <item quantity="one">Ovulation in %1$d day</item>
         <item quantity="other">Ovulation in %1$d days</item>
     </plurals>
+    <string name="today_open_phases">Cycle phases</string>
+    <string name="today_open_hormones">Hormones</string>
+    <string name="chance_pill">Chance to conceive · %1$s</string>
+    <string name="chance_low">lower (model)</string>
+    <string name="chance_medium">medium</string>
+    <string name="chance_high">high</string>
+    <string name="chance_details">About %1$d%% today according to the model. It is a rough estimate based on the predicted ovulation; it does not account for your health and can be very wrong. This is not a contraception method.</string>
+    <string name="chance_not_contraception">This estimate is not a contraception method.</string>
 </resources>
