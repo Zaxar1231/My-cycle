@@ -16,6 +16,7 @@ import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import io.github.zaxar1231.mycycle.core.domain.usecase.ApplyPetCareUseCase
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,17 +45,23 @@ import javax.inject.Singleton
 @Singleton
 class PartnerSync @Inject constructor(
     @ApplicationContext private val context: Context,
-    // Lazy: the repository reads its Keystore-encrypted file when created, which must not happen
-    // on the main thread during app start.
+    // Lazy: the partner repository reads its Keystore-encrypted file when created, which must not
+    // happen on the main thread during app start, and the others open the database, which must
+    // wait for the key check (a lost key would otherwise crash the app before it can say so).
     private val partnerRepository: dagger.Lazy<PartnerRepository>,
-    private val observePrediction: ObserveCyclePredictionUseCase,
-    private val dayLogs: DayLogRepository,
-    private val pets: PetRepository,
-    private val applyCare: ApplyPetCareUseCase,
+    private val predictionUseCase: dagger.Lazy<ObserveCyclePredictionUseCase>,
+    private val dayLogRepository: dagger.Lazy<DayLogRepository>,
+    private val petRepository: dagger.Lazy<PetRepository>,
+    private val applyCareUseCase: dagger.Lazy<ApplyPetCareUseCase>,
     private val dates: DateProvider,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    // An unreadable database (lost key) must not take the app down from a background job.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> })
     private val partners: PartnerRepository get() = partnerRepository.get()
+    private val observePrediction get() = predictionUseCase.get()
+    private val dayLogs get() = dayLogRepository.get()
+    private val pets get() = petRepository.get()
+    private val applyCare get() = applyCareUseCase.get()
 
     fun start() {
         scope.launch {
