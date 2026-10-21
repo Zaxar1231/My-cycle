@@ -43,9 +43,4 @@
     <string name="onb_theme_title">Оформление</string>
     <string name="onb_pin_title">Защита PIN-кодом</string>
     <string name="onb_pin_text">PIN-код из 4 цифр закроет приложение от чужих глаз, а войти можно будет и по отпечатку или лицу. Это можно сделать и позже в настройках.</string>
-    <string name="pet_cat">Котик</string>
-    <string name="pet_fox">Лисёнок</string>
-    <string name="pet_bunny">Зайка</string>
-    <string name="pet_panda">Панда</string>
-    <string name="pet_penguin">Пингвин</string>
 </resources>
