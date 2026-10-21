@@ -5,9 +5,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -18,37 +23,52 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.zaxar1231.mycycle.core.domain.backup.BackupRules
-import java.time.LocalDate
 
 /** Settings card content: a report for the doctor, a CSV table, and an encrypted backup. */
 @Composable
 fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    // Not saveable: passwords never go into the saved instance state.
-    var pendingBackup by remember { mutableStateOf(false) }
-    var restoreUri by remember { mutableStateOf<Uri?>(null) }
-    var backupUri by remember { mutableStateOf<Uri?>(null) }
-    var confirmRestore by remember { mutableStateOf<Uri?>(null) }
-    val date = LocalDate.now().toString()
+    // The password is asked before the file is created and never goes into the saved instance
+    // state; if the app is restarted in between, the new empty file is removed.
+    var askBackupPassword by remember { mutableStateOf(false) }
+    var backupPassword by remember { mutableStateOf<CharArray?>(null) }
+    // Uris and choices survive a restart of the app while the file picker is open.
+    var csvOptions by rememberSaveable { mutableStateOf(false) }
+    var csvNotes by rememberSaveable { mutableStateOf(false) }
+    var csvSex by rememberSaveable { mutableStateOf(false) }
+    var confirmRestore by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var restoreUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    val date = viewModel.today().toString()
     val reportName = stringResource(R.string.data_report_file, date)
+    val csvName = stringResource(R.string.data_csv_file, date)
+    val backupName = stringResource(R.string.data_backup_file, date)
 
     val report = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(PDF)) { uri -> uri?.let(viewModel::saveReport) }
-    val csv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(CSV)) { uri -> uri?.let(viewModel::saveCsv) }
+    val csv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(CSV)) { uri ->
+        uri?.let { viewModel.saveCsv(it, includeNotes = csvNotes, includeSex = csvSex) }
+    }
     val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(BINARY)) { uri ->
-        if (uri != null) {
-            backupUri = uri
-            pendingBackup = true
+        val password = backupPassword
+        backupPassword = null
+        when {
+            uri != null && password != null -> viewModel.saveBackup(uri, password)
+            uri != null -> viewModel.discard(uri)
+            else -> password?.fill('\u0000')
         }
     }
+    // Any type: file managers often label a backup as something else, and the content is checked anyway.
     val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> confirmRestore = uri }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -56,20 +76,21 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
         OutlinedButton(onClick = { report.launch(reportName) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_report))
         }
-        OutlinedButton(onClick = { csv.launch("twilight-cycle-$date.csv") }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+        Note(stringResource(R.string.data_report_note))
+        OutlinedButton(onClick = { csvOptions = true }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_csv))
         }
         Note(stringResource(R.string.data_csv_note))
-        OutlinedButton(onClick = { backup.launch("twilight-cycle-$date.tcbackup") }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { askBackupPassword = true }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_backup))
         }
-        OutlinedButton(onClick = { restore.launch(arrayOf(BINARY)) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { restore.launch(arrayOf("*/*")) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_restore))
         }
         Note(stringResource(R.string.data_backup_note))
         if (state.busy) CircularProgressIndicator()
         state.message?.let { message ->
-            val error = message in setOf(DataMessage.WRONG_PASSWORD, DataMessage.NOT_A_BACKUP, DataMessage.FAILED)
+            val error = message in setOf(DataMessage.WRONG_PASSWORD, DataMessage.NOT_A_BACKUP, DataMessage.TOO_LARGE, DataMessage.FAILED)
             Text(
                 stringResource(message.textRes()),
                 color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
@@ -78,16 +99,37 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
         }
     }
 
-    val target = backupUri
-    if (pendingBackup && target != null) {
+    if (csvOptions) {
+        AlertDialog(
+            onDismissRequest = { csvOptions = false },
+            title = { Text(stringResource(R.string.data_csv_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.data_csv_note), style = MaterialTheme.typography.bodyMedium)
+                    CheckRow(stringResource(R.string.data_csv_include_notes), csvNotes) { csvNotes = it }
+                    CheckRow(stringResource(R.string.data_csv_include_sex), csvSex) { csvSex = it }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    csvOptions = false
+                    csv.launch(csvName)
+                }) { Text(stringResource(R.string.data_csv_go)) }
+            },
+            dismissButton = { TextButton(onClick = { csvOptions = false }) { Text(stringResource(R.string.data_cancel)) } },
+        )
+    }
+    if (askBackupPassword) {
         PasswordDialog(
             title = stringResource(R.string.data_backup_password_title),
             text = stringResource(R.string.data_backup_password_text),
             confirm = true,
-            onDismiss = { pendingBackup = false },
+            onDismiss = { askBackupPassword = false },
             onPassword = {
-                pendingBackup = false
-                viewModel.saveBackup(target, it)
+                askBackupPassword = false
+                backupPassword?.fill('\u0000')
+                backupPassword = it
+                backup.launch(backupName)
             },
         )
     }
@@ -119,12 +161,24 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
     }
 }
 
+@Composable
+private fun CheckRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange),
+    ) {
+        Checkbox(checked = checked, onCheckedChange = null)
+        Spacer(Modifier.width(8.dp))
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
 /** Asks for the backup password; with [confirm], twice. Hands it over as characters, not a String. */
 @Composable
 private fun PasswordDialog(title: String, text: String?, confirm: Boolean, onDismiss: () -> Unit, onPassword: (CharArray) -> Unit) {
     var first by remember { mutableStateOf("") }
     var second by remember { mutableStateOf("") }
-    val valid = BackupRules.isValidPassword(first.toCharArray()) && (!confirm || first == second)
+    val valid = BackupRules.isValidPassword(first.length) && (!confirm || first == second)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -140,7 +194,14 @@ private fun PasswordDialog(title: String, text: String?, confirm: Boolean, onDis
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onPassword(first.toCharArray()) }, enabled = valid) { Text(stringResource(R.string.data_ok)) } },
+        confirmButton = {
+            TextButton(onClick = {
+                val password = first.toCharArray()
+                first = ""
+                second = ""
+                onPassword(password)
+            }, enabled = valid) { Text(stringResource(R.string.data_ok)) }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.data_cancel)) } },
     )
 }
@@ -170,6 +231,7 @@ private fun DataMessage.textRes() = when (this) {
     DataMessage.RESTORED -> R.string.data_restored
     DataMessage.WRONG_PASSWORD -> R.string.data_wrong_password
     DataMessage.NOT_A_BACKUP -> R.string.data_not_a_backup
+    DataMessage.TOO_LARGE -> R.string.data_too_large
     DataMessage.FAILED -> R.string.data_failed
 }
 

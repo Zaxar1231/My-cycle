@@ -2,16 +2,23 @@
 <resources>
     <string name="data_intro">Файлы создаются на телефоне и сохраняются туда, куда вы выберете. Приложение их никуда не отправляет.</string>
     <string name="data_report">PDF-отчёт для врача</string>
-    <string name="data_report_file">twilight-cycle-report-%1$s.pdf</string>
+    <string name="data_report_file" translatable="false">report-%1$s.pdf</string>
+    <string name="data_csv_file" translatable="false">table-%1$s.csv</string>
+    <string name="data_backup_file" translatable="false">backup-%1$s.tcbackup</string>
+    <string name="data_report_note">PDF не зашифрован: в нём сводка по циклам, частые симптомы и препараты. Заметки, секс и вес в отчёт не попадают.</string>
     <string name="data_csv">Таблица записей (CSV)</string>
     <string name="data_csv_note">CSV не зашифрован: его может прочитать любое приложение, у которого есть доступ к файлу.</string>
+    <string name="data_csv_title">Что включить в таблицу</string>
+    <string name="data_csv_include_notes">Заметки</string>
+    <string name="data_csv_include_sex">Отметки о сексе</string>
+    <string name="data_csv_go">Выбрать, куда сохранить</string>
     <string name="data_backup">Зашифрованная резервная копия</string>
     <string name="data_restore">Восстановить из копии</string>
     <string name="data_backup_note">Копия шифруется вашим паролем (AES-256). Без пароля её не открыть, и восстановить пароль нельзя.</string>
     <string name="data_backup_password_title">Пароль для копии</string>
     <string name="data_backup_password_text">Запомните его: без пароля копию не восстановить.</string>
     <string name="data_restore_title">Восстановить из копии?</string>
-    <string name="data_restore_text">Все текущие записи, циклы, препараты и питомец заменятся данными из копии.</string>
+    <string name="data_restore_text">Все текущие записи, циклы и препараты заменятся данными из копии. Питомец заменится, если он есть в копии.</string>
     <string name="data_restore_go">Восстановить</string>
     <string name="data_restore_password_title">Пароль от копии</string>
     <string name="data_password">Пароль</string>
@@ -25,6 +32,7 @@
     <string name="data_restored">Данные восстановлены из копии.</string>
     <string name="data_wrong_password">Неверный пароль, или файл повреждён.</string>
     <string name="data_not_a_backup">Это не резервная копия Twilight Cycle.</string>
+    <string name="data_too_large">Файл слишком большой для резервной копии.</string>
     <string name="data_failed">Не получилось. Данные не изменились.</string>
     <string name="report_title">Twilight Cycle: отчёт о цикле</string>
     <string name="report_generated">Составлен %1$s по записям в приложении</string>

@@ -2,11 +2,13 @@ package io.github.zaxar1231.mycycle.feature.backup
 
 import android.content.Context
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.zaxar1231.mycycle.core.domain.backup.BackupRepository
+import io.github.zaxar1231.mycycle.core.domain.backup.BackupRules
 import io.github.zaxar1231.mycycle.core.domain.backup.RestoreResult
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
@@ -22,11 +24,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.time.LocalDate
 import javax.inject.Inject
 
 /** The outcome of the last action, shown under the buttons. */
 enum class DataMessage {
-    REPORT_SAVED, CSV_SAVED, BACKUP_SAVED, RESTORED, WRONG_PASSWORD, NOT_A_BACKUP, FAILED
+    REPORT_SAVED, CSV_SAVED, BACKUP_SAVED, RESTORED, WRONG_PASSWORD, NOT_A_BACKUP, TOO_LARGE, FAILED
 }
 
 data class DataUiState(val busy: Boolean = false, val message: DataMessage? = null)
@@ -45,7 +49,10 @@ class BackupViewModel @Inject constructor(
     private val _state = MutableStateFlow(DataUiState())
     val state: StateFlow<DataUiState> = _state.asStateFlow()
 
-    fun saveReport(uri: Uri) = perform(DataMessage.REPORT_SAVED) {
+    /** For the suggested file names. */
+    fun today(): LocalDate = dates.today()
+
+    fun saveReport(uri: Uri) = perform(DataMessage.REPORT_SAVED, uri) {
         val today = dates.today()
         val (prediction, cycles) = observePrediction.withCycles(today).first()
         val history = statistics.history(prediction, cycles, today)
@@ -63,32 +70,42 @@ class BackupViewModel @Inject constructor(
         write(uri) { ReportPdf.write(context, data, it) }
     }
 
-    fun saveCsv(uri: Uri) = perform(DataMessage.CSV_SAVED) {
-        val csv = backups.exportCsv()
+    fun saveCsv(uri: Uri, includeNotes: Boolean, includeSex: Boolean) = perform(DataMessage.CSV_SAVED, uri) {
+        val csv = backups.exportCsv(includeNotes, includeSex)
         write(uri) { it.write(csv.toByteArray(Charsets.UTF_8)) }
     }
 
-    fun saveBackup(uri: Uri, password: CharArray) = perform(DataMessage.BACKUP_SAVED) {
+    fun saveBackup(uri: Uri, password: CharArray) = perform(DataMessage.BACKUP_SAVED, uri, onBusy = { password.fill('\u0000') }) {
         val file = try {
             backups.exportEncrypted(password)
         } finally {
             password.fill('\u0000')
         }
-        write(uri) { it.write(file) }
+        try {
+            write(uri) { it.write(file) }
+        } finally {
+            file.fill(0)
+        }
+    }
+
+    /** The user created a file but gave no password (or the app was restarted meanwhile): remove the empty file. */
+    fun discard(uri: Uri) {
+        viewModelScope.launch { deleteQuietly(uri) }
     }
 
     fun restore(uri: Uri, password: CharArray) {
-        if (_state.value.busy) return
+        if (_state.value.busy) {
+            password.fill('\u0000')
+            return
+        }
         _state.value = DataUiState(busy = true)
         viewModelScope.launch {
             val message = try {
-                val bytes = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                }
-                if (bytes == null) {
-                    DataMessage.FAILED
-                } else {
-                    when (backups.restoreEncrypted(bytes, password)) {
+                when (val file = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use(::readBackup) }) {
+                    null -> DataMessage.FAILED
+                    ReadResult.NotABackup -> DataMessage.NOT_A_BACKUP
+                    ReadResult.TooLarge -> DataMessage.TOO_LARGE
+                    is ReadResult.Bytes -> when (backups.restoreEncrypted(file.bytes, password)) {
                         RestoreResult.RESTORED -> DataMessage.RESTORED
                         RestoreResult.WRONG_PASSWORD -> DataMessage.WRONG_PASSWORD
                         RestoreResult.NOT_A_BACKUP -> DataMessage.NOT_A_BACKUP
@@ -106,14 +123,53 @@ class BackupViewModel @Inject constructor(
         }
     }
 
+    private sealed interface ReadResult {
+        class Bytes(val bytes: ByteArray) : ReadResult
+        data object NotABackup : ReadResult
+        data object TooLarge : ReadResult
+    }
+
+    /** Checks the first bytes before reading on, and stops at [BackupRules.MAX_BACKUP_BYTES]. */
+    private fun readBackup(input: InputStream): ReadResult {
+        val start = input.readUpTo(MAGIC_BYTES)
+        if (!backups.looksLikeBackup(start)) return ReadResult.NotABackup
+        val rest = input.readUpTo((BackupRules.MAX_BACKUP_BYTES - MAGIC_BYTES + 1).toInt())
+        if (start.size + rest.size > BackupRules.MAX_BACKUP_BYTES) return ReadResult.TooLarge
+        return ReadResult.Bytes(start + rest)
+    }
+
+    /** InputStream.readNBytes needs API 33. */
+    private fun InputStream.readUpTo(limit: Int): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(BUFFER_BYTES)
+        while (out.size() < limit) {
+            val read = read(buffer, 0, minOf(buffer.size, limit - out.size()))
+            if (read < 0) break
+            out.write(buffer, 0, read)
+        }
+        return out.toByteArray()
+    }
+
     private suspend fun write(uri: Uri, block: (java.io.OutputStream) -> Unit) = withContext(Dispatchers.IO) {
         // "wt" truncates, so a shorter file does not keep the tail of an older one.
         val out = context.contentResolver.openOutputStream(uri, "wt") ?: error("cannot open $uri")
         out.use(block)
     }
 
-    private fun perform(success: DataMessage, action: suspend () -> Unit) {
-        if (_state.value.busy) return
+    private suspend fun deleteQuietly(uri: Uri) = withContext(Dispatchers.IO) {
+        try {
+            DocumentsContract.deleteDocument(context.contentResolver, uri)
+        } catch (e: Exception) {
+            // The provider may not allow deleting; the file then stays, empty or partial.
+        }
+    }
+
+    /** Runs [action]; when it fails, the half-written file at [target] is removed. */
+    private fun perform(success: DataMessage, target: Uri, onBusy: () -> Unit = {}, action: suspend () -> Unit) {
+        if (_state.value.busy) {
+            onBusy()
+            return
+        }
         _state.value = DataUiState(busy = true)
         viewModelScope.launch {
             val message = try {
@@ -122,9 +178,15 @@ class BackupViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                deleteQuietly(target)
                 DataMessage.FAILED
             }
             _state.value = DataUiState(message = message)
         }
+    }
+
+    private companion object {
+        const val MAGIC_BYTES = 4
+        const val BUFFER_BYTES = 64 * 1024
     }
 }

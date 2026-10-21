@@ -2,16 +2,20 @@
 <resources>
     <string name="data_intro">Files are made on the phone and saved where you choose. The app does not send them anywhere.</string>
     <string name="data_report">PDF report for the doctor</string>
-    <string name="data_report_file">twilight-cycle-report-%1$s.pdf</string>
+    <string name="data_report_note">The PDF is not encrypted: it holds a cycle summary, frequent symptoms and medications. Notes, sex and weight are left out.</string>
     <string name="data_csv">Table of logs (CSV)</string>
     <string name="data_csv_note">CSV is not encrypted: any app with access to the file can read it.</string>
+    <string name="data_csv_title">What to include in the table</string>
+    <string name="data_csv_include_notes">Notes</string>
+    <string name="data_csv_include_sex">Sex entries</string>
+    <string name="data_csv_go">Choose where to save</string>
     <string name="data_backup">Encrypted backup</string>
     <string name="data_restore">Restore from a backup</string>
     <string name="data_backup_note">The backup is encrypted with your password (AES-256). It cannot be opened without the password, and the password cannot be recovered.</string>
     <string name="data_backup_password_title">Backup password</string>
     <string name="data_backup_password_text">Remember it: the backup cannot be restored without it.</string>
     <string name="data_restore_title">Restore from the backup?</string>
-    <string name="data_restore_text">All current logs, cycles, medications and the pet are replaced with the backup\'s data.</string>
+    <string name="data_restore_text">All current logs, cycles and medications are replaced with the backup\'s data. The pet is replaced if the backup has one.</string>
     <string name="data_restore_go">Restore</string>
     <string name="data_restore_password_title">Backup password</string>
     <string name="data_password">Password</string>
@@ -25,6 +29,7 @@
     <string name="data_restored">Data restored from the backup.</string>
     <string name="data_wrong_password">Wrong password, or the file is damaged.</string>
     <string name="data_not_a_backup">This is not a Twilight Cycle backup.</string>
+    <string name="data_too_large">The file is too large for a backup.</string>
     <string name="data_failed">Something went wrong. Your data is unchanged.</string>
     <string name="report_title">Twilight Cycle: cycle report</string>
     <string name="report_generated">Made on %1$s from the logs in the app</string>

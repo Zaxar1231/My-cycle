@@ -39,7 +39,15 @@ object ReportPdf {
 
     fun write(context: Context, data: ReportData, out: OutputStream) {
         val document = PdfDocument()
-        val writer = Writer(document)
+        try {
+            draw(context, data, Writer(document))
+            document.writeTo(out)
+        } finally {
+            document.close()
+        }
+    }
+
+    private fun draw(context: Context, data: ReportData, writer: Writer) {
         val dates = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault())
         val s = data.summary
         writer.title(context.getString(R.string.report_title))
@@ -85,14 +93,12 @@ object ReportPdf {
         if (active.isNotEmpty()) {
             writer.heading(context.getString(R.string.report_medications))
             active.forEach { med ->
-                writer.text(med.dosage?.takeIf { it.isNotBlank() }?.let { context.getString(R.string.report_medication_dose, med.name, it) } ?: med.name)
+                writer.wrapped(med.dosage?.takeIf { it.isNotBlank() }?.let { context.getString(R.string.report_medication_dose, med.name, it) } ?: med.name)
             }
             writer.gap()
         }
         writer.small(context.getString(R.string.report_disclaimer))
         writer.finish()
-        document.writeTo(out)
-        document.close()
     }
 
     /** Lines top to bottom, with a new page when one is full. */
@@ -109,6 +115,7 @@ object ReportPdf {
         fun title(text: String) = line(text, titlePaint, LINE * 1.6f)
         fun heading(text: String) = line(text, heading, LINE * 1.3f)
         fun text(text: String) = line(text, body, LINE)
+        fun wrapped(text: String) = wrap(text, body).forEach { line(it, body, LINE) }
         fun small(text: String) = wrap(text, smallPaint).forEach { line(it, smallPaint, LINE * 0.8f) }
         fun gap() {
             y += LINE / 2

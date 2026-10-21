@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
-    <string name="settings_placeholder">All data stays on this phone. Widgets are added from the home screen.</string>
+    <string name="settings_placeholder">Your data is stored on this phone. It leaves it only encrypted: in partner mode and in a backup you save yourself. Widgets are added from the home screen.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_security">Security</string>
     <string name="settings_customize_home">Customize home screen</string>

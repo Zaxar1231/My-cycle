@@ -25,14 +25,25 @@ import javax.inject.Singleton
 class RoomBackupRepository @Inject constructor(private val db: TwilightDatabase) : BackupRepository {
 
     override suspend fun exportEncrypted(password: CharArray): ByteArray = withContext(Dispatchers.IO) {
-        BackupCrypto.seal(BackupCodec.encode(snapshot()), password)
+        val plain = BackupCodec.encode(snapshot())
+        try {
+            BackupCrypto.seal(plain, password)
+        } finally {
+            plain.fill(0)
+        }
     }
+
+    override fun looksLikeBackup(start: ByteArray) = BackupCrypto.hasMagic(start)
 
     override suspend fun restoreEncrypted(file: ByteArray, password: CharArray): RestoreResult = withContext(Dispatchers.IO) {
         val content = when (val opened = BackupCrypto.open(file, password)) {
             BackupCrypto.Opened.NotABackup -> return@withContext RestoreResult.NOT_A_BACKUP
             BackupCrypto.Opened.WrongPassword -> return@withContext RestoreResult.WRONG_PASSWORD
-            is BackupCrypto.Opened.Plain -> BackupCodec.decode(opened.bytes) ?: return@withContext RestoreResult.NOT_A_BACKUP
+            is BackupCrypto.Opened.Plain -> try {
+                BackupCodec.decode(opened.bytes)
+            } finally {
+                opened.bytes.fill(0)
+            } ?: return@withContext RestoreResult.NOT_A_BACKUP
         }
         try {
             replaceAll(content)
@@ -45,28 +56,8 @@ class RoomBackupRepository @Inject constructor(private val db: TwilightDatabase)
         }
     }
 
-    override suspend fun exportCsv(): String = withContext(Dispatchers.IO) {
-        val logs = db.dayLogDao().all()
-        val medications = db.medicationDao().all().associate { it.id to it.name }
-        buildString {
-            appendLine(CSV_HEADER.joinToString(","))
-            logs.forEach { log ->
-                val meds = log.medicationIds.split(",").mapNotNull { it.toLongOrNull()?.let(medications::get) }.joinToString(";")
-                val cells = listOf(
-                    log.date.toString(),
-                    log.periodEvent.orEmpty(),
-                    log.flow.orEmpty(),
-                    log.moods.replace(",", ";"),
-                    log.symptoms.replace(",", ";"),
-                    log.sexActivity.orEmpty(),
-                    log.temperatureCelsius?.toString().orEmpty(),
-                    log.weightKg?.toString().orEmpty(),
-                    meds,
-                    log.note.orEmpty(),
-                )
-                appendLine(cells.joinToString(",") { csvCell(it) })
-            }
-        }
+    override suspend fun exportCsv(includeNotes: Boolean, includeSex: Boolean): String = withContext(Dispatchers.IO) {
+        BackupCsv.build(db.dayLogDao().all(), db.medicationDao().all().associate { it.id to it.name }, includeNotes, includeSex)
     }
 
     private suspend fun snapshot(): BackupContent = db.withTransaction {
@@ -99,13 +90,5 @@ class RoomBackupRepository @Inject constructor(private val db: TwilightDatabase)
             (profile ?: ProfileEntity(role = UserRole.TRACKER.name, usualCycleLength = 0, usualPeriodLength = 0, accountId = null))
                 .copy(usualCycleLength = content.usualCycleLength, usualPeriodLength = content.usualPeriodLength),
         )
-    }
-
-    /** RFC 4180: quotes around cells with commas, quotes or line breaks; quotes doubled. */
-    private fun csvCell(value: String): String =
-        if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + value.replace("\"", "\"\"") + "\"" else value
-
-    private companion object {
-        val CSV_HEADER = listOf("date", "period", "flow", "moods", "symptoms", "sex", "temperature_c", "weight_kg", "medications", "note")
     }
 }
