@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.core.domain.repository
 
+import io.github.zaxar1231.mycycle.core.domain.model.Affirmation
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.Medication
@@ -72,6 +73,13 @@ interface DataAccess {
 
     /** Deletes data that can no longer be decrypted. Only after the user explicitly agreed. */
     suspend fun resetUnreadableData()
+}
+
+/** Favourite affirmations, stored on the device. */
+interface AffirmationRepository {
+    fun observeFavorites(): Flow<List<Affirmation>>
+    fun observeIsFavorite(text: String): Flow<Boolean>
+    suspend fun setFavorite(text: String, favorite: Boolean)
 }
 
 interface PhaseContentRepository {

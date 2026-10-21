@@ -15,8 +15,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.zaxar1231.mycycle.core.data.content.AssetPhaseContentRepository
+import io.github.zaxar1231.mycycle.core.data.content.TemplateAffirmationGenerator
 import io.github.zaxar1231.mycycle.core.data.db.Migrations
 import io.github.zaxar1231.mycycle.core.data.db.TwilightDatabase
+import io.github.zaxar1231.mycycle.core.data.repository.RoomAffirmationRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomCycleRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomDayLogRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomMedicationRepository
@@ -25,6 +27,7 @@ import io.github.zaxar1231.mycycle.core.data.repository.RoomTransactionRunner
 import io.github.zaxar1231.mycycle.core.data.security.DatabaseKeyProvider
 import io.github.zaxar1231.mycycle.core.data.security.EncryptedDataAccess
 import io.github.zaxar1231.mycycle.core.data.settings.DataStoreSettingsRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.AffirmationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DataAccess
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
@@ -33,6 +36,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.TransactionRunner
+import io.github.zaxar1231.mycycle.core.domain.wellness.AffirmationGenerator
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
@@ -63,6 +67,8 @@ object DatabaseModule {
 
     @Provides fun profileDao(db: TwilightDatabase) = db.profileDao()
 
+    @Provides fun affirmationDao(db: TwilightDatabase) = db.affirmationDao()
+
     @Provides
     @Singleton
     fun provideSettingsStore(@ApplicationContext context: Context): DataStore<Preferences> =
@@ -89,4 +95,8 @@ interface RepositoryModule {
     @Binds fun dataAccess(impl: EncryptedDataAccess): DataAccess
 
     @Binds fun phaseContent(impl: AssetPhaseContentRepository): PhaseContentRepository
+
+    @Binds fun affirmations(impl: RoomAffirmationRepository): AffirmationRepository
+
+    @Binds fun affirmationGenerator(impl: TemplateAffirmationGenerator): AffirmationGenerator
 }
