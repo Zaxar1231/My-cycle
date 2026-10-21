@@ -44,7 +44,7 @@ class AccountViewModel @Inject constructor(
             _form.value = AccountFormState(notice = AccountNotice.BAD_EMAIL)
             return
         }
-        run { accounts.resetPassword(email) }
+        perform { accounts.resetPassword(email) }
     }
 
     fun signOut() {
@@ -64,10 +64,10 @@ class AccountViewModel @Inject constructor(
             _form.value = AccountFormState(notice = notice)
             return
         }
-        run(action)
+        perform(action)
     }
 
-    private fun run(action: suspend () -> AuthResult) {
+    private fun perform(action: suspend () -> AuthResult) {
         if (_form.value.busy) return
         _form.update { it.copy(busy = true, result = null, notice = null) }
         viewModelScope.launch {
