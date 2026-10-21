@@ -19,6 +19,9 @@ interface CycleDao {
     @Query("SELECT * FROM cycles ORDER BY start_date")
     suspend fun all(): List<CycleEntity>
 
+    @Query("DELETE FROM cycles")
+    suspend fun deleteAll()
+
     @Query("SELECT id FROM cycles WHERE start_date = :startDate")
     suspend fun idForStartDate(startDate: LocalDate): Long?
 
@@ -61,6 +64,12 @@ interface DayLogDao {
 
     @Query("DELETE FROM day_logs WHERE date = :date")
     suspend fun delete(date: LocalDate)
+
+    @Query("SELECT * FROM day_logs ORDER BY date")
+    suspend fun all(): List<DayLogEntity>
+
+    @Query("DELETE FROM day_logs")
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -73,6 +82,12 @@ interface MedicationDao {
 
     @Delete
     suspend fun delete(medication: MedicationEntity)
+
+    @Query("SELECT * FROM medications ORDER BY name")
+    suspend fun all(): List<MedicationEntity>
+
+    @Query("DELETE FROM medications")
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -89,6 +104,10 @@ interface PetDao {
 
     @Update
     suspend fun update(pet: PetEntity)
+
+    /** Restoring a backup replaces the pet. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun replace(pet: PetEntity)
 }
 
 @Dao
@@ -98,6 +117,9 @@ interface ProfileDao {
 
     @Upsert
     suspend fun upsert(profile: ProfileEntity)
+
+    @Query("SELECT * FROM profile WHERE id = ${ProfileEntity.SINGLE_PROFILE_ID}")
+    suspend fun get(): ProfileEntity?
 }
 
 @Dao
@@ -113,6 +135,12 @@ interface AffirmationDao {
 
     @Query("DELETE FROM affirmations WHERE text = :text")
     suspend fun deleteByText(text: String)
+
+    @Query("SELECT text FROM affirmations WHERE is_favorite = 1 ORDER BY id")
+    suspend fun favoriteTexts(): List<String>
+
+    @Query("DELETE FROM affirmations")
+    suspend fun deleteAll()
 
     /** Favourites are unique by text: adding one twice keeps a single row. */
     @Transaction

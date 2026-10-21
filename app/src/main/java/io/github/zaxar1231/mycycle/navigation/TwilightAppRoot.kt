@@ -42,6 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import io.github.zaxar1231.mycycle.R
 import io.github.zaxar1231.mycycle.feature.account.AccountSection
 import io.github.zaxar1231.mycycle.feature.account.AccountStepContent
+import io.github.zaxar1231.mycycle.feature.backup.DataSection
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
 import io.github.zaxar1231.mycycle.feature.calendar.HomeCustomizerRoute
 import io.github.zaxar1231.mycycle.feature.calendar.homeCustomizerScreen
@@ -146,6 +147,7 @@ fun TwilightAppRoot(
                 securitySection = { SecuritySection() },
                 accountSection = { AccountSection() },
                 remindersSection = { RemindersSection() },
+                dataSection = { DataSection() },
                 partnerSection = { PartnerSection(onOpenPartner = { navController.navigate(PartnerRoute) { launchSingleTop = true } }) },
                 updatesSection = updatesSection,
                 onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },

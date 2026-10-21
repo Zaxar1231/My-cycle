@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_intro">Файлы создаются на телефоне и сохраняются туда, куда вы выберете. Приложение их никуда не отправляет.</string>
+    <string name="data_report">PDF-отчёт для врача</string>
+    <string name="data_report_file" translatable="false">report-%1$s.pdf</string>
+    <string name="data_csv_file" translatable="false">table-%1$s.csv</string>
+    <string name="data_backup_file" translatable="false">backup-%1$s.tcbackup</string>
+    <string name="data_report_note">PDF не зашифрован: в нём сводка по циклам, частые симптомы и препараты. Заметки, секс и вес в отчёт не попадают.</string>
+    <string name="data_csv">Таблица записей (CSV)</string>
+    <string name="data_csv_note">CSV не зашифрован: его может прочитать любое приложение, у которого есть доступ к файлу.</string>
+    <string name="data_csv_title">Что включить в таблицу</string>
+    <string name="data_csv_include_notes">Заметки</string>
+    <string name="data_csv_include_sex">Отметки о сексе</string>
+    <string name="data_csv_go">Выбрать, куда сохранить</string>
+    <string name="data_backup">Зашифрованная резервная копия</string>
+    <string name="data_restore">Восстановить из копии</string>
+    <string name="data_backup_note">Копия шифруется вашим паролем (AES-256). Без пароля её не открыть, и восстановить пароль нельзя.</string>
+    <string name="data_backup_password_title">Пароль для копии</string>
+    <string name="data_backup_password_text">Запомните его: без пароля копию не восстановить.</string>
+    <string name="data_restore_title">Восстановить из копии?</string>
+    <string name="data_restore_text">Все текущие записи, циклы, препараты и аффирмации заменятся данными из копии (из аффирмаций в копии только избранные). Питомец заменится, если он есть в копии.</string>
+    <string name="data_restore_go">Восстановить</string>
+    <string name="data_restore_password_title">Пароль от копии</string>
+    <string name="data_password">Пароль</string>
+    <string name="data_password_again">Пароль ещё раз</string>
+    <string name="data_password_hint">Не короче %1$d символов</string>
+    <string name="data_ok">Готово</string>
+    <string name="data_cancel">Отмена</string>
+    <string name="data_report_saved">Отчёт сохранён.</string>
+    <string name="data_csv_saved">Таблица сохранена.</string>
+    <string name="data_backup_saved">Копия сохранена.</string>
+    <string name="data_restored">Данные восстановлены из копии.</string>
+    <string name="data_wrong_password">Неверный пароль, или файл повреждён.</string>
+    <string name="data_not_a_backup">Это не резервная копия Twilight Cycle.</string>
+    <string name="data_not_saved">Копия не сохранена: приложение перезапускалось, пока был открыт выбор файла. Попробуйте ещё раз.</string>
+    <string name="data_too_large">Файл слишком большой для резервной копии.</string>
+    <string name="data_failed">Не получилось. Данные не изменились.</string>
+    <string name="report_title">Twilight Cycle: отчёт о цикле</string>
+    <string name="report_generated">Составлен %1$s по записям в приложении</string>
+    <string name="report_summary">Сводка</string>
+    <string name="report_cycles_count">Завершённых циклов: %1$d</string>
+    <string name="report_avg_cycle">Средняя длина цикла: %1$.1f дн.</string>
+    <string name="report_avg_period">Средняя длина месячных: %1$.1f дн.</string>
+    <string name="report_usual_cycle">Обычная длина цикла (со слов пользователя): %1$d дн.</string>
+    <string name="report_usual_period">Обычная длина месячных (со слов пользователя): %1$d дн.</string>
+    <string name="report_range">Самый короткий и самый длинный цикл: %1$d и %2$d дн.</string>
+    <string name="report_regular">Длина циклов почти не меняется (обычно такой цикл называют регулярным).</string>
+    <string name="report_irregular">Длина циклов заметно меняется.</string>
+    <string name="report_regularity_unknown">Для оценки регулярности пока мало данных.</string>
+    <string name="report_history">Циклы (последние 12)</string>
+    <string name="report_col_start">Начало</string>
+    <string name="report_col_length">Длина, дн.</string>
+    <string name="report_col_period">Месячные, дн.</string>
+    <string name="report_current">идёт, %1$d-й день</string>
+    <string name="report_symptoms">Частые симптомы (дней с отметкой)</string>
+    <string name="report_symptom_days">%1$s: %2$d</string>
+    <string name="report_medications">Препараты</string>
+    <string name="report_medication_dose">%1$s, %2$s</string>
+    <string name="report_disclaimer">Данные внесены пользователем вручную. Прогнозы приложения приблизительные. Отчёт не является медицинским заключением и не заменяет консультацию врача.</string>
+</resources>
