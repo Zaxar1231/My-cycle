@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
@@ -33,6 +31,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
+/**
+ * Details under the calendar: the fertile window, the chance to conceive, links to the phase and
+ * hormone screens and how reliable the prediction is. The headline numbers live in [CycleHero].
+ */
 @Composable
 fun TodayCard(
     prediction: CyclePrediction,
@@ -42,40 +44,15 @@ fun TodayCard(
     onOpenHormones: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val hasCycles = prediction.timeline.isNotEmpty()
-    val status = prediction.today
+    val status = prediction.today ?: return
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (status == null && hasCycles) {
-                // Logged cycles start after today, for example after the device clock moved back.
-                Text(stringResource(R.string.today_cycle_in_future), style = MaterialTheme.typography.bodyMedium)
-                return@Column
-            }
-            if (status == null) {
-                Text(stringResource(R.string.today_no_data_title), style = MaterialTheme.typography.titleLarge)
-                Text(stringResource(R.string.today_no_data_text), style = MaterialTheme.typography.bodyMedium)
-                Button(onClick = onPeriodStarted) { Text(stringResource(R.string.today_period_started)) }
-                return@Column
-            }
             val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-            Text(stringResource(R.string.today_cycle_day, status.cycleDay), style = MaterialTheme.typography.headlineMedium)
-            Text(stringResource(status.phase.labelRes()), style = MaterialTheme.typography.titleMedium)
-
-            val periodLine = when {
-                status.daysLate > 0 -> pluralStringResource(R.plurals.today_period_late, status.daysLate, status.daysLate)
-                status.daysUntilNextPeriod == 0 -> stringResource(R.string.today_period_expected_today)
-                else -> pluralStringResource(R.plurals.today_until_period, status.daysUntilNextPeriod, status.daysUntilNextPeriod)
-            }
-            Text(periodLine, style = MaterialTheme.typography.bodyLarge)
-            val ovulationLine = if (status.daysUntilOvulation == 0) {
-                stringResource(R.string.today_ovulation_today)
-            } else {
-                pluralStringResource(R.plurals.today_until_ovulation, status.daysUntilOvulation, status.daysUntilOvulation)
-            }
-            Text(ovulationLine, style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.today_cycle_day, status.cycleDay), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(status.phase.labelRes()), style = MaterialTheme.typography.bodyLarge)
             Text(
                 stringResource(
                     R.string.today_fertile_window,
@@ -85,7 +62,8 @@ fun TodayCard(
                 style = MaterialTheme.typography.bodyMedium,
             )
             // While the period is due or late the ovulation of this cycle is unknown, so no estimate.
-            if (status.daysLate == 0 && status.daysUntilNextPeriod > 0) {
+            val due = status.daysLate > 0 || status.daysUntilNextPeriod == 0
+            if (!due) {
                 PregnancyChanceModel.on(today, prediction)?.let { chance ->
                     ExpandablePills(listOf(chancePill(chance)))
                     Text(stringResource(R.string.chance_not_contraception), style = MaterialTheme.typography.labelMedium)
@@ -102,19 +80,18 @@ fun TodayCard(
             prediction.source.noteRes()?.let {
                 Text(stringResource(it), style = MaterialTheme.typography.bodySmall)
             }
+            // Early starts are common, so the button is there on every day outside the period.
             if (status.phase != CyclePhase.MENSTRUAL || status.daysLate > 0) {
                 OutlinedButton(onClick = onPeriodStarted) { Text(stringResource(R.string.today_period_started)) }
             }
             Text(
                 stringResource(UiR.string.medical_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = DISCLAIMER_ALPHA),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
 }
-
-private const val DISCLAIMER_ALPHA = 0.7f
 
 /** "Chance to conceive · high"; opens the model estimate and the contraception warning. */
 @Composable

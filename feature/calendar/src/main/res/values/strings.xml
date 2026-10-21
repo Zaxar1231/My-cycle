@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="today_no_data_title">Отметьте начало месячных</string>
-    <string name="today_no_data_text">Прогноз появится, когда приложение узнает, когда начались последние месячные.</string>
     <string name="today_period_started">Месячные начались сегодня</string>
     <string name="today_cycle_day">День цикла %1$d</string>
-    <string name="today_period_expected_today">Месячные ожидаются сегодня</string>
-    <string name="today_ovulation_today">Овуляция ожидается сегодня</string>
     <string name="today_fertile_window">Фертильное окно: %1$s – %2$s</string>
     <string name="confidence_low">Низкая точность</string>
     <string name="confidence_medium">Средняя точность</string>
@@ -27,31 +24,6 @@
     <string name="today_ovulation_confirmed">Овуляция в этом цикле подтверждена по температуре</string>
     <string name="save_failed">Не удалось сохранить. Попробуйте ещё раз.</string>
     <string name="ok">OK</string>
-    <string name="content_tip">Совет дня</string>
-    <string name="content_symptoms">Симптомы</string>
-    <string name="content_symptoms_heading">У многих в этой фазе бывает</string>
-    <string name="content_pros">Плюсы</string>
-    <string name="content_cons">Минусы</string>
-    <string name="content_bullet">• %1$s</string>
-    <string name="content_pill_count">%1$s · %2$d</string>
-    <plurals name="today_until_period">
-        <item quantity="one">До месячных %1$d день</item>
-        <item quantity="few">До месячных %1$d дня</item>
-        <item quantity="many">До месячных %1$d дней</item>
-        <item quantity="other">До месячных %1$d дня</item>
-    </plurals>
-    <plurals name="today_period_late">
-        <item quantity="one">Задержка %1$d день</item>
-        <item quantity="few">Задержка %1$d дня</item>
-        <item quantity="many">Задержка %1$d дней</item>
-        <item quantity="other">Задержка %1$d дня</item>
-    </plurals>
-    <plurals name="today_until_ovulation">
-        <item quantity="one">До овуляции %1$d день</item>
-        <item quantity="few">До овуляции %1$d дня</item>
-        <item quantity="many">До овуляции %1$d дней</item>
-        <item quantity="other">До овуляции %1$d дня</item>
-    </plurals>
     <string name="today_open_phases">Фазы цикла</string>
     <string name="today_open_hormones">Гормоны</string>
     <string name="chance_pill">Вероятность забеременеть · %1$s</string>
@@ -60,4 +32,41 @@
     <string name="chance_high">высокая</string>
     <string name="chance_details">По модели — около %1$d%% на сегодня. Это грубая оценка по прогнозу овуляции, она не учитывает ваше здоровье и может сильно ошибаться. Это не метод контрацепции.</string>
     <string name="chance_not_contraception">Оценка шанса — не метод контрацепции.</string>
+    <string name="hero_edit_period">Изменить даты месячных</string>
+    <string name="hero_theme">Оформление</string>
+    <string name="hero_today">Сегодня</string>
+    <string name="hero_period_expected">ожидаются месячные</string>
+    <string name="hero_ovulation">овуляция по прогнозу</string>
+    <string name="hero_fertile_now">фертильное окно</string>
+    <string name="hero_cycle_day">день цикла</string>
+    <string name="hero_percent">%1$d%%</string>
+    <string name="hero_chance">вероятность забеременеть</string>
+    <string name="theme_sheet_title">Оформление</string>
+    <!-- The number is shown separately in large type, so these labels have no %d. -->
+    <plurals name="hero_until_period" tools:ignore="ImpliedQuantity">
+        <item quantity="one">день до месячных</item>
+        <item quantity="few">дня до месячных</item>
+        <item quantity="many">дней до месячных</item>
+        <item quantity="other">дня до месячных</item>
+    </plurals>
+    <string name="hero_period_day">день месячных</string>
+    <plurals name="hero_days_late" tools:ignore="ImpliedQuantity">
+        <item quantity="one">день задержки</item>
+        <item quantity="few">дня задержки</item>
+        <item quantity="many">дней задержки</item>
+        <item quantity="other">дня задержки</item>
+    </plurals>
+    <plurals name="hero_until_fertile" tools:ignore="ImpliedQuantity">
+        <item quantity="one">день до фертильности</item>
+        <item quantity="few">дня до фертильности</item>
+        <item quantity="many">дней до фертильности</item>
+        <item quantity="other">дня до фертильности</item>
+    </plurals>
+    <plurals name="hero_until_ovulation" tools:ignore="ImpliedQuantity">
+        <item quantity="one">день до овуляции</item>
+        <item quantity="few">дня до овуляции</item>
+        <item quantity="many">дней до овуляции</item>
+        <item quantity="other">дня до овуляции</item>
+    </plurals>
+    <string name="hero_period_started">Месячные начались</string>
 </resources>

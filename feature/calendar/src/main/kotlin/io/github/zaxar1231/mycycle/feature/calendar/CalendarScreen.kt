@@ -19,6 +19,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +36,9 @@ import androidx.navigation.compose.composable
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
+import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
+import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -58,7 +64,6 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val todayContent by viewModel.todayContent.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
     val language = LocalConfiguration.current.locales[0].language
     LaunchedEffect(language) { viewModel.setLanguage(language) }
@@ -78,31 +83,47 @@ fun CalendarScreen(
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
+    var showTheme by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .verticalScroll(rememberScrollState()),
     ) {
-        TodayCard(
+        CycleHero(
             prediction = prediction,
             today = state.today,
+            onEditPeriod = { onOpenDayLog(state.today) },
             onPeriodStarted = viewModel::markPeriodStartedToday,
-            onOpenPhases = onOpenPhases,
-            onOpenHormones = onOpenHormones,
+            onOpenTheme = { showTheme = true },
         )
-        todayContent?.let { PhaseContentCard(it, state.today) }
-        MonthCalendar(
-            month = state.month,
-            today = state.today,
-            prediction = prediction,
-            loggedDays = state.loggedDays,
-            onPrevious = viewModel::showPreviousMonth,
-            onNext = viewModel::showNextMonth,
-            onToday = viewModel::showToday,
-            onDayClick = viewModel::select,
-        )
+        Column(
+            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            MonthCalendar(
+                month = state.month,
+                today = state.today,
+                prediction = prediction,
+                loggedDays = state.loggedDays,
+                onPrevious = viewModel::showPreviousMonth,
+                onNext = viewModel::showNextMonth,
+                onToday = viewModel::showToday,
+                onDayClick = viewModel::select,
+            )
+            TodayCard(
+                prediction = prediction,
+                today = state.today,
+                onPeriodStarted = viewModel::markPeriodStartedToday,
+                onOpenPhases = onOpenPhases,
+                onOpenHormones = onOpenHormones,
+            )
+        }
+    }
+
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val savedTheme = theme
+    if (showTheme && savedTheme != null) {
+        ThemeSheet(savedTheme, onChange = viewModel::setTheme, onDismiss = { showTheme = false })
     }
 
     state.selectedDay?.let { day ->
@@ -159,6 +180,17 @@ private fun DayDetailsSheet(
             if (!day.isAfter(today)) {
                 Button(onClick = onLog, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.day_log_button)) }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThemeSheet(theme: ThemeSettings, onChange: (ThemeSettings) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(stringResource(R.string.theme_sheet_title), style = MaterialTheme.typography.titleLarge)
+            ThemePicker(theme, onChange)
         }
     }
 }

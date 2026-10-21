@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="today_no_data_title">Mark the start of your period</string>
-    <string name="today_no_data_text">Predictions appear once the app knows when your last period started.</string>
     <string name="today_period_started">My period started today</string>
     <string name="today_cycle_day">Cycle day %1$d</string>
-    <string name="today_period_expected_today">Period expected today</string>
-    <string name="today_ovulation_today">Ovulation expected today</string>
     <string name="today_fertile_window">Fertile window: %1$s – %2$s</string>
     <string name="confidence_low">Low accuracy</string>
     <string name="confidence_medium">Medium accuracy</string>
@@ -27,25 +24,6 @@
     <string name="today_ovulation_confirmed">Ovulation this cycle confirmed by temperature</string>
     <string name="save_failed">Could not save. Please try again.</string>
     <string name="ok">OK</string>
-    <string name="content_tip">Tip of the day</string>
-    <string name="content_symptoms">Symptoms</string>
-    <string name="content_symptoms_heading">Many people notice in this phase</string>
-    <string name="content_pros">Upsides</string>
-    <string name="content_cons">Downsides</string>
-    <string name="content_bullet">• %1$s</string>
-    <string name="content_pill_count">%1$s · %2$d</string>
-    <plurals name="today_until_period">
-        <item quantity="one">Period in %1$d day</item>
-        <item quantity="other">Period in %1$d days</item>
-    </plurals>
-    <plurals name="today_period_late">
-        <item quantity="one">%1$d day late</item>
-        <item quantity="other">%1$d days late</item>
-    </plurals>
-    <plurals name="today_until_ovulation">
-        <item quantity="one">Ovulation in %1$d day</item>
-        <item quantity="other">Ovulation in %1$d days</item>
-    </plurals>
     <string name="today_open_phases">Cycle phases</string>
     <string name="today_open_hormones">Hormones</string>
     <string name="chance_pill">Chance to conceive · %1$s</string>
@@ -54,4 +32,32 @@
     <string name="chance_high">high</string>
     <string name="chance_details">About %1$d%% today according to the model. It is a rough estimate based on the predicted ovulation; it does not account for your health and can be very wrong. This is not a contraception method.</string>
     <string name="chance_not_contraception">This estimate is not a contraception method.</string>
+    <string name="hero_edit_period">Edit period dates</string>
+    <string name="hero_theme">Appearance</string>
+    <string name="hero_today">Today</string>
+    <string name="hero_period_expected">period expected</string>
+    <string name="hero_ovulation">predicted ovulation</string>
+    <string name="hero_fertile_now">fertile window</string>
+    <string name="hero_cycle_day">cycle day</string>
+    <string name="hero_percent">%1$d%%</string>
+    <string name="hero_chance">chance to conceive</string>
+    <string name="theme_sheet_title">Appearance</string>
+    <plurals name="hero_until_period" tools:ignore="ImpliedQuantity">
+        <item quantity="one">day until period</item>
+        <item quantity="other">days until period</item>
+    </plurals>
+    <string name="hero_period_day">day of period</string>
+    <plurals name="hero_days_late" tools:ignore="ImpliedQuantity">
+        <item quantity="one">day late</item>
+        <item quantity="other">days late</item>
+    </plurals>
+    <plurals name="hero_until_fertile" tools:ignore="ImpliedQuantity">
+        <item quantity="one">day until fertile window</item>
+        <item quantity="other">days until fertile window</item>
+    </plurals>
+    <plurals name="hero_until_ovulation" tools:ignore="ImpliedQuantity">
+        <item quantity="one">day until ovulation</item>
+        <item quantity="other">days until ovulation</item>
+    </plurals>
+    <string name="hero_period_started">Period started</string>
 </resources>

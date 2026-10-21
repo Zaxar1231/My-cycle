@@ -1,4 +1,4 @@
-package io.github.zaxar1231.mycycle.feature.calendar
+package io.github.zaxar1231.mycycle.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
-import io.github.zaxar1231.mycycle.core.ui.component.ExpandablePills
-import io.github.zaxar1231.mycycle.core.ui.component.Pill
-import io.github.zaxar1231.mycycle.core.ui.component.labelRes
+import io.github.zaxar1231.mycycle.core.ui.R
 import java.time.LocalDate
 
 /**

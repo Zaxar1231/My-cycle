@@ -7,6 +7,7 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
@@ -78,12 +79,6 @@ class CalendarViewModel @Inject constructor(
 
     private val language = MutableStateFlow(Locale.getDefault().language)
 
-    /** Content for today's phase. */
-    val todayContent: StateFlow<PhaseContent?> = combine(state, language) { s, lang -> phaseOn(s, s.today)?.let { it to lang } }
-        .distinctUntilChanged()
-        .map { key -> key?.let { (phase, lang) -> loadContent(phase, lang) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
-
     /** Content for the selected day's phase, tagged with the day so the sheet never shows a stale one. */
     val selectedContent: StateFlow<DayContent?> = combine(state, language) { s, lang ->
         s.selectedDay?.let { day -> phaseOn(s, day)?.let { Triple(day, it, lang) } }
@@ -106,6 +101,23 @@ class CalendarViewModel @Inject constructor(
         } catch (e: Exception) {
             null
         }
+
+    /** Null until the saved theme is read, so the picker never starts from defaults and overwrites it. */
+    val theme: StateFlow<ThemeSettings?> = settings.settings
+        .map { it.theme }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    fun setTheme(theme: ThemeSettings) {
+        viewModelScope.launch {
+            try {
+                settings.setTheme(theme)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                saveFailed.value = true
+            }
+        }
+    }
 
     /** Follows the UI language: the ViewModel survives a per-app or system language change. */
     fun setLanguage(lang: String) {

@@ -18,10 +18,13 @@ data class UserSettings(
 enum class UserRole { TRACKER, PARTNER }
 
 data class ThemeSettings(
-    val style: ThemeStyle = ThemeStyle.MATERIAL_YOU,
+    val style: ThemeStyle = ThemeStyle.ROSE,
     val mode: ThemeMode = ThemeMode.SYSTEM,
+    /** Decorative flowers around the cycle ring on the home screen. */
+    val flowers: Boolean = true,
 )
 
-enum class ThemeStyle { MATERIAL_YOU, TWILIGHT }
+/** [ROSE] is the default look: dark background, rose accents. */
+enum class ThemeStyle { ROSE, MATERIAL_YOU, TWILIGHT }
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }

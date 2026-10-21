@@ -3,7 +3,10 @@ package io.github.zaxar1231.mycycle.feature.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
+import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.stats.ChronologyEntry
 import io.github.zaxar1231.mycycle.core.domain.stats.CycleHistoryItem
@@ -23,11 +26,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 
 data class StatsUiState(
@@ -37,6 +43,8 @@ data class StatsUiState(
     val summary: CycleSummary,
     val logs: LogStatistics,
     val chronology: List<ChronologyEntry>,
+    /** Today's phase, null without a current cycle or while the period is due. */
+    val todayPhase: CyclePhase? = null,
 )
 
 /** The cycle being edited and what went wrong with the last attempt. */
@@ -51,6 +59,7 @@ class StatsViewModel @Inject constructor(
     private val editCycle: EditCycleUseCase,
     private val deleteCycle: DeleteCycleUseCase,
     private val dateProvider: DateProvider,
+    private val phaseContent: PhaseContentRepository,
 ) : ViewModel() {
     // Refreshed on resume: the ViewModel can outlive midnight.
     private val today = MutableStateFlow(dateProvider.today())
@@ -66,11 +75,31 @@ class StatsViewModel @Inject constructor(
                 summary = calculator.summary(history),
                 logs = calculator.logs(prediction, history, logs),
                 chronology = calculator.chronology(prediction, history, logs),
+                todayPhase = prediction.today?.takeIf { it.daysLate == 0 && it.daysUntilNextPeriod > 0 }?.phase,
             )
         }
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    private val language = MutableStateFlow(Locale.getDefault().language)
+
+    /** Texts for today's phase; null if there is no phase or the content file cannot be read. */
+    val todayContent: StateFlow<PhaseContent?> = combine(state.map { it?.todayPhase }.distinctUntilChanged(), language) { phase, lang ->
+        phase?.let {
+            try {
+                phaseContent.content(it, lang)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    fun setLanguage(lang: String) {
+        language.value = lang
+    }
 
     // Kept here rather than in the UI, so an open edit dialog survives rotation.
     private val _editing = MutableStateFlow<CycleEditState?>(null)

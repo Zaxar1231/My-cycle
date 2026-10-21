@@ -1,8 +1,6 @@
 package io.github.zaxar1231.mycycle.feature.calendar
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,13 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,13 +68,24 @@ fun MonthCalendar(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onPrevious) {
-                Icon(painterResource(UiR.drawable.ic_arrow_back), stringResource(R.string.calendar_previous_month))
+                Icon(
+                    painterResource(UiR.drawable.ic_chevron_left),
+                    stringResource(R.string.calendar_previous_month),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             }
-            Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text(
+                title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+            )
             IconButton(onClick = onNext) {
                 Icon(
-                    painterResource(UiR.drawable.ic_arrow_back),
+                    painterResource(UiR.drawable.ic_chevron_left),
                     stringResource(R.string.calendar_next_month),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.rotate(HALF_TURN_DEGREES),
                 )
             }
@@ -89,7 +98,7 @@ fun MonthCalendar(
         Row {
             (0 until DAYS_IN_WEEK).forEach { i ->
                 Text(
-                    firstDayOfWeek.plus(i.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale),
+                    firstDayOfWeek.plus(i.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale).uppercase(locale),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium,
@@ -97,71 +106,118 @@ fun MonthCalendar(
                 )
             }
         }
-        val leadingBlanks = (month.atDay(1).dayOfWeek.value - firstDayOfWeek.value + DAYS_IN_WEEK) % DAYS_IN_WEEK
-        val cells = List(leadingBlanks) { null } + (1..month.lengthOfMonth()).map { month.atDay(it) }
-        cells.chunked(DAYS_IN_WEEK).forEach { week ->
-            Row {
-                week.forEach { date ->
-                    Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
-                        if (date != null) {
-                            DayCell(
-                                date = date,
-                                kind = prediction?.dayKind(date) ?: DayKind.OTHER,
-                                isToday = date == today,
-                                hasLog = date in loggedDays,
-                                colors = colors,
-                                onClick = { onDayClick(date) },
-                            )
-                        }
-                    }
+        // Whole weeks: the grid starts and ends with greyed days of the neighbouring months.
+        val leadingDays = (month.atDay(1).dayOfWeek.value - firstDayOfWeek.value + DAYS_IN_WEEK) % DAYS_IN_WEEK
+        val firstCell = month.atDay(1).minusDays(leadingDays.toLong())
+        val cellCount = (leadingDays + month.lengthOfMonth() + DAYS_IN_WEEK - 1) / DAYS_IN_WEEK * DAYS_IN_WEEK
+        val dates = List(cellCount) { firstCell.plusDays(it.toLong()) }
+        dates.chunked(DAYS_IN_WEEK).forEach { week ->
+            val kinds = week.map { date -> prediction?.dayKind(date) ?: DayKind.OTHER }
+            Row(Modifier.fillMaxWidth()) {
+                week.forEachIndexed { index, date ->
+                    val band = kinds[index].band()
+                    DayCell(
+                        date = date,
+                        kind = kinds[index],
+                        inMonth = YearMonth.from(date) == month,
+                        isToday = date == today,
+                        hasLog = date in loggedDays,
+                        // A band is drawn as one rounded bar across consecutive days of the same kind.
+                        joinStart = band != null && kinds.getOrNull(index - 1)?.band() == band,
+                        joinEnd = band != null && kinds.getOrNull(index + 1)?.band() == band,
+                        colors = colors,
+                        onClick = { onDayClick(date) },
+                        modifier = Modifier.weight(1f),
+                    )
                 }
-                repeat(DAYS_IN_WEEK - week.size) { Spacer(Modifier.weight(1f)) }
             }
         }
         CalendarLegend(colors)
     }
 }
 
+/** Days drawn as a continuous bar: the period and the fertile window (ovulation sits inside it). */
+private enum class Band { PERIOD, PREDICTED_PERIOD, FERTILE }
+
+private fun DayKind.band(): Band? = when (this) {
+    DayKind.PERIOD -> Band.PERIOD
+    DayKind.PREDICTED_PERIOD -> Band.PREDICTED_PERIOD
+    DayKind.FERTILE, DayKind.OVULATION -> Band.FERTILE
+    DayKind.LUTEAL, DayKind.OTHER -> null
+}
+
 @Composable
-private fun DayCell(date: LocalDate, kind: DayKind, isToday: Boolean, hasLog: Boolean, colors: CycleColors, onClick: () -> Unit) {
-    val (background, content) = when (kind) {
-        DayKind.PERIOD -> colors.period to colors.onPeriod
-        DayKind.FERTILE -> colors.fertile to colors.onFertile
-        DayKind.OVULATION -> colors.ovulation to colors.onOvulation
-        DayKind.LUTEAL -> colors.luteal.copy(alpha = LUTEAL_ALPHA) to MaterialTheme.colorScheme.onSurface
-        DayKind.PREDICTED_PERIOD, DayKind.OTHER -> Color.Transparent to MaterialTheme.colorScheme.onSurface
-    }
-    val border = when {
-        kind == DayKind.PREDICTED_PERIOD -> BorderStroke(2.dp, colors.period)
-        isToday -> BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        else -> null
+private fun DayCell(
+    date: LocalDate,
+    kind: DayKind,
+    inMonth: Boolean,
+    isToday: Boolean,
+    hasLog: Boolean,
+    joinStart: Boolean,
+    joinEnd: Boolean,
+    colors: CycleColors,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bandColor = when (kind.band()) {
+        Band.PERIOD -> colors.period
+        Band.PREDICTED_PERIOD -> colors.predictedPeriod
+        Band.FERTILE -> colors.fertile
+        null -> Color.Transparent
+    }.let { if (inMonth) it else it.copy(alpha = it.alpha * OUTSIDE_ALPHA) }
+    val bandShape = RoundedCornerShape(
+        topStartPercent = if (joinStart) 0 else HALF_PERCENT,
+        bottomStartPercent = if (joinStart) 0 else HALF_PERCENT,
+        topEndPercent = if (joinEnd) 0 else HALF_PERCENT,
+        bottomEndPercent = if (joinEnd) 0 else HALF_PERCENT,
+    )
+    // Today and ovulation get a solid circle on top of the bar.
+    val (circle, textColor) = when {
+        isToday -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+        kind == DayKind.OVULATION -> colors.ovulation to colors.onOvulation
+        !inMonth -> Color.Transparent to MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = OUTSIDE_ALPHA)
+        // Neighbouring months stay grey even on a band; today and ovulation above keep their circle.
+        kind.band() == Band.PERIOD -> Color.Transparent to colors.onPeriod
+        kind.band() == Band.FERTILE -> Color.Transparent to colors.onFertile
+        else -> Color.Transparent to MaterialTheme.colorScheme.onSurface
     }
     val description = stringResource(kind.labelRes())
     Box(
-        Modifier
-            .fillMaxWidth()
+        modifier
             .aspectRatio(1f)
-            .clip(CircleShape)
-            .background(background)
-            .then(if (border != null) Modifier.border(border, CircleShape) else Modifier)
             .clickable(onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            date.dayOfMonth.toString(),
-            color = content,
-            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-            style = MaterialTheme.typography.bodyMedium,
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(BAND_HEIGHT)
+                .background(bandColor, bandShape),
         )
+        Box(
+            Modifier
+                .fillMaxHeight(BAND_HEIGHT)
+                .aspectRatio(1f)
+                .clip(CircleShape)
+                .background(circle),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                date.dayOfMonth.toString(),
+                color = textColor,
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
         if (hasLog) {
             Box(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = (-4).dp)
+                    .offset(y = (-2).dp)
                     .size(4.dp)
                     .clip(CircleShape)
-                    .background(content),
+                    .background(MaterialTheme.colorScheme.primary),
             )
         }
     }
@@ -172,10 +228,9 @@ private fun DayCell(date: LocalDate, kind: DayKind, isToday: Boolean, hasLog: Bo
 private fun CalendarLegend(colors: CycleColors) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         LegendItem(DayKind.PERIOD, Modifier.background(colors.period))
-        LegendItem(DayKind.PREDICTED_PERIOD, Modifier.border(2.dp, colors.period, CircleShape))
+        LegendItem(DayKind.PREDICTED_PERIOD, Modifier.background(colors.predictedPeriod))
         LegendItem(DayKind.FERTILE, Modifier.background(colors.fertile))
         LegendItem(DayKind.OVULATION, Modifier.background(colors.ovulation))
-        LegendItem(DayKind.LUTEAL, Modifier.background(colors.luteal.copy(alpha = LUTEAL_ALPHA)))
     }
 }
 
@@ -198,5 +253,7 @@ fun DayKind.labelRes() = when (this) {
 
 private const val DAYS_IN_WEEK = 7
 private const val HALF_TURN_DEGREES = 180f
-private const val LUTEAL_ALPHA = 0.6f
+private const val HALF_PERCENT = 50
+private const val BAND_HEIGHT = 0.78f
+private const val OUTSIDE_ALPHA = 0.5f
 

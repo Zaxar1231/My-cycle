@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="theme_style">Стиль</string>
+    <string name="theme_style_rose">Роза</string>
+    <string name="theme_flowers">Цветы на главном экране</string>
     <string name="theme_style_material_you">Material You</string>
     <string name="theme_style_twilight">Сумерки</string>
     <string name="theme_material_you_unsupported">Цвета из обоев доступны на Android 12 и новее, на этом устройстве будет палитра «Сумерки».</string>
@@ -42,4 +44,12 @@
     <string name="sex_none">Не было</string>
     <string name="sex_protected">Защищённый</string>
     <string name="sex_unprotected">Незащищённый</string>
+    <!-- Phase content card -->
+    <string name="content_tip">Совет дня</string>
+    <string name="content_symptoms">Симптомы</string>
+    <string name="content_symptoms_heading">У многих в этой фазе бывает</string>
+    <string name="content_pros">Плюсы</string>
+    <string name="content_cons">Минусы</string>
+    <string name="content_bullet">• %1$s</string>
+    <string name="content_pill_count">%1$s · %2$d</string>
 </resources>
