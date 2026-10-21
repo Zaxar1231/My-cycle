@@ -132,17 +132,19 @@ class BackupViewModel @Inject constructor(
         }
         _state.value = DataUiState(busy = true)
         // Not cancelled when the screen is left: a restore is one short transaction the user started.
-        viewModelScope.launch(NonCancellable) {
+        viewModelScope.launch {
             val message = try {
-                when (val file = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use(::readBackup) }) {
-                    null -> DataMessage.FAILED
-                    ReadResult.NotABackup -> DataMessage.NOT_A_BACKUP
-                    ReadResult.TooLarge -> DataMessage.TOO_LARGE
-                    is ReadResult.Bytes -> when (backups.restoreEncrypted(file.bytes, password)) {
-                        RestoreResult.RESTORED -> DataMessage.RESTORED
-                        RestoreResult.WRONG_PASSWORD -> DataMessage.WRONG_PASSWORD
-                        RestoreResult.NOT_A_BACKUP -> DataMessage.NOT_A_BACKUP
-                        RestoreResult.FAILED -> DataMessage.FAILED
+                withContext(NonCancellable + Dispatchers.IO) {
+                    when (val file = context.contentResolver.openInputStream(uri)?.use(::readBackup)) {
+                        null -> DataMessage.FAILED
+                        ReadResult.NotABackup -> DataMessage.NOT_A_BACKUP
+                        ReadResult.TooLarge -> DataMessage.TOO_LARGE
+                        is ReadResult.Bytes -> when (backups.restoreEncrypted(file.bytes, password)) {
+                            RestoreResult.RESTORED -> DataMessage.RESTORED
+                            RestoreResult.WRONG_PASSWORD -> DataMessage.WRONG_PASSWORD
+                            RestoreResult.NOT_A_BACKUP -> DataMessage.NOT_A_BACKUP
+                            RestoreResult.FAILED -> DataMessage.FAILED
+                        }
                     }
                 }
             } catch (e: CancellationException) {
@@ -213,14 +215,14 @@ class BackupViewModel @Inject constructor(
         }
         _state.value = DataUiState(busy = true)
         // Not cancelled when the screen is left, so no empty or half-written file stays behind.
-        viewModelScope.launch(NonCancellable) {
+        viewModelScope.launch {
             val message = try {
-                action()
+                withContext(NonCancellable) { action() }
                 success
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                deleteQuietly(target)
+                withContext(NonCancellable) { deleteQuietly(target) }
                 DataMessage.FAILED
             }
             _state.value = DataUiState(message = message)
