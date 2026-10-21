@@ -8,4 +8,9 @@
     <string name="theme_mode_system">Как в системе</string>
     <string name="theme_mode_light">Светлая</string>
     <string name="theme_mode_dark">Тёмная</string>
+    <string name="phase_menstrual">Менструальная фаза</string>
+    <string name="phase_follicular">Фолликулярная фаза</string>
+    <string name="phase_ovulatory">Овуляторная фаза</string>
+    <string name="phase_luteal">Лютеиновая фаза</string>
+    <string name="medical_disclaimer">Прогнозы приблизительны и не являются медицинской консультацией или методом контрацепции.</string>
 </resources>

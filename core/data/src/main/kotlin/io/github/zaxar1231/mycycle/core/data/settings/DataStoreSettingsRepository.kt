@@ -76,6 +76,7 @@ class DataStoreSettingsRepository @Inject constructor(
             accountId = profile?.accountId,
             usualCycleLength = profile?.usualCycleLength ?: defaults.usualCycleLength,
             usualPeriodLength = profile?.usualPeriodLength ?: defaults.usualPeriodLength,
+            usualLengthsEstimated = prefs[USUAL_LENGTHS_ESTIMATED] ?: defaults.usualLengthsEstimated,
             theme = ThemeSettings(
                 style = enumOrNull<ThemeStyle>(prefs[THEME_STYLE]) ?: defaults.theme.style,
                 mode = enumOrNull<ThemeMode>(prefs[THEME_MODE]) ?: defaults.theme.mode,
@@ -89,6 +90,7 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[THEME_STYLE] = theme.style.name
         prefs[THEME_MODE] = theme.mode.name
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
+        prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
     }
 
     private companion object {
@@ -96,5 +98,6 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME_STYLE = stringPreferencesKey("theme_style")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
+        val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
     }
 }

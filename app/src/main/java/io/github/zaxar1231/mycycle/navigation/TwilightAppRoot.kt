@@ -34,6 +34,7 @@ import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
 import io.github.zaxar1231.mycycle.feature.settings.settingsScreen
 import io.github.zaxar1231.mycycle.feature.stats.statsScreen
+import java.time.LocalDate
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
 @Composable
@@ -55,7 +56,7 @@ fun TwilightAppRoot(
         bottomBar = {
             if (showBars) {
                 BottomBar(navController, destination, onAddLog = {
-                    navController.navigate(DayLogRoute) { launchSingleTop = true }
+                    navController.navigate(DayLogRoute(LocalDate.now())) { launchSingleTop = true }
                 })
             }
         },
@@ -70,7 +71,7 @@ fun TwilightAppRoot(
             onboardingScreen(onFinished = {
                 navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } }
             })
-            calendarScreen()
+            calendarScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             statsScreen()
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)

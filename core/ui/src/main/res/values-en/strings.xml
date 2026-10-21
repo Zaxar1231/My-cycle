@@ -8,4 +8,9 @@
     <string name="theme_mode_system">System</string>
     <string name="theme_mode_light">Light</string>
     <string name="theme_mode_dark">Dark</string>
+    <string name="phase_menstrual">Menstrual phase</string>
+    <string name="phase_follicular">Follicular phase</string>
+    <string name="phase_ovulatory">Ovulatory phase</string>
+    <string name="phase_luteal">Luteal phase</string>
+    <string name="medical_disclaimer">Predictions are estimates, not medical advice or a method of contraception.</string>
 </resources>

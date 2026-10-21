@@ -16,7 +16,7 @@
 Пакет `io.github.zaxar1231.mycycle` и `applicationId` не меняются (иначе обновления не встанут поверх).
 
 - `:app` — `TwilightApp` (Hilt), `MainActivity`, навигация (`navigation/`: нижний бар `Календарь · Статистика · [+] · Питомец · Настройки`), Hilt-модули (`di/`)
-- `:core:domain` — чистый Kotlin без Android: модели (`Cycle`, `DayLog`, `Medication`, `Pet`, `PartnerLink`, `UserSettings`…), интерфейсы репозиториев, use case'ы, `CycleConstants` (все числа цикла — только здесь), `DateProvider`, позже `CyclePredictor`. Тесты JUnit 5
+- `:core:domain` — чистый Kotlin без Android: модели (`Cycle`, `DayLog`, `Medication`, `Pet`, `PartnerLink`, `UserSettings`…), интерфейсы репозиториев, use case'ы, `CycleConstants` (все числа цикла — только здесь), `DateProvider`, `CyclePredictor` (вся логика прогнозов — только здесь, любое изменение — с тестами в `CyclePredictorTest`). Тесты JUnit 5
 - `:core:ui` — тема `TwilightTheme` (Material You по умолчанию), `CycleColors` (цвета фаз берутся из темы, не хардкодятся), общие компоненты и иконки
 - `:core:update` — самообновление из GitHub Releases (`UpdateChecker`, `UpdateInstaller`, `UpdateWorker`, `Version`, UI карточки и диалога)
 - `:core:data` — Room, зашифрованный SQLCipher (пароль БД случайный, сам зашифрован ключом из Android Keystore, лежит в no-backup), DataStore для настроек, реализации репозиториев. Любое изменение схемы — новая `version` и миграция в `Migrations`, без destructive fallback

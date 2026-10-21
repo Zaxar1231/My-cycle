@@ -23,4 +23,21 @@ object CycleConstants {
 
     /** Below this many completed cycles the onboarding values are used instead of history. */
     const val MIN_CYCLES_FOR_HISTORY = 2
+
+    /** Days around ovulation (on each side) that count as the ovulatory phase. */
+    const val OVULATORY_PHASE_HALF_WIDTH = 1
+
+    /** How many future periods are drawn in the calendar. */
+    const val PREDICTED_FUTURE_CYCLES = 3
+
+    /** Basal body temperature: baseline window, length of the shift and the rise that counts. */
+    const val BBT_BASELINE_DAYS = 6
+    const val BBT_SHIFT_DAYS = 3
+    const val BBT_MIN_RISE_CELSIUS = 0.2
+    const val BBT_MAX_RISE_CELSIUS = 0.5
+
+    /** Confidence: enough stable cycles give HIGH, a moderate spread gives MEDIUM. */
+    const val HIGH_CONFIDENCE_MIN_CYCLES = 4
+    const val HIGH_CONFIDENCE_MAX_DEVIATION_DAYS = 2.0
+    const val MEDIUM_CONFIDENCE_MAX_DEVIATION_DAYS = 4.0
 }
