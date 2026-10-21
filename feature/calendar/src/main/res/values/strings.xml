@@ -113,4 +113,5 @@
     <string name="size_compact">Компактно</string>
     <string name="size_normal">Обычно</string>
     <string name="size_large">Крупно</string>
+    <string name="customize_visible">Показывать блок «%1$s»</string>
 </resources>

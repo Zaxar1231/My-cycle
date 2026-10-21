@@ -104,4 +104,5 @@
     <string name="size_compact">Compact</string>
     <string name="size_normal">Normal</string>
     <string name="size_large">Large</string>
+    <string name="customize_visible">Show the “%1$s” block</string>
 </resources>

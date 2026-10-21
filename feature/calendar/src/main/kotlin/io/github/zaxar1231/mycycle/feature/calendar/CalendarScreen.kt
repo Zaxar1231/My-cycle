@@ -117,7 +117,15 @@ fun CalendarScreen(
             .padding(bottom = AIR),
         verticalArrangement = Arrangement.spacedBy(AIR),
     ) {
-        val visible = blocks.order.filter { blocks.style(it).visible }
+        // Blocks with nothing to show yet (no current cycle) leave no empty gap.
+        val hasShape = prediction.shapeOn(state.today) != null
+        val visible = blocks.order.filter { block ->
+            blocks.style(block).visible && when (block) {
+                HomeBlock.KEY_DATES -> hasShape
+                HomeBlock.TODAY -> prediction.today != null
+                else -> true
+            }
+        }
         if (visible.isEmpty()) {
             Column(Modifier.padding(SIDE), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(stringResource(R.string.home_all_hidden), style = MaterialTheme.typography.bodyLarge)

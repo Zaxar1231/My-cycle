@@ -43,7 +43,7 @@ fun BlockCard(modifier: Modifier = Modifier, style: BlockStyle = LocalBlockStyle
     }
     // Text picks black or white against a custom fill, so any colour from the wheel stays readable.
     val textColor = when (style.look) {
-        BlockLook.FILLED -> custom?.let { if (it.luminance() > HALF) Color(0xFF1C1B1F) else Color.White } ?: scheme.onSurface
+        BlockLook.FILLED -> custom?.let { if (it.luminance() > EQUAL_CONTRAST) Color(0xFF1C1B1F) else Color.White } ?: scheme.onSurface
         BlockLook.TONAL -> if (custom != null) scheme.onSurface else scheme.onPrimaryContainer
         else -> LocalContentColor.current
     }
@@ -64,14 +64,42 @@ fun BlockCard(modifier: Modifier = Modifier, style: BlockStyle = LocalBlockStyle
         BlockSize.NORMAL -> 1f
         BlockSize.LARGE -> LARGE_TEXT
     }
+    // On a custom fill every role children read from the theme follows the text colour, so
+    // calendar numbers, chips and the disclaimer stay readable, not just plain Text.
+    val innerScheme = if (custom != null && style.look == BlockLook.FILLED) {
+        scheme.copy(
+            onSurface = textColor,
+            onSurfaceVariant = textColor.copy(alpha = VARIANT_ALPHA),
+            outline = textColor.copy(alpha = OUTLINE_ALPHA),
+            outlineVariant = textColor.copy(alpha = OUTLINE_VARIANT_ALPHA),
+            primary = textColor,
+            onPrimary = custom,
+            onPrimaryContainer = textColor,
+        )
+    } else {
+        scheme
+    }
     CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * scale)) {
-        Surface(modifier.fillMaxWidth(), shape = shape, color = container, contentColor = textColor, border = border) {
-            Box(Modifier.padding(padding)) { content() }
+        MaterialTheme(colorScheme = innerScheme, typography = MaterialTheme.typography, shapes = MaterialTheme.shapes) {
+            if (style.look == BlockLook.NONE) {
+                // No container: nothing to clip, so day circles and ripples near the corners stay whole.
+                CompositionLocalProvider(LocalContentColor provides textColor) {
+                    Box(modifier.fillMaxWidth()) { content() }
+                }
+            } else {
+                Surface(modifier.fillMaxWidth(), shape = shape, color = container, contentColor = textColor, border = border) {
+                    Box(Modifier.padding(padding)) { content() }
+                }
+            }
         }
     }
 }
 
-private const val HALF = 0.5f
+/** The luminance at which black and white text have the same contrast. */
+private const val EQUAL_CONTRAST = 0.179f
+private const val VARIANT_ALPHA = 0.75f
+private const val OUTLINE_ALPHA = 0.6f
+private const val OUTLINE_VARIANT_ALPHA = 0.3f
 private const val TONAL_ALPHA = 0.35f
 private const val GLASS_TINT = 0.3f
 private const val GLASS_DARK = 0.1f

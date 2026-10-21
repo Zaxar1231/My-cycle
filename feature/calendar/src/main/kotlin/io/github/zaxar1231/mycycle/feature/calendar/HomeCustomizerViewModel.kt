@@ -43,6 +43,18 @@ class HomeCustomizerViewModel @Inject constructor(private val settings: Settings
 
     fun move(from: Int, to: Int) = edit { it.moved(from, to) }
 
+    /** Moves by block, not by index, so fast drag events never move a neighbour by mistake. */
+    fun moveBlock(block: HomeBlock, delta: Int) = edit { layout ->
+        val from = layout.order.indexOf(block)
+        layout.moved(from, from + delta)
+    }
+
+    /** Saves at once, before the screen closes, so the home screen shows the change without a jump. */
+    fun flush() {
+        val pending = draft.value ?: return
+        viewModelScope.launch(NonCancellable) { save(pending) }
+    }
+
     fun setStyle(block: HomeBlock, style: BlockStyle) = edit { it.withStyle(block, style) }
 
     fun reset() = edit { HomeLayout.DEFAULT }
