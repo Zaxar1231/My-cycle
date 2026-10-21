@@ -29,7 +29,7 @@ object PetItems {
     fun byId(id: String): PetItem? = ALL.firstOrNull { it.id == id }
 }
 
-enum class PurchaseResult { BOUGHT, NOT_ENOUGH_COINS, LEVEL_TOO_LOW, ALREADY_OWNED }
+enum class PurchaseResult { BOUGHT, NOT_ENOUGH_COINS, LEVEL_TOO_LOW, ALREADY_OWNED, FAILED }
 
 object PetShop {
     fun check(pet: Pet, item: PetItem): PurchaseResult = when {

@@ -87,6 +87,7 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val hasPet by viewModel.hasPet.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
     val language = LocalConfiguration.current.locales[0].language
     LaunchedEffect(language) { viewModel.setLanguage(language) }
@@ -126,6 +127,7 @@ fun CalendarScreen(
             blocks.style(block).visible && when (block) {
                 HomeBlock.KEY_DATES -> hasShape
                 HomeBlock.TODAY -> prediction.today != null
+                HomeBlock.PET -> hasPet
                 else -> true
             }
         }

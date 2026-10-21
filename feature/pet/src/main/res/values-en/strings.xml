@@ -40,6 +40,7 @@
     <string name="pet_bought">Done! Your pet is wearing it.</string>
     <string name="pet_need_coins">Not enough coins yet.</string>
     <string name="pet_need_level">Unlocks at a higher level.</string>
+    <string name="pet_failed">Something went wrong. Please try again.</string>
     <string name="pet_owned">Already in the wardrobe.</string>
     <string name="pet_item_tuft">Tuft</string>
     <string name="pet_item_bangs">Bangs</string>

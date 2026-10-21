@@ -86,7 +86,7 @@ class PetViewModel @Inject constructor(
 
     fun buy(item: PetItem) {
         viewModelScope.launch {
-            _purchase.value = guarded { wardrobe.buy(item) } ?: PurchaseResult.NOT_ENOUGH_COINS
+            _purchase.value = guarded { wardrobe.buy(item) } ?: PurchaseResult.FAILED
             tryOn.value = null
         }
     }

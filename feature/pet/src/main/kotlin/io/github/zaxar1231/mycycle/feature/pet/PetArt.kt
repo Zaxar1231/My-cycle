@@ -74,11 +74,22 @@ object DrawnPetRenderer : PetRenderer {
             Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
         }
         val clock = petClock(onScreen && !still)
+        // Without animations the hearts stand still for a moment, then one more redraw clears them.
+        var heartsGone by remember { mutableLongStateOf(0L) }
+        if (still) {
+            LaunchedEffect(look.pettedAt) {
+                delay(HEARTS_MILLIS)
+                heartsGone = look.pettedAt
+            }
+        }
         Spacer(
             modifier
                 .onGloballyPositioned { onScreen = it.boundsInWindow().height > 0f }
                 .semantics { contentDescription = description }
-                .drawBehind { drawPet(look, clock.longValue, hearts = !still) },
+                .drawBehind {
+                    val frozen = if (still) look.pettedAt != heartsGone else null
+                    drawPet(look, clock.longValue, frozenHearts = frozen)
+                },
         )
     }
 }
@@ -112,7 +123,8 @@ private fun coatOf(type: PetType) = when (type) {
     PetType.PENGUIN -> Coat(Color(0xFF2F3B5C), Color(0xFFFDFBF7), Color(0xFFF2A33A), Color(0xFF2F3B5C))
 }
 
-private fun DrawScope.drawPet(look: PetLook, millis: Long, hearts: Boolean) {
+/** [frozenHearts]: null animates the hearts, true shows them still, false hides them. */
+private fun DrawScope.drawPet(look: PetLook, millis: Long, frozenHearts: Boolean?) {
     val s = size.minDimension
     val left = (size.width - s) / 2
     val top = (size.height - s) / 2
@@ -143,7 +155,11 @@ private fun DrawScope.drawPet(look: PetLook, millis: Long, hearts: Boolean) {
         if (sleepy) drawZs(s, millis)
         if (look.mood == PetMood.HAPPY) drawSparkles(s, millis)
     }
-    if (hearts) drawHearts(look.pettedAt, s, left, top)
+    when (frozenHearts) {
+        null -> drawHearts(look.pettedAt, s, left, top, still = false)
+        true -> drawHearts(look.pettedAt, s, left, top, still = true)
+        false -> Unit
+    }
 }
 
 private fun DrawScope.drawTail(type: PetType, coat: Coat, s: Float, sway: Float) {
@@ -465,9 +481,9 @@ private fun DrawScope.drawSparkles(s: Float, millis: Long) {
 }
 
 /** Hearts float up for a moment after a stroke. */
-private fun DrawScope.drawHearts(pettedAt: Long, s: Float, left: Float, top: Float) {
+private fun DrawScope.drawHearts(pettedAt: Long, s: Float, left: Float, top: Float, still: Boolean) {
     if (pettedAt == 0L) return
-    val age = android.os.SystemClock.uptimeMillis() - pettedAt
+    val age = if (still) 0L else android.os.SystemClock.uptimeMillis() - pettedAt
     if (age !in 0..HEARTS_MILLIS) return
     val t = age.toFloat() / HEARTS_MILLIS
     listOf(0.3f, 0.5f, 0.7f).forEachIndexed { i, x ->

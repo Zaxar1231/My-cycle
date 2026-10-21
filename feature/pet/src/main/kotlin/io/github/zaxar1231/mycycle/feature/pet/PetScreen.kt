@@ -24,7 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -156,9 +156,10 @@ private fun HowToEarn() {
 @Composable
 private fun Wardrobe(pet: Pet, tryOn: PetItem?, viewModel: PetViewModel) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    TabRow(selectedTabIndex = tab) {
-        Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.pet_shop)) })
-        Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.pet_wardrobe)) })
+    // Switching tabs ends a try-on, so nothing from the other tab stays on the pet.
+    PrimaryTabRow(selectedTabIndex = tab) {
+        Tab(selected = tab == 0, onClick = { tab = 0; viewModel.tryOn(null) }, text = { Text(stringResource(R.string.pet_shop)) })
+        Tab(selected = tab == 1, onClick = { tab = 1; viewModel.tryOn(null) }, text = { Text(stringResource(R.string.pet_wardrobe)) })
     }
     val items = if (tab == 0) PetItems.ALL.filter { it.id !in pet.ownedItems } else PetItems.ALL.filter { it.id in pet.ownedItems }
     if (items.isEmpty()) {
@@ -212,8 +213,8 @@ fun PetHomeCard(onOpen: () -> Unit, viewModel: PetViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pet = state.pet ?: return
     val look = viewModel.look(state) ?: return
-    BlockCard(Modifier.fillMaxWidth().clickable(onClickLabel = stringResource(R.string.pet_open), onClick = onOpen)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    BlockCard(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().clickable(onClickLabel = stringResource(R.string.pet_open), onClick = onOpen), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             PetPicture(look, stringResource(R.string.pet_description, stringResource(pet.type.nameRes()), stringResource(state.mood.textRes())), Modifier.size(HOME_PET_SIZE))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(pet.type.nameRes()), style = MaterialTheme.typography.titleMedium)
@@ -250,6 +251,7 @@ private fun PurchaseResult.messageRes() = when (this) {
     PurchaseResult.NOT_ENOUGH_COINS -> R.string.pet_need_coins
     PurchaseResult.LEVEL_TOO_LOW -> R.string.pet_need_level
     PurchaseResult.ALREADY_OWNED -> R.string.pet_owned
+    PurchaseResult.FAILED -> R.string.pet_failed
 }
 
 private fun PetItem.nameRes() = when (id) {

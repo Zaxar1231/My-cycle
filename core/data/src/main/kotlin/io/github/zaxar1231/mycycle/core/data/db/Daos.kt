@@ -80,6 +80,9 @@ interface PetDao {
     @Query("SELECT * FROM pet WHERE id = ${PetEntity.SINGLE_PET_ID}")
     fun observe(): Flow<PetEntity?>
 
+    @Query("SELECT * FROM pet WHERE id = ${PetEntity.SINGLE_PET_ID}")
+    suspend fun get(): PetEntity?
+
     /** IGNORE: a second pet never replaces the first one, and retrying onboarding is harmless. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(pet: PetEntity)

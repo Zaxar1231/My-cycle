@@ -9,7 +9,6 @@ import io.github.zaxar1231.mycycle.core.domain.pet.PurchaseResult
 import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.TransactionRunner
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
-import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -33,7 +32,7 @@ class RewardPetUseCase @Inject constructor(
 
     private suspend fun claim(rule: (Pet) -> PetReward?): PetReward? =
         transactions.inTransaction {
-            val pet = pets.observePet().first() ?: return@inTransaction null
+            val pet = pets.pet() ?: return@inTransaction null
             rule(pet)?.also { pets.update(it.pet) }
         }
 }
@@ -44,14 +43,14 @@ class PetWardrobeUseCase @Inject constructor(
     private val transactions: TransactionRunner,
 ) {
     suspend fun buy(item: PetItem): PurchaseResult = transactions.inTransaction {
-        val pet = pets.observePet().first() ?: return@inTransaction PurchaseResult.NOT_ENOUGH_COINS
+        val pet = pets.pet() ?: return@inTransaction PurchaseResult.FAILED
         val result = PetShop.check(pet, item)
         if (result == PurchaseResult.BOUGHT) pets.update(PetShop.buy(pet, item))
         result
     }
 
     suspend fun wear(item: PetItem, on: Boolean) = transactions.inTransaction {
-        val pet = pets.observePet().first() ?: return@inTransaction
+        val pet = pets.pet() ?: return@inTransaction
         pets.update(if (on) PetShop.wear(pet, item) else PetShop.takeOff(pet, item))
     }
 }
