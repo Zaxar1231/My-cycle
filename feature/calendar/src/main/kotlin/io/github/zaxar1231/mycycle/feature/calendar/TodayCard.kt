@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -16,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.PredictionConfidence
@@ -45,11 +44,8 @@ fun TodayCard(
     modifier: Modifier = Modifier,
 ) {
     val status = prediction.today ?: return
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    BlockCard(modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
             Text(stringResource(R.string.today_cycle_day, status.cycleDay), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(status.phase.labelRes()), style = MaterialTheme.typography.bodyLarge)

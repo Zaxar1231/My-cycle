@@ -40,6 +40,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.zaxar1231.mycycle.R
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
+import io.github.zaxar1231.mycycle.feature.calendar.HomeCustomizerRoute
+import io.github.zaxar1231.mycycle.feature.calendar.homeCustomizerScreen
 import io.github.zaxar1231.mycycle.feature.calendar.calendarScreen
 import io.github.zaxar1231.mycycle.feature.daylog.DayLogRoute
 import io.github.zaxar1231.mycycle.feature.daylog.MedicationsRoute
@@ -101,6 +103,7 @@ fun TwilightAppRoot(
                 onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } },
                 onOpenPhases = { navController.navigate(PhasesRoute) { launchSingleTop = true } },
                 onOpenHormones = { navController.navigate(HormonesRoute) { launchSingleTop = true } },
+                onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },
                 homeExtras = {
                     AffirmationCard(
                         onOpenBreathing = { navController.navigate(BreathingRoute) { launchSingleTop = true } },
@@ -109,10 +112,16 @@ fun TwilightAppRoot(
                 },
             )
             insightsScreens(onBack = { navController.navigateUp() })
+            homeCustomizerScreen(onBack = { navController.navigateUp() })
             wellnessScreens(onBack = { navController.navigateUp() })
             statsScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             petScreen()
-            settingsScreen(appearanceSection = appearanceSection, securitySection = { SecuritySection() }, updatesSection = updatesSection)
+            settingsScreen(
+                appearanceSection = appearanceSection,
+                securitySection = { SecuritySection() },
+                updatesSection = updatesSection,
+                onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },
+            )
             dayLogScreen(
                 onBack = { navController.navigateUp() },
                 onManageMedications = { navController.navigate(MedicationsRoute) { launchSingleTop = true } },

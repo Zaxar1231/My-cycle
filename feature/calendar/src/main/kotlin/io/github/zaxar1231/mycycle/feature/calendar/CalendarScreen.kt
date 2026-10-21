@@ -1,5 +1,10 @@
 package io.github.zaxar1231.mycycle.feature.calendar
 
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.CompositionLocalProvider
+import io.github.zaxar1231.mycycle.core.domain.model.HomeBlock
+import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
+import io.github.zaxar1231.mycycle.core.ui.component.LocalBlockStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,10 +59,17 @@ fun NavGraphBuilder.calendarScreen(
     onOpenDayLog: (LocalDate) -> Unit,
     onOpenPhases: () -> Unit,
     onOpenHormones: () -> Unit,
+    onCustomizeHome: () -> Unit,
     homeExtras: @Composable () -> Unit = {},
 ) {
     composable<CalendarRoute> {
-        CalendarScreen(onOpenDayLog = onOpenDayLog, onOpenPhases = onOpenPhases, onOpenHormones = onOpenHormones, homeExtras = homeExtras)
+        CalendarScreen(
+            onOpenDayLog = onOpenDayLog,
+            onOpenPhases = onOpenPhases,
+            onOpenHormones = onOpenHormones,
+            onCustomizeHome = onCustomizeHome,
+            homeExtras = homeExtras,
+        )
     }
 }
 
@@ -66,6 +78,7 @@ fun CalendarScreen(
     onOpenDayLog: (LocalDate) -> Unit,
     onOpenPhases: () -> Unit,
     onOpenHormones: () -> Unit,
+    onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
     homeExtras: @Composable () -> Unit = {},
     viewModel: CalendarViewModel = hiltViewModel(),
@@ -92,50 +105,79 @@ fun CalendarScreen(
     }
     var showTheme by rememberSaveable { mutableStateOf(false) }
     val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val layout by viewModel.layout.collectAsStateWithLifecycle()
+    // Drawn once the saved style and layout are known, so nothing switches after a moment.
+    val saved = theme
+    val blocks = layout
+    if (saved == null || blocks == null) return
     Column(
         modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = AIR),
+        verticalArrangement = Arrangement.spacedBy(AIR),
     ) {
-        // Drawn once the saved style is known, so the picture does not switch after a moment.
-        theme?.let { saved ->
-            CycleHero(
-                style = saved.home,
-                prediction = prediction,
-                today = state.today,
-                onEditPeriod = { onOpenDayLog(state.today) },
-                onPeriodStarted = viewModel::markPeriodStartedToday,
-                onOpenTheme = { showTheme = true },
-            )
+        val visible = blocks.order.filter { blocks.style(it).visible }
+        if (visible.isEmpty()) {
+            Column(Modifier.padding(SIDE), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(stringResource(R.string.home_all_hidden), style = MaterialTheme.typography.bodyLarge)
+                Button(onClick = onCustomizeHome) { Text(stringResource(R.string.home_customize)) }
+            }
         }
-        Column(
-            Modifier.padding(start = SIDE, end = SIDE, top = AIR, bottom = AIR),
-            verticalArrangement = Arrangement.spacedBy(AIR),
-        ) {
-            MonthCalendar(
-                month = state.month,
-                today = state.today,
-                prediction = prediction,
-                loggedDays = state.loggedDays,
-                onPrevious = viewModel::showPreviousMonth,
-                onNext = viewModel::showNextMonth,
-                onToday = viewModel::showToday,
-                onDayClick = viewModel::select,
-            )
-            TodayCard(
-                prediction = prediction,
-                today = state.today,
-                onPeriodStarted = viewModel::markPeriodStartedToday,
-                onOpenPhases = onOpenPhases,
-                onOpenHormones = onOpenHormones,
-            )
-            homeExtras()
+        visible.forEach { block ->
+            // Cards of every feature read the block style through BlockCard.
+            CompositionLocalProvider(LocalBlockStyle provides blocks.style(block)) {
+                val side = Modifier.padding(horizontal = SIDE)
+                when (block) {
+                    HomeBlock.HERO -> BlockCard {
+                        CycleHero(
+                            style = saved.home,
+                            prediction = prediction,
+                            today = state.today,
+                            onEditPeriod = { onOpenDayLog(state.today) },
+                            onPeriodStarted = viewModel::markPeriodStartedToday,
+                            onOpenTheme = { showTheme = true },
+                        )
+                    }
+                    HomeBlock.KEY_DATES -> Box(side) { KeyDatesCard(prediction, state.today) }
+                    HomeBlock.CALENDAR -> BlockCard(side) {
+                        MonthCalendar(
+                            month = state.month,
+                            today = state.today,
+                            prediction = prediction,
+                            loggedDays = state.loggedDays,
+                            onPrevious = viewModel::showPreviousMonth,
+                            onNext = viewModel::showNextMonth,
+                            onToday = viewModel::showToday,
+                            onDayClick = viewModel::select,
+                        )
+                    }
+                    HomeBlock.TODAY -> Box(side) {
+                        TodayCard(
+                            prediction = prediction,
+                            today = state.today,
+                            onPeriodStarted = viewModel::markPeriodStartedToday,
+                            onOpenPhases = onOpenPhases,
+                            onOpenHormones = onOpenHormones,
+                        )
+                    }
+                    HomeBlock.AFFIRMATION -> Box(side) { homeExtras() }
+                }
+            }
         }
     }
 
-    val savedTheme = theme
-    if (showTheme && savedTheme != null) {
-        ThemeSheet(savedTheme, onChange = viewModel::setTheme, onSeedChange = viewModel::setSeedColor, onDismiss = { showTheme = false })
+    if (showTheme) {
+        ThemeSheet(
+            saved,
+            onChange = viewModel::setTheme,
+            onSeedChange = viewModel::setSeedColor,
+            onCustomizeHome = {
+                showTheme = false
+                onCustomizeHome()
+            },
+            onDismiss = { showTheme = false },
+        )
     }
 
     state.selectedDay?.let { day ->
@@ -198,7 +240,13 @@ private fun DayDetailsSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeSheet(theme: ThemeSettings, onChange: (ThemeSettings) -> Unit, onSeedChange: (Int) -> Unit, onDismiss: () -> Unit) {
+private fun ThemeSheet(
+    theme: ThemeSettings,
+    onChange: (ThemeSettings) -> Unit,
+    onSeedChange: (Int) -> Unit,
+    onCustomizeHome: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier
@@ -208,6 +256,7 @@ private fun ThemeSheet(theme: ThemeSettings, onChange: (ThemeSettings) -> Unit, 
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(stringResource(R.string.theme_sheet_title), style = MaterialTheme.typography.titleLarge)
+            OutlinedButton(onClick = onCustomizeHome, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.home_customize)) }
             ThemePicker(theme, onChange, onSeedChange = onSeedChange)
         }
     }

@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.feature.wellness
 
+import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
@@ -8,8 +9,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,11 +42,9 @@ fun AffirmationCard(
         onPauseOrDispose {}
     }
     val context = LocalContext.current
-    Card(
-        modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // Drawn in the style the user picked for this home block.
+    BlockCard(modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.affirmation_title), style = MaterialTheme.typography.titleMedium)
             text?.let { Text(stringResource(R.string.affirmation_quote, it), style = MaterialTheme.typography.titleLarge, fontStyle = FontStyle.Italic) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

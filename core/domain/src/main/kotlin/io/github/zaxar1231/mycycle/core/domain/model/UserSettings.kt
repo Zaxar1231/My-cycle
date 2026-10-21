@@ -15,6 +15,7 @@ data class UserSettings(
     val theme: ThemeSettings = ThemeSettings(),
     val pinSuggestionDismissed: Boolean = false,
     val security: SecuritySettings = SecuritySettings(),
+    val homeLayout: HomeLayout = HomeLayout.DEFAULT,
 )
 
 /** Whether a PIN is set is known only to the PIN store; these are the options around it. */
