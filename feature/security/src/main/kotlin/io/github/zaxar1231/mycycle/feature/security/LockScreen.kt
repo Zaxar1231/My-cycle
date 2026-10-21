@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
 
 /**
  * Wraps the app and covers it while it is locked, in two layers: an opaque layer in the app's
@@ -45,7 +45,7 @@ fun AppLockGate(viewModel: AppLockViewModel, biometricUnlock: Boolean, content: 
         Box(if (locked) Modifier.clearAndSetSemantics {} else Modifier) { content() }
         if (locked) {
             // Input goes to the dialog window above, this layer only hides the content.
-            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+            Box(Modifier.fillMaxSize().background(TwilightThemeExtras.solidBackground))
             val context = LocalContext.current
             val activity = LocalActivity.current
             val biometrics = remember(biometricUnlock) { biometricUnlock && Biometrics.isAvailable(context) && Biometrics.isEnrolled() }

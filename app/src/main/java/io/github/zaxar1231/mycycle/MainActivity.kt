@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -21,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.security.AutoLock
 import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
+import io.github.zaxar1231.mycycle.core.ui.theme.LocalDarkTheme
 import io.github.zaxar1231.mycycle.core.ui.theme.TwilightTheme
 import io.github.zaxar1231.mycycle.core.update.UpdateInstaller
 import io.github.zaxar1231.mycycle.core.update.UpdateViewModel
@@ -50,6 +52,17 @@ class MainActivity : ComponentActivity() {
             val appState = main.state.collectAsStateWithLifecycle().value
             val settings = (appState as? AppState.Ready)?.settings
             TwilightTheme(settings?.theme ?: ThemeSettings()) {
+                // Status and navigation bar icons follow the app's theme, not the system's:
+                // AMOLED and Neon are dark even when the phone is in light mode.
+                val dark = LocalDarkTheme.current
+                LaunchedEffect(dark) {
+                    val bars = if (dark) {
+                        SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                    }
+                    enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+                }
                 Surface(Modifier.fillMaxSize()) {
                     if (appState is AppState.DataLost) DataLostScreen(onStartOver = main::startOver)
                     if (settings != null) {

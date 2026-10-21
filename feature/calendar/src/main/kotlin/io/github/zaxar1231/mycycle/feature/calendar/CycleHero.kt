@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +42,7 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.insights.PregnancyChanceModel
 import io.github.zaxar1231.mycycle.core.ui.component.FlowerBackdrop
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
+import io.github.zaxar1231.mycycle.core.ui.theme.LocalDarkTheme
 import io.github.zaxar1231.mycycle.core.ui.theme.LocalShowFlowers
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -72,7 +72,7 @@ internal fun RingHero(
         if (LocalShowFlowers.current) {
             FlowerBackdrop(
                 colors = listOf(MaterialTheme.colorScheme.primary, CORAL, MAGENTA, MaterialTheme.colorScheme.secondary),
-                dark = MaterialTheme.colorScheme.background.luminance() < HALF,
+                dark = LocalDarkTheme.current,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -247,6 +247,5 @@ private const val PAGER_SHARE = 0.46f
 private val DOT_SIZE = 8.dp
 private val PALETTE_SIZE = 56.dp
 private const val PALETTE_ALPHA = 0.6f
-private const val HALF = 0.5f
 private val CORAL = Color(0xFFE07A5F)
 private val MAGENTA = Color(0xFFB0558F)

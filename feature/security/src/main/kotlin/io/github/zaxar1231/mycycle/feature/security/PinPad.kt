@@ -1,5 +1,15 @@
 package io.github.zaxar1231.mycycle.feature.security
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
+import io.github.zaxar1231.mycycle.core.ui.theme.GlassBackdrop
+import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +25,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,7 +59,14 @@ internal fun PinScreen(
     onBiometric: (() -> Unit)? = null,
     bottom: @Composable () -> Unit = {},
 ) {
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    val style = TwilightThemeExtras.style
+    Box(Modifier.fillMaxSize()) {
+        // Opaque in every style: nothing of the app may show through the lock screen.
+        if (style == ThemeStyle.LIQUID_GLASS) {
+            GlassBackdrop(MaterialTheme.colorScheme, TwilightThemeExtras.solidBackground)
+        } else {
+            Box(Modifier.fillMaxSize().background(TwilightThemeExtras.solidBackground))
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -83,7 +99,7 @@ private fun PinDots(entered: Int) {
                 Modifier
                     .size(DOT_SIZE)
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .background(if (filled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background, CircleShape),
+                    .background(if (filled) MaterialTheme.colorScheme.primary else Color.Transparent, CircleShape),
             )
         }
     }
@@ -113,10 +129,54 @@ private fun Keypad(enabled: Boolean, onDigit: (Char) -> Unit, onBackspace: () ->
     }
 }
 
+/** Keys follow the theme: glass panes, glowing neon rings, inked paper squares or tonal circles. */
 @Composable
 private fun DigitKey(digit: Char, enabled: Boolean, onDigit: (Char) -> Unit) {
-    FilledTonalButton(onClick = { onDigit(digit) }, enabled = enabled, shape = CircleShape, modifier = Modifier.size(KEY_SIZE)) {
-        Text(digit.toString(), style = MaterialTheme.typography.headlineSmall)
+    val label: @Composable () -> Unit = { Text(digit.toString(), style = MaterialTheme.typography.headlineSmall) }
+    val onClick = { onDigit(digit) }
+    val scheme = MaterialTheme.colorScheme
+    when (TwilightThemeExtras.style) {
+        ThemeStyle.LIQUID_GLASS -> OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            shape = CircleShape,
+            border = BorderStroke(1.dp, Color.White.copy(alpha = GLASS_EDGE_ALPHA)),
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White.copy(alpha = GLASS_PANE_ALPHA), contentColor = scheme.onSurface),
+            modifier = Modifier.size(KEY_SIZE),
+            content = { label() },
+        )
+        ThemeStyle.NEON -> OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            shape = CircleShape,
+            border = BorderStroke(NEON_RING, scheme.primary),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.primary),
+            modifier = Modifier
+                .size(KEY_SIZE)
+                .drawBehind {
+                    drawCircle(Brush.radialGradient(listOf(scheme.primary.copy(alpha = NEON_GLOW_ALPHA), Color.Transparent)), size.minDimension * NEON_GLOW_SCALE)
+                },
+            content = { label() },
+        )
+        ThemeStyle.PAPER -> OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            shape = RoundedCornerShape(PAPER_CORNER),
+            border = BorderStroke(1.dp, scheme.onSurface.copy(alpha = PAPER_INK_ALPHA)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.onSurface),
+            modifier = Modifier.size(KEY_SIZE),
+            content = { label() },
+        )
+        ThemeStyle.AMOLED -> OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            shape = CircleShape,
+            border = BorderStroke(1.dp, scheme.primary.copy(alpha = AMOLED_RING_ALPHA)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.onSurface),
+            modifier = Modifier.size(KEY_SIZE),
+            content = { label() },
+        )
+        else -> FilledTonalButton(onClick = onClick, enabled = enabled, shape = CircleShape, modifier = Modifier.size(KEY_SIZE), content = { label() })
     }
 }
 
@@ -145,6 +205,14 @@ internal fun pinMessage(state: PinEntryState, onFreezeEnded: () -> Unit): String
 
 private val DOT_SIZE = 16.dp
 private val KEY_SIZE = 72.dp
+private const val GLASS_EDGE_ALPHA = 0.45f
+private const val GLASS_PANE_ALPHA = 0.16f
+private val NEON_RING = 1.5.dp
+private const val NEON_GLOW_ALPHA = 0.35f
+private const val NEON_GLOW_SCALE = 0.7f
+private val PAPER_CORNER = 14.dp
+private const val PAPER_INK_ALPHA = 0.55f
+private const val AMOLED_RING_ALPHA = 0.6f
 private const val TICK_MILLIS = 250L
 private const val MILLIS_PER_SECOND = 1_000L
 private const val SECONDS_PER_MINUTE = 60L
