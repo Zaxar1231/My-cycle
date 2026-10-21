@@ -34,7 +34,7 @@
     <string name="security_change_pin">Сменить PIN-код</string>
     <string name="security_biometric">Отпечаток или лицо</string>
     <string name="security_biometric_hint">Входить без ввода PIN</string>
-    <string name="security_biometric_unavailable">Недоступно: на устройстве нет биометрии, она не настроена, или Android ниже 10</string>
+    <string name="security_biometric_unavailable">Недоступно: на устройстве нет надёжной биометрии, она не настроена, или Android ниже 10</string>
     <string name="security_lock_after">Блокировать после сворачивания</string>
     <string name="security_lock_now">Сразу</string>
     <plurals name="security_lock_minutes">
@@ -44,7 +44,10 @@
         <item quantity="other">Через %d минуты</item>
     </plurals>
     <string name="security_hide_recents">Скрывать в недавних приложениях</string>
-    <string name="security_hide_recents_hint">Вместо содержимого — пустой экран. Снимки экрана в приложении тоже будут недоступны</string>
+    <string name="security_hide_recents_hint">Вместо содержимого — пустой экран. Снимки экрана в приложении тоже будут недоступны. На Android 13 и новее с PIN-кодом превью скрыто и без этого</string>
     <string name="security_set_pin">Установить PIN-код</string>
     <string name="security_pin_set">PIN-код установлен. Изменить или убрать его можно в настройках.</string>
+    <string name="security_biometric_invalidated">На телефоне изменились отпечатки или лица. Включите вход по биометрии заново</string>
+    <string name="security_biometric_failed">Не удалось включить: нужна блокировка экрана телефона и надёжная биометрия</string>
+    <string name="lock_erase_failed">Система не дала удалить данные. Удалите их в настройках Android: Приложения → Twilight Cycle → Хранилище → Очистить данные</string>
 </resources>

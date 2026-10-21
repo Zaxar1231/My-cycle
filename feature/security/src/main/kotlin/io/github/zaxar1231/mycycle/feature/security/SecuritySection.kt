@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,9 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
     val options = security ?: return
     val context = LocalContext.current
     val biometricsAvailable = Biometrics.isAvailable(context)
+    // Re-read when the setting changes; a new fingerprint on the phone invalidates the key.
+    val biometricsEnrolled = remember(options.biometricUnlock) { Biometrics.isEnrolled() }
+    var biometricError by rememberSaveable { mutableStateOf(false) }
     var action by rememberSaveable { mutableStateOf<PinAction?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -49,11 +53,23 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
             TextButton(onClick = { action = PinAction.CHANGE_VERIFY }) { Text(stringResource(R.string.security_change_pin)) }
             SwitchRow(
                 R.string.security_biometric,
-                if (biometricsAvailable) R.string.security_biometric_hint else R.string.security_biometric_unavailable,
-                checked = options.biometricUnlock && biometricsAvailable,
+                when {
+                    !biometricsAvailable -> R.string.security_biometric_unavailable
+                    biometricError -> R.string.security_biometric_failed
+                    options.biometricUnlock && !biometricsEnrolled -> R.string.security_biometric_invalidated
+                    else -> R.string.security_biometric_hint
+                },
+                checked = options.biometricUnlock && biometricsAvailable && biometricsEnrolled,
                 enabled = biometricsAvailable,
-                onChange = viewModel::setBiometricUnlock,
-            )
+            ) { on ->
+                biometricError = false
+                if (on) {
+                    if (Biometrics.enable()) viewModel.setBiometricUnlock(true) else biometricError = true
+                } else {
+                    Biometrics.disable()
+                    viewModel.setBiometricUnlock(false)
+                }
+            }
             Text(stringResource(R.string.security_lock_after), style = MaterialTheme.typography.bodyLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AutoLock.OPTIONS_MINUTES.forEach { minutes ->
@@ -88,6 +104,7 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
         PinAction.REMOVE -> PinVerifyDialog(
             viewModel::check,
             onVerified = {
+                Biometrics.disable()
                 viewModel.removePin()
                 action = null
             },

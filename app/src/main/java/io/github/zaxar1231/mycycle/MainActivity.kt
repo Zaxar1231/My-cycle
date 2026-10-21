@@ -54,6 +54,12 @@ class MainActivity : ComponentActivity() {
                     if (appState is AppState.DataLost) DataLostScreen(onStartOver = main::startOver)
                     if (settings != null) {
                         val locked = lock.locked.collectAsStateWithLifecycle().value
+                        val hasPin = lock.hasPin.collectAsStateWithLifecycle().value
+                        // With a PIN the recents preview must not show what the lock screen hides.
+                        // The snapshot is taken on leaving, before the app locks, so it is turned off.
+                        LaunchedEffect(hasPin) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(!hasPin)
+                        }
                         val hideInRecents = settings.security.hideInRecents
                         LaunchedEffect(hideInRecents) {
                             if (hideInRecents) {

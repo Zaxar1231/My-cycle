@@ -39,7 +39,7 @@ fun AppLockGate(viewModel: AppLockViewModel, biometricUnlock: Boolean) {
         onDismissRequest = { (context as? Activity)?.moveTaskToBack(true) },
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        LockScreen(viewModel, biometricUnlock && Biometrics.isAvailable(context))
+        LockScreen(viewModel, biometricUnlock && Biometrics.isAvailable(context) && Biometrics.isEnrolled())
     }
 }
 
@@ -55,7 +55,6 @@ private fun LockScreen(viewModel: AppLockViewModel, biometrics: Boolean) {
 
     val showPrompt: () -> Unit = {
         if (biometrics && prompt == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            viewModel.biometricInProgress = true
             prompt = Biometrics.authenticate(
                 context,
                 title,
@@ -66,6 +65,7 @@ private fun LockScreen(viewModel: AppLockViewModel, biometrics: Boolean) {
                     prompt = null
                 },
             )
+            viewModel.biometricInProgress = prompt != null
         }
     }
     // Opens once per lock, not again after rotation or after the user closed it.
@@ -111,6 +111,7 @@ private fun LockScreen(viewModel: AppLockViewModel, biometrics: Boolean) {
 private fun ForgotPinDialog(biometrics: Boolean, onBiometric: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var confirmErase by rememberSaveable { mutableStateOf(false) }
+    var eraseFailed by rememberSaveable { mutableStateOf(false) }
     if (!confirmErase) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -130,14 +131,18 @@ private fun ForgotPinDialog(biometrics: Boolean, onBiometric: () -> Unit, onDism
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.lock_erase_title)) },
-            text = { Text(stringResource(R.string.lock_erase_text)) },
-            confirmButton = { TextButton(onClick = { eraseAllData(context) }) { Text(stringResource(R.string.lock_erase_confirm)) } },
+            text = { Text(stringResource(if (eraseFailed) R.string.lock_erase_failed else R.string.lock_erase_text)) },
+            confirmButton = {
+                TextButton(onClick = { if (!eraseAllData(context)) eraseFailed = true }) { Text(stringResource(R.string.lock_erase_confirm)) }
+            },
             dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.lock_forgot_cancel)) } },
         )
     }
 }
 
-/** Wipes every file of the app, the PIN with it, and closes the app; the next start is a fresh install. */
-private fun eraseAllData(context: Context) {
-    context.getSystemService(ActivityManager::class.java)?.clearApplicationUserData()
-}
+/**
+ * Wipes every file and Keystore key of the app, the PIN with them, and closes the app; the next
+ * start is like a fresh install. Returns false if the system refused.
+ */
+private fun eraseAllData(context: Context): Boolean =
+    context.getSystemService(ActivityManager::class.java)?.clearApplicationUserData() == true

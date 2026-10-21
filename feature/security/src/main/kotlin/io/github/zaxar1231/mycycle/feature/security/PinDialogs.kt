@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
@@ -19,9 +18,10 @@ import kotlinx.coroutines.launch
 /** Asks for a new PIN twice; [onPinChosen] gets it once both entries match. */
 @Composable
 internal fun PinSetupDialog(onPinChosen: (String) -> Unit, onDismiss: () -> Unit) {
-    var first by rememberSaveable { mutableStateOf<String?>(null) }
-    var entered by rememberSaveable { mutableStateOf("") }
-    var mismatch by rememberSaveable { mutableStateOf(false) }
+    // Not saveable: the PIN must not end up in the saved instance state. Rotation restarts the entry.
+    var first by remember { mutableStateOf<String?>(null) }
+    var entered by remember { mutableStateOf("") }
+    var mismatch by remember { mutableStateOf(false) }
     FullScreenDialog(onDismiss) {
         PinScreen(
             title = stringResource(if (first == null) R.string.pin_setup_enter else R.string.pin_setup_confirm),

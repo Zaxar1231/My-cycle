@@ -32,7 +32,7 @@
     <string name="security_change_pin">Change PIN</string>
     <string name="security_biometric">Fingerprint or face</string>
     <string name="security_biometric_hint">Unlock without typing the PIN</string>
-    <string name="security_biometric_unavailable">Unavailable: no biometrics on this device, none set up, or Android older than 10</string>
+    <string name="security_biometric_unavailable">Unavailable: no strong biometrics on this device, none set up, or Android older than 10</string>
     <string name="security_lock_after">Lock after leaving the app</string>
     <string name="security_lock_now">Immediately</string>
     <plurals name="security_lock_minutes">
@@ -40,7 +40,10 @@
         <item quantity="other">After %d minutes</item>
     </plurals>
     <string name="security_hide_recents">Hide in recent apps</string>
-    <string name="security_hide_recents_hint">Shows a blank preview. Screenshots inside the app are blocked too</string>
+    <string name="security_hide_recents_hint">Shows a blank preview. Screenshots inside the app are blocked too. On Android 13 and later the preview is hidden anyway while a PIN is set</string>
     <string name="security_set_pin">Set a PIN</string>
     <string name="security_pin_set">PIN is set. You can change or remove it in settings.</string>
+    <string name="security_biometric_invalidated">Fingerprints or faces on the phone changed. Turn biometric unlock on again</string>
+    <string name="security_biometric_failed">Could not turn on: the phone needs a screen lock and strong biometrics</string>
+    <string name="lock_erase_failed">The system did not allow erasing the data. Clear it in Android settings: Apps → Twilight Cycle → Storage → Clear data</string>
 </resources>

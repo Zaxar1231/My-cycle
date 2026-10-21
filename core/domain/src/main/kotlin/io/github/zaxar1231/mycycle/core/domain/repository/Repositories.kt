@@ -11,6 +11,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import io.github.zaxar1231.mycycle.core.domain.security.PinCheck
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
@@ -81,7 +82,8 @@ interface DataAccess {
  * so the PIN cannot be brute-forced from copied files.
  */
 interface PinRepository {
-    val hasPin: Flow<Boolean>
+    /** Read synchronously at start-up, so the very first frame is already locked. */
+    val hasPin: StateFlow<Boolean>
     suspend fun setPin(pin: String)
     suspend fun check(pin: String): PinCheck
 

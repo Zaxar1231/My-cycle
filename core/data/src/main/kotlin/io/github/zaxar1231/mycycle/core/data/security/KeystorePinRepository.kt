@@ -1,10 +1,13 @@
 package io.github.zaxar1231.mycycle.core.data.security
 
 import android.content.Context
+import android.os.SystemClock
+import android.provider.Settings
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.core.util.AtomicFile
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -14,7 +17,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.PinRepository
 import io.github.zaxar1231.mycycle.core.domain.security.PinCheck
 import io.github.zaxar1231.mycycle.core.domain.security.PinPolicy
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -36,17 +39,19 @@ import javax.inject.Singleton
  * no-backup storage. A four-digit PIN is easy to guess offline from a plain hash; with a
  * Keystore key every guess has to go through this device, where wrong attempts freeze input.
  * The failure counter lives in DataStore, so restarting the app does not reset it.
+ * Plain DataStore is fine here: it is excluded from backups like every other app file.
  */
 @Singleton
 class KeystorePinRepository @Inject constructor(
     @ApplicationContext context: Context,
     private val store: DataStore<Preferences>,
 ) : PinRepository {
+    private val contentResolver = context.contentResolver
     private val file = AtomicFile(File(context.noBackupFilesDir, PIN_FILE))
     private val lock = Mutex()
     private val present = MutableStateFlow(file.baseFile.exists())
 
-    override val hasPin: Flow<Boolean> = present.asStateFlow()
+    override val hasPin: StateFlow<Boolean> = present.asStateFlow()
 
     override suspend fun setPin(pin: String) = lock.withLock {
         require(PinPolicy.isValid(pin)) { "PIN must be ${PinPolicy.LENGTH} digits" }
@@ -67,27 +72,26 @@ class KeystorePinRepository @Inject constructor(
     }
 
     override suspend fun check(pin: String): PinCheck = lock.withLock {
-        val now = System.currentTimeMillis()
-        frozenUntil(now)?.let { return PinCheck.LockedOut(it) }
+        frozenFor()?.let { return PinCheck.LockedOut(System.currentTimeMillis() + it) }
         if (matches(pin)) {
             resetFailures()
             return PinCheck.Correct
         }
         var failures = 0
-        var until: Long? = null
+        var freeze = 0L
         store.edit { prefs ->
             failures = (prefs[FAILURES] ?: 0) + 1
             prefs[FAILURES] = failures
-            val freeze = PinPolicy.lockoutAfter(failures)
-            if (freeze > 0) {
-                until = now + freeze
-                prefs[LOCKED_UNTIL] = now + freeze
-            }
+            freeze = PinPolicy.lockoutAfter(failures)
+            if (freeze > 0) prefs.startFreeze(freeze)
         }
-        PinCheck.Wrong(attemptsLeft = (PinPolicy.FREE_ATTEMPTS - failures).coerceAtLeast(0), lockedUntilMillis = until)
+        PinCheck.Wrong(
+            attemptsLeft = (PinPolicy.FREE_ATTEMPTS - failures).coerceAtLeast(0),
+            lockedUntilMillis = if (freeze > 0) System.currentTimeMillis() + freeze else null,
+        )
     }
 
-    override suspend fun lockedUntil(): Long? = lock.withLock { frozenUntil(System.currentTimeMillis()) }
+    override suspend fun lockedUntil(): Long? = lock.withLock { frozenFor()?.let { System.currentTimeMillis() + it } }
 
     override suspend fun clear() = lock.withLock {
         withContext(Dispatchers.IO) {
@@ -98,15 +102,34 @@ class KeystorePinRepository @Inject constructor(
         present.value = false
     }
 
-    /** A freeze longer than the maximum means the clock was moved back; it is shortened to the maximum. */
-    private suspend fun frozenUntil(now: Long): Long? {
-        val until = store.data.first()[LOCKED_UNTIL] ?: return null
-        return when {
-            until <= now -> null
-            until - now > PinPolicy.MAX_LOCKOUT_MILLIS -> now + PinPolicy.MAX_LOCKOUT_MILLIS
-            else -> until
+    /**
+     * Milliseconds of freeze left. Counted on the monotonic clock, so changing the date in system
+     * settings does not end it. After a reboot that clock restarts, so the full freeze starts again.
+     */
+    private suspend fun frozenFor(): Long? {
+        val prefs = store.data.first()
+        val until = prefs[FROZEN_UNTIL_ELAPSED] ?: return null
+        if (prefs[FROZEN_BOOT] == bootCount()) {
+            val left = until - SystemClock.elapsedRealtime()
+            if (left > 0) return left
+            // Served in full: forget it, so a later reboot does not start it again.
+            store.edit {
+                it.remove(FROZEN_UNTIL_ELAPSED)
+                it.remove(FROZEN_BOOT)
+            }
+            return null
         }
+        val freeze = PinPolicy.lockoutAfter(prefs[FAILURES] ?: 0).takeIf { it > 0 } ?: return null
+        store.edit { it.startFreeze(freeze) }
+        return freeze
     }
+
+    private fun MutablePreferences.startFreeze(millis: Long) {
+        this[FROZEN_UNTIL_ELAPSED] = SystemClock.elapsedRealtime() + millis
+        this[FROZEN_BOOT] = bootCount()
+    }
+
+    private fun bootCount(): Int = Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT, 0)
 
     private suspend fun matches(pin: String): Boolean = withContext(Dispatchers.IO) {
         if (!PinPolicy.isValid(pin) || !file.baseFile.exists()) return@withContext false
@@ -122,7 +145,8 @@ class KeystorePinRepository @Inject constructor(
     private suspend fun resetFailures() {
         store.edit { prefs ->
             prefs.remove(FAILURES)
-            prefs.remove(LOCKED_UNTIL)
+            prefs.remove(FROZEN_UNTIL_ELAPSED)
+            prefs.remove(FROZEN_BOOT)
         }
     }
 
@@ -151,6 +175,7 @@ class KeystorePinRepository @Inject constructor(
         const val SALT_BYTES = 16
         const val MAC_BYTES = 32
         val FAILURES = intPreferencesKey("pin_failures")
-        val LOCKED_UNTIL = longPreferencesKey("pin_locked_until")
+        val FROZEN_UNTIL_ELAPSED = longPreferencesKey("pin_frozen_until_elapsed")
+        val FROZEN_BOOT = intPreferencesKey("pin_frozen_boot")
     }
 }

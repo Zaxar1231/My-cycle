@@ -43,7 +43,9 @@ class AppLockViewModel @Inject constructor(private val pins: PinRepository) : Vi
     val lockCount: StateFlow<Int> = _lockCount.asStateFlow()
 
     val locked: StateFlow<Boolean> = combine(pins.hasPin, lockedFlag) { hasPin, locked -> hasPin && locked }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, pins.hasPin.value)
+
+    val hasPin: StateFlow<Boolean> = pins.hasPin
 
     private var backgroundAt: Long? = null
 
