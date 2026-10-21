@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminders_channel_cycle">Cycle reminders</string>
+    <string name="reminders_channel_log">Daily log</string>
+    <string name="reminders_channel_medications">Medications</string>
+    <string name="reminders_public">A Twilight Cycle reminder</string>
+    <string name="reminders_period">Period coming soon</string>
+    <plurals name="reminders_days_before">
+        <item quantity="one">%d day before</item>
+        <item quantity="other">%d days before</item>
+    </plurals>
+    <string name="reminders_fertile">Start of the fertile window</string>
+    <string name="reminders_ovulation">Ovulation day</string>
+    <string name="reminders_log">Remind me to log the day</string>
+    <string name="reminders_medications">Medications (the time is set on each medication)</string>
+    <string name="reminders_note">Reminders are made on the phone, without the internet. If the phone hides sensitive content, the lock screen shows only a neutral line. Forecasts are approximate and not a method of contraception.</string>
+    <plurals name="reminder_period_soon_title">
+        <item quantity="one">Period expected in about %d day</item>
+        <item quantity="other">Period expected in about %d days</item>
+    </plurals>
+    <string name="reminder_period_today_title">Period expected around today</string>
+    <string name="reminder_period_text">The forecast is approximate. Mark the start in the app when it begins.</string>
+    <string name="reminder_fertile_title">The fertile window starts, by the forecast</string>
+    <string name="reminder_ovulation_title">Ovulation today, by the forecast</string>
+    <string name="reminder_forecast_text">This is an approximate forecast, not a method of contraception.</string>
+    <string name="reminder_log_title">How was your day?</string>
+    <string name="reminder_log_text">A couple of notes on how you feel make the forecasts better. And your pet gets coins.</string>
+    <string name="reminder_medication_title">Time to take a medication</string>
+    <string name="reminder_medication_dose">%1$s, %2$s</string>
+</resources>

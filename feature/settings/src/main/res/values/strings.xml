@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Настройки</string>
-    <string name="settings_placeholder">Уведомления, виджеты и экспорт появятся на следующих этапах.</string>
+    <string name="settings_placeholder">Экспорт и отчёт для врача появятся на следующем этапе. Виджеты добавляются с рабочего стола.</string>
     <string name="settings_appearance">Оформление</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_customize_home">Настроить главный экран</string>
     <string name="settings_account">Аккаунт</string>
     <string name="settings_partner">Партнёрский режим</string>
+    <string name="settings_reminders">Напоминания</string>
 </resources>

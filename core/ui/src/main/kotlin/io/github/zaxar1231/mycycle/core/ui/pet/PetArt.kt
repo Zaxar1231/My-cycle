@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.core.ui.pet
 
+import android.graphics.Bitmap
 import android.provider.Settings
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
@@ -17,9 +18,13 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -29,15 +34,17 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import io.github.zaxar1231.mycycle.core.domain.model.PetType
 import io.github.zaxar1231.mycycle.core.domain.pet.PetItem
 import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
 import io.github.zaxar1231.mycycle.core.domain.pet.PetSlot
-import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.delay
 
 /** Everything that decides how the pet looks at one moment. */
 data class PetLook(
@@ -539,3 +546,17 @@ private val BOTTLE_CAP = Color(0xFFB54459)
 private val Z_COLOR = Color(0xFF8C86C9)
 private val SPARKLE = Color(0xFFFFD66B)
 private val HEART = Color(0xFFF2557E)
+
+/** The pet as a still picture, for places without Compose such as home screen widgets. */
+fun renderPetBitmap(look: PetLook, sizePx: Int, density: Float): Bitmap {
+    val image = ImageBitmap(sizePx, sizePx)
+    CanvasDrawScope().draw(
+        Density(density),
+        LayoutDirection.Ltr,
+        Canvas(image),
+        Size(sizePx.toFloat(), sizePx.toFloat()),
+    ) {
+        drawPet(look, millis = 0L, frozenHearts = false)
+    }
+    return image.asAndroidBitmap()
+}

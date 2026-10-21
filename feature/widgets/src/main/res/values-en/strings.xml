@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_cycle_day_name">Cycle day</string>
+    <string name="widget_cycle_overview_name">Cycle: days to period and ovulation</string>
+    <string name="widget_pet_name">Pet</string>
+    <string name="widget_mood_name">Mood</string>
+    <string name="widget_cycle_day_description">Cycle day and phase</string>
+    <string name="widget_cycle_overview_description">Days to the period and ovulation, with a cycle strip</string>
+    <string name="widget_pet_widget_description">Your pet and its mood</string>
+    <string name="widget_mood_description">Log today\'s mood in one tap</string>
+    <string name="widget_locked">Twilight Cycle is protected by a PIN. Open the app.</string>
+    <string name="widget_open_app">Open Twilight Cycle</string>
+    <string name="widget_no_data">Mark the start of a period in the app</string>
+    <string name="widget_no_pet">No pet chosen yet</string>
+    <string name="widget_day">Day %1$d</string>
+    <string name="widget_period_today">Period expected around today</string>
+    <plurals name="widget_period_in">
+        <item quantity="one">Period in about %d day</item>
+        <item quantity="other">Period in about %d days</item>
+    </plurals>
+    <plurals name="widget_late">
+        <item quantity="one">%d day late</item>
+        <item quantity="other">%d days late</item>
+    </plurals>
+    <string name="widget_ovulation_today">Ovulation around today</string>
+    <plurals name="widget_ovulation_in">
+        <item quantity="one">Ovulation in about %d day</item>
+        <item quantity="other">Ovulation in about %d days</item>
+    </plurals>
+    <string name="widget_strip_description">Cycle strip with today highlighted</string>
+    <string name="widget_pet_description">Pet</string>
+    <string name="widget_pet_level">Level %1$d · coins: %2$d</string>
+    <string name="widget_mood_title">How are you today?</string>
+</resources>

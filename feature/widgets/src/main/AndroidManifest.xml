@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Home screen widgets. With an app PIN they show nothing personal. -->
+    <application>
+        <receiver
+            android:name=".CycleDayWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_cycle_day_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_cycle_day" />
+        </receiver>
+        <receiver
+            android:name=".CycleOverviewWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_cycle_overview_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_cycle_overview" />
+        </receiver>
+        <receiver
+            android:name=".PetWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_pet_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pet" />
+        </receiver>
+        <receiver
+            android:name=".MoodWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_mood_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mood" />
+        </receiver>
+    </application>
+</manifest>

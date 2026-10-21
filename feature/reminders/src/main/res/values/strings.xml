@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="reminders_channel_cycle">Напоминания о цикле</string>
+    <string name="reminders_channel_log">Запись дня</string>
+    <string name="reminders_channel_medications">Препараты</string>
+    <string name="reminders_public">Напоминание Twilight Cycle</string>
+    <string name="reminders_period">Скоро месячные</string>
+    <plurals name="reminders_days_before" tools:ignore="ImpliedQuantity">
+        <item quantity="one">за %d день</item>
+        <item quantity="few">за %d дня</item>
+        <item quantity="many">за %d дней</item>
+        <item quantity="other">за %d дня</item>
+    </plurals>
+    <string name="reminders_fertile">Начало фертильного окна</string>
+    <string name="reminders_ovulation">День овуляции</string>
+    <string name="reminders_log">Напоминать о записи дня</string>
+    <string name="reminders_medications">Приём препаратов (время задаётся у каждого препарата)</string>
+    <string name="reminders_note">Напоминания создаются на телефоне, без интернета. Если в настройках телефона скрыт конфиденциальный контент, на заблокированном экране виден только нейтральный текст. Прогнозы приблизительные и не являются методом контрацепции.</string>
+    <plurals name="reminder_period_soon_title" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Месячные примерно через %d день</item>
+        <item quantity="few">Месячные примерно через %d дня</item>
+        <item quantity="many">Месячные примерно через %d дней</item>
+        <item quantity="other">Месячные примерно через %d дня</item>
+    </plurals>
+    <string name="reminder_period_today_title">Месячные ожидаются примерно сегодня</string>
+    <string name="reminder_period_text">Прогноз приблизительный. Отметьте начало в приложении, когда они начнутся.</string>
+    <string name="reminder_fertile_title">По прогнозу начинается фертильное окно</string>
+    <string name="reminder_ovulation_title">По прогнозу сегодня овуляция</string>
+    <string name="reminder_forecast_text">Это приблизительный прогноз, а не метод контрацепции.</string>
+    <string name="reminder_log_title">Как прошёл день?</string>
+    <string name="reminder_log_text">Пара отметок о самочувствии делает прогнозы точнее. А питомец получит монетки.</string>
+    <string name="reminder_medication_title">Время принять препарат</string>
+    <string name="reminder_medication_dose">%1$s, %2$s</string>
+</resources>
