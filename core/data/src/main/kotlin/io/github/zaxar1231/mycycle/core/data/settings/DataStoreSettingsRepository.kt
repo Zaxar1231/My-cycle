@@ -12,6 +12,7 @@ import dagger.Lazy
 import io.github.zaxar1231.mycycle.core.data.db.Converters.Companion.enumOrNull
 import io.github.zaxar1231.mycycle.core.data.db.ProfileDao
 import io.github.zaxar1231.mycycle.core.data.db.ProfileEntity
+import io.github.zaxar1231.mycycle.core.domain.model.AppFont
 import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.SecuritySettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
@@ -88,6 +89,8 @@ class DataStoreSettingsRepository @Inject constructor(
                 flowers = prefs[THEME_FLOWERS] ?: defaults.theme.flowers,
                 home = enumOrNull<HomeStyle>(prefs[THEME_HOME]) ?: defaults.theme.home,
                 seedColor = prefs[THEME_SEED] ?: defaults.theme.seedColor,
+                font = enumOrNull<AppFont>(prefs[THEME_FONT]) ?: defaults.theme.font,
+                customFontFile = prefs[THEME_CUSTOM_FONT],
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
             security = SecuritySettings(
@@ -106,6 +109,8 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[THEME_FLOWERS] = theme.flowers
         prefs[THEME_HOME] = theme.home.name
         prefs[THEME_SEED] = theme.seedColor
+        prefs[THEME_FONT] = theme.font.name
+        theme.customFontFile?.let { prefs[THEME_CUSTOM_FONT] = it } ?: prefs.remove(THEME_CUSTOM_FONT)
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
         prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
         prefs[BIOMETRIC_UNLOCK] = security.biometricUnlock
@@ -120,6 +125,8 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME_FLOWERS = booleanPreferencesKey("theme_flowers")
         val THEME_HOME = stringPreferencesKey("theme_home")
         val THEME_SEED = intPreferencesKey("theme_seed")
+        val THEME_FONT = stringPreferencesKey("theme_font")
+        val THEME_CUSTOM_FONT = stringPreferencesKey("theme_custom_font")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
         val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
         val BIOMETRIC_UNLOCK = booleanPreferencesKey("biometric_unlock")

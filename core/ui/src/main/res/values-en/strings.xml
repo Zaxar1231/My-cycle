@@ -73,4 +73,15 @@
     <string name="theme_style_neon">Neon</string>
     <string name="theme_always_dark">This style is always dark.</string>
     <string name="theme_glass_no_blur">Blur needs Android 12 or newer; here the glass is drawn without it.</string>
+    <string name="theme_font">Font</string>
+    <string name="font_system">System</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_nunito">Nunito</string>
+    <string name="font_comfortaa">Comfortaa</string>
+    <string name="font_lora">Lora</string>
+    <string name="font_caveat">Caveat</string>
+    <string name="font_custom">Own file…</string>
+    <string name="font_custom_hint">A font from a file. It stays inside the app; tap “Own file…” again to change it.</string>
+    <string name="font_custom_failed">Could not open the font. .ttf and .otf files up to 15 MB work.</string>
+    <string name="font_custom_missing">The font file is missing, the system font is used for now. Pick the file again.</string>
 </resources>
