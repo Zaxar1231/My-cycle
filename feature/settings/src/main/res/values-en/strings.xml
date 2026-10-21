@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
-    <string name="settings_placeholder">Notifications, Liquid Glass styles and partner mode arrive in later stages.</string>
+    <string name="settings_placeholder">Notifications, widgets and export arrive in later stages.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_security">Security</string>
     <string name="settings_customize_home">Customize home screen</string>
     <string name="settings_account">Account</string>
+    <string name="settings_partner">Partner mode</string>
 </resources>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="partner_unavailable">Партнёрский режим в этой сборке пока не подключён.</string>
+    <string name="partner_sign_in_first">Чтобы подключить партнёра, сначала войдите в аккаунт.</string>
+    <string name="partner_intro">Пригласите близкого человека: он будет видеть фазу и прогноз месячных и получать подсказки, как поддержать. Что именно показывать, решаете вы.</string>
+    <string name="partner_e2e">Данные шифруются на телефоне. Ключ передаётся только внутри приглашения, поэтому сервер прочитать их не может.</string>
+    <string name="partner_ended">Связь с партнёром разорвана. Общие данные удалены.</string>
+    <string name="partner_invite">Пригласить партнёра</string>
+    <string name="partner_have_code">Вас пригласили?</string>
+    <string name="partner_code">Код приглашения</string>
+    <string name="partner_join">Подключиться</string>
+    <string name="partner_invite_hint">Пусть партнёр отсканирует QR-код камерой своего телефона и откроет ссылку в Twilight Cycle. Или отправьте код: его нужно вставить в настройках, в разделе «Партнёрский режим». Код действует сутки и подходит один раз.</string>
+    <string name="partner_qr_description">QR-код приглашения</string>
+    <string name="partner_key_warning">В коде ключ шифрования. Передавайте его только партнёру и не публикуйте.</string>
+    <string name="partner_share">Отправить код</string>
+    <string name="partner_share_text">Приглашение в Twilight Cycle. Открой ссылку на телефоне с приложением: %1$s\n\nИли вставь код в настройках, раздел «Партнёрский режим»: %2$s</string>
+    <string name="partner_cancel_invite">Отменить</string>
+    <string name="partner_waiting">Ждём, когда партнёр примет приглашение…</string>
+    <string name="partner_linked_owner">Партнёр подключён.</string>
+    <string name="partner_what_shared">Что видит партнёр</string>
+    <string name="partner_share_phase">Фаза и прогноз месячных</string>
+    <string name="partner_share_mood">Настроение за сегодня</string>
+    <string name="partner_share_symptoms">Симптомы за сегодня</string>
+    <string name="partner_share_fertility">Фертильное окно</string>
+    <string name="partner_never_shared">Заметки, секс, вес, температура и препараты не передаются никогда.</string>
+    <string name="partner_linked_partner">Вы видите цикл человека, который вас пригласил.</string>
+    <string name="partner_open">Открыть</string>
+    <string name="partner_notify">Напоминать перед месячными</string>
+    <string name="partner_orphaned">Связь с партнёром есть, но ключа шифрования на этом телефоне нет (например, после переустановки). Отвяжите партнёра и пригласите заново.</string>
+    <string name="partner_unlink">Отвязать</string>
+    <string name="partner_unlink_title">Отвязать партнёра?</string>
+    <string name="partner_unlink_text">Общие данные сразу удалятся с сервера, и у партнёра они пропадут. Подключиться снова можно новым приглашением.</string>
+    <string name="partner_keep">Оставить</string>
+    <string name="partner_error_code">Это не похоже на код приглашения. Проверьте, что он скопирован целиком.</string>
+    <string name="partner_error_not_found">Приглашение не найдено: оно уже использовано, отменено или истекло. Попросите новое.</string>
+    <string name="partner_error_own">Это ваше собственное приглашение. Его нужно открыть на телефоне партнёра.</string>
+    <string name="partner_error_linked">У одного из аккаунтов уже есть партнёр. Сначала отвяжите его.</string>
+    <string name="partner_error_server">Сервер ещё не настроен для партнёрского режима (см. docs/supabase.md).</string>
+    <string name="partner_error_network">Нет связи с сервером. Проверьте интернет.</string>
+    <string name="partner_error_unknown">Не получилось. Попробуйте ещё раз.</string>
+    <string name="partner_screen_title">Цикл партнёра</string>
+    <string name="partner_back">Назад</string>
+    <string name="partner_reload">Обновить</string>
+    <string name="partner_retry">Повторить</string>
+    <string name="partner_nothing_yet">Пока ничего не передано. Данные появятся, когда телефон партнёра выйдет в интернет.</string>
+    <string name="partner_day">День %1$d</string>
+    <string name="partner_phase_hidden">Фазу и прогноз партнёр не показывает.</string>
+    <string name="partner_period_today">Месячные ожидаются примерно сегодня.</string>
+    <plurals name="partner_period_in" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Месячные примерно через %d день.</item>
+        <item quantity="few">Месячные примерно через %d дня.</item>
+        <item quantity="many">Месячные примерно через %d дней.</item>
+        <item quantity="other">Месячные примерно через %d дня.</item>
+    </plurals>
+    <plurals name="partner_period_late" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Месячные ожидались %d день назад.</item>
+        <item quantity="few">Месячные ожидались %d дня назад.</item>
+        <item quantity="many">Месячные ожидались %d дней назад.</item>
+        <item quantity="other">Месячные ожидались %d дня назад.</item>
+    </plurals>
+    <plurals name="partner_updated_days_ago" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Обновлено %d день назад: фаза могла смениться.</item>
+        <item quantity="few">Обновлено %d дня назад: фаза могла смениться.</item>
+        <item quantity="many">Обновлено %d дней назад: фаза могла смениться.</item>
+        <item quantity="other">Обновлено %d дня назад: фаза могла смениться.</item>
+    </plurals>
+    <string name="partner_date_format">d MMMM</string>
+    <string name="partner_fertile_title">Фертильное окно</string>
+    <string name="partner_fertile_range">Примерно с %1$s по %2$s</string>
+    <string name="partner_fertile_today">Сегодня — в фертильном окне.</string>
+    <string name="partner_logged_on">Отмечено %1$s</string>
+    <string name="partner_mood_chip">%1$s %2$s</string>
+    <string name="partner_tips_title">Как поддержать</string>
+    <string name="partner_tip_bullet">• %1$s</string>
+    <string-array name="partner_tips_menstrual">
+        <item>Спроси, чем помочь, и просто будь рядом.</item>
+        <item>Возьми на себя часть домашних дел.</item>
+        <item>Тёплый чай, грелка или любимая еда часто бывают кстати.</item>
+        <item>Если хочется тишины и отдыха, это нормально: не принимай на свой счёт.</item>
+    </string-array>
+    <string-array name="partner_tips_follicular">
+        <item>У многих в эти дни прибавляется энергии: хорошее время для общих планов.</item>
+        <item>Предложи прогулку, спорт или попробовать вместе что-то новое.</item>
+        <item>Поддержи идеи и начинания.</item>
+    </string-array>
+    <string-array name="partner_tips_ovulatory">
+        <item>Многие в эти дни особенно общительны и уверены в себе.</item>
+        <item>Хорошее время для свидания или встречи с друзьями.</item>
+        <item>Комплименты и внимание будут кстати.</item>
+    </string-array>
+    <string-array name="partner_tips_luteal">
+        <item>Ближе к месячным возможны усталость и перепады настроения. Будь терпеливее.</item>
+        <item>Поменьше споров, побольше заботы.</item>
+        <item>Помоги разгрузить расписание и оставь время на отдых.</item>
+        <item>Уютный вечер дома и что-нибудь вкусное часто радуют.</item>
+    </string-array>
+    <string name="partner_disclaimer">Прогноз приблизительный. Это не медицинская консультация и не метод контрацепции.</string>
+    <string name="partner_home_title">Цикл партнёра</string>
+    <string name="partner_separator">" · "</string>
+</resources>

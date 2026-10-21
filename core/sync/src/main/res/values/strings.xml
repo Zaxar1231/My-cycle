@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="partner_channel">Партнёрский режим</string>
+    <string name="partner_notice_title">Скоро начнутся месячные</string>
+    <string name="partner_notice_today">Ожидаются примерно сегодня. Будь внимательнее.</string>
+    <plurals name="partner_notice_days">
+        <item quantity="one">Примерно через %d день. Будь внимательнее.</item>
+        <item quantity="few">Примерно через %d дня. Будь внимательнее.</item>
+        <item quantity="many">Примерно через %d дней. Будь внимательнее.</item>
+        <item quantity="other">Примерно через %d дня. Будь внимательнее.</item>
+    </plurals>
+</resources>
