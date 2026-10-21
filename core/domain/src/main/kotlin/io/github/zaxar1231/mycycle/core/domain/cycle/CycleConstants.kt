@@ -58,4 +58,13 @@ object CycleConstants {
     const val MIN_PATTERN_OCCURRENCES = 3
     const val PATTERN_WINDOW_DAYS = 2
     const val PATTERN_MIN_SHARE = 0.5
+
+    /**
+     * Chance of conception from intercourse on a single day, by day relative to ovulation, in percent.
+     * Rounded from Wilcox et al., NEJM 1995. Days outside the window get [CONCEPTION_CHANCE_OUTSIDE_WINDOW].
+     */
+    val CONCEPTION_CHANCE_BY_DAY: Map<Int, Int> = mapOf(-5 to 10, -4 to 16, -3 to 14, -2 to 27, -1 to 31, 0 to 33)
+    const val CONCEPTION_CHANCE_OUTSIDE_WINDOW = 1
+    const val HIGH_CHANCE_MIN_PERCENT = 20
+    const val MEDIUM_CHANCE_MIN_PERCENT = 5
 }

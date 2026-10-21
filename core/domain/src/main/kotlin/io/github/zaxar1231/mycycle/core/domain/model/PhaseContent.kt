@@ -9,6 +9,8 @@ data class PhaseContent(
     val pros: List<String>,
     val cons: List<String>,
     val tips: List<String>,
+    /** What happens in the body during this phase, for the phase analysis screen. */
+    val about: String = "",
 ) {
     /** One tip per day, rotating through the list. */
     fun tipFor(dayOfYear: Int): String? = tips.takeIf { it.isNotEmpty() }?.let { it[Math.floorMod(dayOfYear, it.size)] }

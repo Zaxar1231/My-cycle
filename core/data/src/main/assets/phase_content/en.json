@@ -1,5 +1,6 @@
 {
   "MENSTRUAL": {
+    "about": "Starts on the first day of the period. Estrogen and progesterone are low and the uterine lining sheds. It usually lasts 3–7 days.",
     "symptoms": [
       "Lower abdominal cramps",
       "Tiredness and sleepiness",
@@ -26,6 +27,7 @@
     ]
   },
   "FOLLICULAR": {
+    "about": "After the period, follicles mature in the ovaries, estrogen rises gradually and the uterine lining thickens. Many people feel more energetic.",
     "symptoms": [
       "A rise in energy",
       "Better mood",
@@ -48,6 +50,7 @@
     ]
   },
   "OVULATORY": {
+    "about": "Around mid-cycle an LH surge triggers ovulation, the release of an egg. These are the most fertile days; the egg lives for about a day.",
     "symptoms": [
       "Clear, stretchy discharge",
       "Mild one-sided abdominal pain",
@@ -71,6 +74,7 @@
     ]
   },
   "LUTEAL": {
+    "about": "After ovulation the corpus luteum produces progesterone. Without a pregnancy, hormones fall towards the end of the phase and some people notice PMS signs.",
     "symptoms": [
       "Bloating and water retention",
       "Sugar cravings",

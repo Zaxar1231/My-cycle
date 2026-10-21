@@ -52,4 +52,11 @@
         <item quantity="many">До овуляции %1$d дней</item>
         <item quantity="other">До овуляции %1$d дня</item>
     </plurals>
+    <string name="today_open_phases">Фазы цикла</string>
+    <string name="today_open_hormones">Гормоны</string>
+    <string name="chance_pill">Вероятность забеременеть · %1$s</string>
+    <string name="chance_low">низкая</string>
+    <string name="chance_medium">средняя</string>
+    <string name="chance_high">высокая</string>
+    <string name="chance_details">По модели — около %1$d%% на сегодня. Это грубая оценка по прогнозу овуляции, она не учитывает ваше здоровье и может сильно ошибаться. Это не метод контрацепции.</string>
 </resources>

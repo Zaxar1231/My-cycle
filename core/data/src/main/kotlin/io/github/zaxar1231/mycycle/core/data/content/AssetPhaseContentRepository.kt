@@ -37,6 +37,7 @@ class AssetPhaseContentRepository @Inject constructor(
                 pros = obj.strings("pros"),
                 cons = obj.strings("cons"),
                 tips = obj.strings("tips"),
+                about = obj?.optString("about").orEmpty(),
             )
         }
     }
