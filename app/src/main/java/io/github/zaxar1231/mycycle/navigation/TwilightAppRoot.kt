@@ -63,6 +63,7 @@ import io.github.zaxar1231.mycycle.feature.partner.partnerScreen
 import io.github.zaxar1231.mycycle.feature.pet.PetHomeCard
 import io.github.zaxar1231.mycycle.feature.pet.PetRoute
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
+import io.github.zaxar1231.mycycle.feature.reminders.RemindersSection
 import io.github.zaxar1231.mycycle.feature.security.PinOffer
 import io.github.zaxar1231.mycycle.feature.security.SecuritySection
 import io.github.zaxar1231.mycycle.feature.settings.SettingsRoute
@@ -144,6 +145,7 @@ fun TwilightAppRoot(
                 appearanceSection = appearanceSection,
                 securitySection = { SecuritySection() },
                 accountSection = { AccountSection() },
+                remindersSection = { RemindersSection() },
                 partnerSection = { PartnerSection(onOpenPartner = { navController.navigate(PartnerRoute) { launchSingleTop = true } }) },
                 updatesSection = updatesSection,
                 onCustomizeHome = { navController.navigate(HomeCustomizerRoute) { launchSingleTop = true } },

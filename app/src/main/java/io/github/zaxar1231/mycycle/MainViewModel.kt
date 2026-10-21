@@ -8,6 +8,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.DataAccess
 import io.github.zaxar1231.mycycle.core.domain.repository.DataAccessStatus
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
+import io.github.zaxar1231.mycycle.feature.reminders.ReminderScheduler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,7 @@ sealed interface AppState {
 class MainViewModel @Inject constructor(
     private val dataAccess: DataAccess,
     private val settingsRepository: SettingsRepository,
+    private val reminders: ReminderScheduler,
 ) : ViewModel() {
     private val _state = MutableStateFlow<AppState>(AppState.Loading)
     val state: StateFlow<AppState> = _state.asStateFlow()
@@ -61,6 +63,7 @@ class MainViewModel @Inject constructor(
                 _state.value = AppState.DataLost
                 return@launch
             }
+            reminders.start()
             settingsRepository.settings.collect { _state.value = AppState.Ready(it) }
         }
     }

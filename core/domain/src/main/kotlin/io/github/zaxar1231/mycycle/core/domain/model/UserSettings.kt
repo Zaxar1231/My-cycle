@@ -1,6 +1,7 @@
 package io.github.zaxar1231.mycycle.core.domain.model
 
 import io.github.zaxar1231.mycycle.core.domain.cycle.CycleConstants
+import io.github.zaxar1231.mycycle.core.domain.reminders.ReminderSettings
 import io.github.zaxar1231.mycycle.core.domain.security.AutoLock
 
 /** Local profile and preferences. Accounts arrive in stage 9, until then [accountId] is null. */
@@ -16,6 +17,7 @@ data class UserSettings(
     val pinSuggestionDismissed: Boolean = false,
     val security: SecuritySettings = SecuritySettings(),
     val homeLayout: HomeLayout = HomeLayout.DEFAULT,
+    val reminders: ReminderSettings = ReminderSettings(),
 )
 
 /** Whether a PIN is set is known only to the PIN store; these are the options around it. */

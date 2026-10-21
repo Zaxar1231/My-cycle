@@ -28,6 +28,7 @@ fun NavGraphBuilder.settingsScreen(
     securitySection: @Composable () -> Unit,
     accountSection: @Composable () -> Unit,
     partnerSection: @Composable () -> Unit,
+    remindersSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
 ) {
@@ -37,6 +38,7 @@ fun NavGraphBuilder.settingsScreen(
             securitySection = securitySection,
             accountSection = accountSection,
             partnerSection = partnerSection,
+            remindersSection = remindersSection,
             updatesSection = updatesSection,
             onCustomizeHome = onCustomizeHome,
         )
@@ -49,6 +51,7 @@ fun SettingsScreen(
     securitySection: @Composable () -> Unit,
     accountSection: @Composable () -> Unit,
     partnerSection: @Composable () -> Unit,
+    remindersSection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
     onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
@@ -71,6 +74,12 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
                 OutlinedButton(onClick = onCustomizeHome, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_customize_home)) }
                 appearanceSection()
+            }
+        }
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.settings_reminders), style = MaterialTheme.typography.titleMedium)
+                remindersSection()
             }
         }
         Card(Modifier.fillMaxWidth()) {

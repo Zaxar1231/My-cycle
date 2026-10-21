@@ -6,6 +6,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.HomeLayout
 import io.github.zaxar1231.mycycle.core.domain.model.Medication
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
+import io.github.zaxar1231.mycycle.core.domain.reminders.ReminderSettings
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
@@ -74,6 +75,7 @@ interface SettingsRepository {
     suspend fun setSeedColor(seed: Int) = update { it.copy(theme = it.theme.copy(seedColor = seed)) }
 
     suspend fun setHomeLayout(layout: HomeLayout) = update { it.copy(homeLayout = layout) }
+    suspend fun setReminders(reminders: ReminderSettings) = update { it.copy(reminders = reminders) }
 }
 
 enum class DataAccessStatus { READY, KEY_LOST }
