@@ -28,10 +28,12 @@
     <string name="save_failed">Не удалось сохранить. Попробуйте ещё раз.</string>
     <string name="ok">OK</string>
     <string name="content_tip">Совет дня</string>
-    <string name="content_symptoms">Возможные симптомы</string>
-    <string name="content_pros">Плюсы фазы</string>
-    <string name="content_cons">Минусы фазы</string>
+    <string name="content_symptoms">Симптомы</string>
+    <string name="content_symptoms_heading">У многих в этой фазе бывает</string>
+    <string name="content_pros">Плюсы</string>
+    <string name="content_cons">Минусы</string>
     <string name="content_bullet">• %1$s</string>
+    <string name="content_pill_count">%1$s · %2$d</string>
     <plurals name="today_until_period">
         <item quantity="one">До месячных %1$d день</item>
         <item quantity="few">До месячных %1$d дня</item>
