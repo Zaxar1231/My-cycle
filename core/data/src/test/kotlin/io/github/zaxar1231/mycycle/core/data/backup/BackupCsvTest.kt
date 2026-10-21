@@ -27,7 +27,7 @@ class BackupCsvTest {
     @Test
     fun `the file opens in a spreadsheet as text`() {
         val csv = BackupCsv.build(listOf(log), meds, includeNotes = false, includeSex = false)
-        assertTrue(csv.startsWith("﻿date,period,flow,moods,symptoms,temperature_c,weight_kg,medications\r\n"))
+        assertTrue(csv.startsWith(Char(0xFEFF) + "date,period,flow,moods,symptoms,temperature_c,weight_kg,medications\r\n"))
         assertEquals("2026-10-02,START,MEDIUM,HAPPY;TIRED,HEADACHE,36.6,,\"Iron;=HYPERLINK(\"\"x\"\")\"\r\n", csv.substringAfter("\r\n"))
     }
 

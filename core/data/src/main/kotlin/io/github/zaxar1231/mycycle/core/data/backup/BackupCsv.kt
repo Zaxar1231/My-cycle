@@ -7,7 +7,8 @@ import io.github.zaxar1231.mycycle.core.data.db.DayLogEntity
  * UTF-8 with a BOM and CRLF line ends, so Excel opens Cyrillic text correctly.
  */
 internal object BackupCsv {
-    private const val BOM = "﻿"
+    // Built from its code point: lint rejects a literal byte-order mark in the source.
+    private val BOM = Char(0xFEFF)
     private const val EOL = "\r\n"
 
     fun build(logs: List<DayLogEntity>, medicationNames: Map<Long, String>, includeNotes: Boolean, includeSex: Boolean): String {
