@@ -16,6 +16,7 @@ internal data class BackupContent(
     val created: String,
     val usualCycleLength: Int,
     val usualPeriodLength: Int,
+    val usualLengthsEstimated: Boolean = false,
     val cycles: List<CycleRow> = emptyList(),
     val logs: List<LogRow> = emptyList(),
     val medications: List<MedicationRow> = emptyList(),

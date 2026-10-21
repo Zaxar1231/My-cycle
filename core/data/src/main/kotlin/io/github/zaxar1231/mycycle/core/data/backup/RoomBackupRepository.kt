@@ -10,8 +10,10 @@ import io.github.zaxar1231.mycycle.core.domain.model.UserRole
 import io.github.zaxar1231.mycycle.core.domain.backup.BackupRepository
 import io.github.zaxar1231.mycycle.core.domain.backup.RestoreResult
 import io.github.zaxar1231.mycycle.core.domain.cycle.CycleConstants
+import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
@@ -22,10 +24,14 @@ import javax.inject.Singleton
  * not stored: they are worked out again from the restored cycles.
  */
 @Singleton
-class RoomBackupRepository @Inject constructor(private val db: TwilightDatabase) : BackupRepository {
+class RoomBackupRepository @Inject constructor(
+    private val db: TwilightDatabase,
+    private val settings: SettingsRepository,
+) : BackupRepository {
 
     override suspend fun exportEncrypted(password: CharArray): ByteArray = withContext(Dispatchers.IO) {
-        val plain = BackupCodec.encode(snapshot())
+        val estimated = settings.settings.first().usualLengthsEstimated
+        val plain = BackupCodec.encode(snapshot().copy(usualLengthsEstimated = estimated))
         try {
             BackupCrypto.seal(plain, password)
         } finally {
@@ -47,13 +53,15 @@ class RoomBackupRepository @Inject constructor(private val db: TwilightDatabase)
         }
         try {
             replaceAll(content)
-            RestoreResult.RESTORED
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             // The transaction rolled back: the data is exactly as before.
-            RestoreResult.FAILED
+            return@withContext RestoreResult.FAILED
         }
+        // Stored next to the database, so it follows the transaction; the data is restored either way.
+        runCatching { settings.update { it.copy(usualLengthsEstimated = content.usualLengthsEstimated) } }
+        RestoreResult.RESTORED
     }
 
     override suspend fun exportCsv(includeNotes: Boolean, includeSex: Boolean): String = withContext(Dispatchers.IO) {

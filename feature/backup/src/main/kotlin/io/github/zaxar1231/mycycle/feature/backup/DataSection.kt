@@ -1,5 +1,6 @@
 package io.github.zaxar1231.mycycle.feature.backup
 
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,10 +41,9 @@ import io.github.zaxar1231.mycycle.core.domain.backup.BackupRules
 @Composable
 fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    // The password is asked before the file is created and never goes into the saved instance
-    // state; if the app is restarted in between, the new empty file is removed.
+    // The password is asked before the file is created and waits in the view model, never in the
+    // saved instance state; if the app is restarted in between, the new empty file is removed.
     var askBackupPassword by remember { mutableStateOf(false) }
-    var backupPassword by remember { mutableStateOf<CharArray?>(null) }
     // Uris and choices survive a restart of the app while the file picker is open.
     var csvOptions by rememberSaveable { mutableStateOf(false) }
     var csvNotes by rememberSaveable { mutableStateOf(false) }
@@ -59,13 +59,12 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
     val csv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(CSV)) { uri ->
         uri?.let { viewModel.saveCsv(it, includeNotes = csvNotes, includeSex = csvSex) }
     }
-    val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(BINARY)) { uri ->
-        val password = backupPassword
-        backupPassword = null
-        when {
-            uri != null && password != null -> viewModel.saveBackup(uri, password)
-            uri != null -> viewModel.discard(uri)
-            else -> password?.fill('\u0000')
+    val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(BINARY), viewModel::backupPicked)
+    val launch: (() -> Unit) -> Unit = { open ->
+        try {
+            open()
+        } catch (e: ActivityNotFoundException) {
+            viewModel.pickerMissing()
         }
     }
     // Any type: file managers often label a backup as something else, and the content is checked anyway.
@@ -73,7 +72,7 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Note(stringResource(R.string.data_intro))
-        OutlinedButton(onClick = { report.launch(reportName) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { launch { report.launch(reportName) } }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_report))
         }
         Note(stringResource(R.string.data_report_note))
@@ -84,13 +83,13 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
         OutlinedButton(onClick = { askBackupPassword = true }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_backup))
         }
-        OutlinedButton(onClick = { restore.launch(arrayOf("*/*")) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { launch { restore.launch(arrayOf("*/*")) } }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.data_restore))
         }
         Note(stringResource(R.string.data_backup_note))
         if (state.busy) CircularProgressIndicator()
         state.message?.let { message ->
-            val error = message in setOf(DataMessage.WRONG_PASSWORD, DataMessage.NOT_A_BACKUP, DataMessage.TOO_LARGE, DataMessage.FAILED)
+            val error = message in setOf(DataMessage.WRONG_PASSWORD, DataMessage.NOT_A_BACKUP, DataMessage.TOO_LARGE, DataMessage.NOT_SAVED, DataMessage.FAILED)
             Text(
                 stringResource(message.textRes()),
                 color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
@@ -113,7 +112,7 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
             confirmButton = {
                 TextButton(onClick = {
                     csvOptions = false
-                    csv.launch(csvName)
+                    launch { csv.launch(csvName) }
                 }) { Text(stringResource(R.string.data_csv_go)) }
             },
             dismissButton = { TextButton(onClick = { csvOptions = false }) { Text(stringResource(R.string.data_cancel)) } },
@@ -127,9 +126,8 @@ fun DataSection(viewModel: BackupViewModel = hiltViewModel()) {
             onDismiss = { askBackupPassword = false },
             onPassword = {
                 askBackupPassword = false
-                backupPassword?.fill('\u0000')
-                backupPassword = it
-                backup.launch(backupName)
+                viewModel.holdPassword(it)
+                launch { backup.launch(backupName) }
             },
         )
     }
@@ -232,6 +230,7 @@ private fun DataMessage.textRes() = when (this) {
     DataMessage.WRONG_PASSWORD -> R.string.data_wrong_password
     DataMessage.NOT_A_BACKUP -> R.string.data_not_a_backup
     DataMessage.TOO_LARGE -> R.string.data_too_large
+    DataMessage.NOT_SAVED -> R.string.data_not_saved
     DataMessage.FAILED -> R.string.data_failed
 }
 

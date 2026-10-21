@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Настройки</string>
-    <string name="settings_placeholder">Данные хранятся на этом телефоне. Наружу они уходят только зашифрованными: в партнёрском режиме и в резервной копии, которую вы сохраните сами. Виджеты добавляются с рабочего стола.</string>
+    <string name="settings_placeholder">Данные хранятся на этом телефоне. В партнёрском режиме и в резервной копии они уходят наружу только зашифрованными. PDF-отчёт и CSV-таблица, которые вы сохраняете сами, не шифруются. Виджеты добавляются с рабочего стола.</string>
     <string name="settings_appearance">Оформление</string>
     <string name="settings_security">Безопасность</string>
     <string name="settings_customize_home">Настроить главный экран</string>

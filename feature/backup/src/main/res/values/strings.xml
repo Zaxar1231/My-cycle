@@ -18,7 +18,7 @@
     <string name="data_backup_password_title">Пароль для копии</string>
     <string name="data_backup_password_text">Запомните его: без пароля копию не восстановить.</string>
     <string name="data_restore_title">Восстановить из копии?</string>
-    <string name="data_restore_text">Все текущие записи, циклы и препараты заменятся данными из копии. Питомец заменится, если он есть в копии.</string>
+    <string name="data_restore_text">Все текущие записи, циклы, препараты и аффирмации заменятся данными из копии (из аффирмаций в копии только избранные). Питомец заменится, если он есть в копии.</string>
     <string name="data_restore_go">Восстановить</string>
     <string name="data_restore_password_title">Пароль от копии</string>
     <string name="data_password">Пароль</string>
@@ -32,6 +32,7 @@
     <string name="data_restored">Данные восстановлены из копии.</string>
     <string name="data_wrong_password">Неверный пароль, или файл повреждён.</string>
     <string name="data_not_a_backup">Это не резервная копия Twilight Cycle.</string>
+    <string name="data_not_saved">Копия не сохранена: приложение перезапускалось, пока был открыт выбор файла. Попробуйте ещё раз.</string>
     <string name="data_too_large">Файл слишком большой для резервной копии.</string>
     <string name="data_failed">Не получилось. Данные не изменились.</string>
     <string name="report_title">Twilight Cycle: отчёт о цикле</string>

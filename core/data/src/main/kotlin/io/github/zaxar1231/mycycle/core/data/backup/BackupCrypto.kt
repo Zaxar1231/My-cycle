@@ -30,7 +30,7 @@ internal object BackupCrypto {
     const val ITERATIONS = 600_000
 
     /** Far above [ITERATIONS], so a damaged header cannot make opening run for hours. */
-    private const val MAX_ITERATIONS = 10_000_000
+    private const val MAX_ITERATIONS = 3_000_000
     private val random = SecureRandom()
 
     /** Whether [start] looks like the beginning of a backup file. */

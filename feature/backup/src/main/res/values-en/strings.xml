@@ -15,7 +15,7 @@
     <string name="data_backup_password_title">Backup password</string>
     <string name="data_backup_password_text">Remember it: the backup cannot be restored without it.</string>
     <string name="data_restore_title">Restore from the backup?</string>
-    <string name="data_restore_text">All current logs, cycles and medications are replaced with the backup\'s data. The pet is replaced if the backup has one.</string>
+    <string name="data_restore_text">All current logs, cycles, medications and affirmations are replaced with the backup\'s data (the backup holds only favourite affirmations). The pet is replaced if the backup has one.</string>
     <string name="data_restore_go">Restore</string>
     <string name="data_restore_password_title">Backup password</string>
     <string name="data_password">Password</string>
@@ -29,6 +29,7 @@
     <string name="data_restored">Data restored from the backup.</string>
     <string name="data_wrong_password">Wrong password, or the file is damaged.</string>
     <string name="data_not_a_backup">This is not a Twilight Cycle backup.</string>
+    <string name="data_not_saved">The backup was not saved: the app restarted while the file picker was open. Please try again.</string>
     <string name="data_too_large">The file is too large for a backup.</string>
     <string name="data_failed">Something went wrong. Your data is unchanged.</string>
     <string name="report_title">Twilight Cycle: cycle report</string>

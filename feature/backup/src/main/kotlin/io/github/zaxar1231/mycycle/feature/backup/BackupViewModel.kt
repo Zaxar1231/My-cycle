@@ -18,6 +18,7 @@ import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +31,7 @@ import javax.inject.Inject
 
 /** The outcome of the last action, shown under the buttons. */
 enum class DataMessage {
-    REPORT_SAVED, CSV_SAVED, BACKUP_SAVED, RESTORED, WRONG_PASSWORD, NOT_A_BACKUP, TOO_LARGE, FAILED
+    REPORT_SAVED, CSV_SAVED, BACKUP_SAVED, RESTORED, WRONG_PASSWORD, NOT_A_BACKUP, TOO_LARGE, NOT_SAVED, FAILED
 }
 
 data class DataUiState(val busy: Boolean = false, val message: DataMessage? = null)
@@ -49,8 +50,44 @@ class BackupViewModel @Inject constructor(
     private val _state = MutableStateFlow(DataUiState())
     val state: StateFlow<DataUiState> = _state.asStateFlow()
 
+    /**
+     * The backup password while the file picker is open. Kept here, not in the saved state: it
+     * survives a rotation but not the app's process.
+     */
+    private var pendingPassword: CharArray? = null
+
     /** For the suggested file names. */
     fun today(): LocalDate = dates.today()
+
+    fun holdPassword(password: CharArray) {
+        pendingPassword?.fill('\u0000')
+        pendingPassword = password
+    }
+
+    /** The file picker returned: save to [uri], or remove it when the password is gone; null means cancelled. */
+    fun backupPicked(uri: Uri?) {
+        val password = pendingPassword
+        pendingPassword = null
+        when {
+            uri != null && password != null -> saveBackup(uri, password)
+            uri != null -> {
+                viewModelScope.launch { deleteQuietly(uri) }
+                _state.value = DataUiState(message = DataMessage.NOT_SAVED)
+            }
+            else -> password?.fill('\u0000')
+        }
+    }
+
+    /** No app on the phone can create or open documents. */
+    fun pickerMissing() {
+        pendingPassword?.fill('\u0000')
+        pendingPassword = null
+        _state.value = DataUiState(message = DataMessage.FAILED)
+    }
+
+    override fun onCleared() {
+        pendingPassword?.fill('\u0000')
+    }
 
     fun saveReport(uri: Uri) = perform(DataMessage.REPORT_SAVED, uri) {
         val today = dates.today()
@@ -75,7 +112,7 @@ class BackupViewModel @Inject constructor(
         write(uri) { it.write(csv.toByteArray(Charsets.UTF_8)) }
     }
 
-    fun saveBackup(uri: Uri, password: CharArray) = perform(DataMessage.BACKUP_SAVED, uri, onBusy = { password.fill('\u0000') }) {
+    private fun saveBackup(uri: Uri, password: CharArray) = perform(DataMessage.BACKUP_SAVED, uri, onBusy = { password.fill('\u0000') }) {
         val file = try {
             backups.exportEncrypted(password)
         } finally {
@@ -88,18 +125,14 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    /** The user created a file but gave no password (or the app was restarted meanwhile): remove the empty file. */
-    fun discard(uri: Uri) {
-        viewModelScope.launch { deleteQuietly(uri) }
-    }
-
     fun restore(uri: Uri, password: CharArray) {
         if (_state.value.busy) {
             password.fill('\u0000')
             return
         }
         _state.value = DataUiState(busy = true)
-        viewModelScope.launch {
+        // Not cancelled when the screen is left: a restore is one short transaction the user started.
+        viewModelScope.launch(NonCancellable) {
             val message = try {
                 when (val file = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use(::readBackup) }) {
                     null -> DataMessage.FAILED
@@ -151,8 +184,15 @@ class BackupViewModel @Inject constructor(
     }
 
     private suspend fun write(uri: Uri, block: (java.io.OutputStream) -> Unit) = withContext(Dispatchers.IO) {
-        // "wt" truncates, so a shorter file does not keep the tail of an older one.
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error("cannot open $uri")
+        // "wt" truncates, so a shorter file does not keep the tail of an older one; some providers know only "w".
+        val resolver = context.contentResolver
+        val out = try {
+            resolver.openOutputStream(uri, "wt")
+        } catch (e: IllegalArgumentException) {
+            resolver.openOutputStream(uri, "w")
+        } catch (e: java.io.FileNotFoundException) {
+            resolver.openOutputStream(uri, "w")
+        } ?: error("cannot open $uri")
         out.use(block)
     }
 
@@ -168,10 +208,12 @@ class BackupViewModel @Inject constructor(
     private fun perform(success: DataMessage, target: Uri, onBusy: () -> Unit = {}, action: suspend () -> Unit) {
         if (_state.value.busy) {
             onBusy()
+            viewModelScope.launch { deleteQuietly(target) }
             return
         }
         _state.value = DataUiState(busy = true)
-        viewModelScope.launch {
+        // Not cancelled when the screen is left, so no empty or half-written file stays behind.
+        viewModelScope.launch(NonCancellable) {
             val message = try {
                 action()
                 success
