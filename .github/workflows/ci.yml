@@ -7,7 +7,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # The ready_for_review run has its own group: a push at the same moment must not cancel the run
+  # that is allowed to automerge.
+  group: ci-${{ github.ref }}-${{ github.event.action == 'ready_for_review' }}
   cancel-in-progress: true
 
 permissions:

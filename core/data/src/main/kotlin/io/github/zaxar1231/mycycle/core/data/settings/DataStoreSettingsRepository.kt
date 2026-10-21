@@ -80,6 +80,7 @@ class DataStoreSettingsRepository @Inject constructor(
             theme = ThemeSettings(
                 style = enumOrNull<ThemeStyle>(prefs[THEME_STYLE]) ?: defaults.theme.style,
                 mode = enumOrNull<ThemeMode>(prefs[THEME_MODE]) ?: defaults.theme.mode,
+                flowers = prefs[THEME_FLOWERS] ?: defaults.theme.flowers,
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
         )
@@ -89,6 +90,7 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[ONBOARDING_COMPLETED] = onboardingCompleted
         prefs[THEME_STYLE] = theme.style.name
         prefs[THEME_MODE] = theme.mode.name
+        prefs[THEME_FLOWERS] = theme.flowers
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
         prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
     }
@@ -97,6 +99,7 @@ class DataStoreSettingsRepository @Inject constructor(
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val THEME_STYLE = stringPreferencesKey("theme_style")
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        val THEME_FLOWERS = booleanPreferencesKey("theme_flowers")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
         val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
     }

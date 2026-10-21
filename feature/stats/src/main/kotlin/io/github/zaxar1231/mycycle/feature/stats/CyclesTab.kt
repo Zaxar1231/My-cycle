@@ -25,13 +25,15 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CycleConstants
 import io.github.zaxar1231.mycycle.core.domain.stats.CycleHistoryItem
 import io.github.zaxar1231.mycycle.core.domain.stats.CycleSummary
 import io.github.zaxar1231.mycycle.core.domain.stats.Regularity
+import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.ui.component.ExpandablePills
+import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
 import io.github.zaxar1231.mycycle.core.ui.component.Pill
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-internal fun CyclesTab(state: StatsUiState, onEdit: (CycleHistoryItem) -> Unit) {
+internal fun CyclesTab(state: StatsUiState, todayContent: PhaseContent?, onEdit: (CycleHistoryItem) -> Unit) {
     if (state.history.isEmpty()) {
         EmptyText(R.string.stats_empty_cycles)
         return
@@ -42,6 +44,7 @@ internal fun CyclesTab(state: StatsUiState, onEdit: (CycleHistoryItem) -> Unit) 
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        if (todayContent != null) item(key = "phase") { PhaseContentCard(todayContent, state.today) }
         item(key = "summary") { SummaryCard(state.summary, format) }
         item(key = "history") { Text(stringResource(R.string.stats_history), style = MaterialTheme.typography.titleMedium) }
         items(state.history, key = { it.cycle.id }) { item -> HistoryCard(item, state.today, format, onEdit) }

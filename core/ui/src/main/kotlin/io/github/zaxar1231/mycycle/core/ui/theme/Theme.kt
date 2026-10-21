@@ -8,30 +8,37 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 
 /**
- * App theme. Material You (colors from the wallpaper) is the default on Android 12+,
- * the twilight palette is used elsewhere.
+ * App theme. "Twilight rose" is the default; Material You (colors from the wallpaper, Android 12+)
+ * and the violet "twilight" palette are options. Material You falls back to "twilight" on older devices.
  */
 @Composable
 fun TwilightTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    style: ThemeStyle = ThemeStyle.ROSE,
+    showFlowers: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        style == ThemeStyle.ROSE -> if (darkTheme) RoseDark else RoseLight
+        style == ThemeStyle.MATERIAL_YOU && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> TwilightDark
         else -> TwilightLight
     }
-    CompositionLocalProvider(LocalCycleColors provides colorScheme.toCycleColors()) {
+    val cycleColors = if (style == ThemeStyle.ROSE) roseCycleColors(colorScheme, darkTheme) else colorScheme.toCycleColors()
+    CompositionLocalProvider(
+        LocalCycleColors provides cycleColors,
+        LocalShowFlowers provides showFlowers,
+    ) {
         MaterialTheme(colorScheme = colorScheme, content = content)
     }
 }
@@ -44,8 +51,11 @@ fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    TwilightTheme(darkTheme = dark, dynamicColor = settings.style == ThemeStyle.MATERIAL_YOU, content = content)
+    TwilightTheme(darkTheme = dark, style = settings.style, showFlowers = settings.flowers, content = content)
 }
+
+/** Whether decorative flowers are drawn (the user can turn them off). */
+val LocalShowFlowers = staticCompositionLocalOf { true }
 
 object TwilightThemeExtras {
     val cycleColors: CycleColors

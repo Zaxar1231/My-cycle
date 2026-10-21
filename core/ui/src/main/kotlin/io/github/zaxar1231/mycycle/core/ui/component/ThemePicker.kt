@@ -3,13 +3,16 @@ package io.github.zaxar1231.mycycle.core.ui.component
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +46,10 @@ fun ThemePicker(settings: ThemeSettings, onChange: (ThemeSettings) -> Unit, modi
             label = { stringResource(it.labelRes()) },
             onSelect = { onChange(settings.copy(mode = it)) },
         )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.theme_flowers), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            Switch(checked = settings.flowers, onCheckedChange = { onChange(settings.copy(flowers = it)) })
+        }
     }
 }
 
@@ -60,6 +67,7 @@ private fun <T> Choice(options: List<T>, selected: T, label: @Composable (T) -> 
 }
 
 private fun ThemeStyle.labelRes() = when (this) {
+    ThemeStyle.ROSE -> R.string.theme_style_rose
     ThemeStyle.MATERIAL_YOU -> R.string.theme_style_material_you
     ThemeStyle.TWILIGHT -> R.string.theme_style_twilight
 }
