@@ -77,7 +77,7 @@ sealed interface WidgetData {
         @OptIn(ExperimentalCoroutinesApi::class)
         fun observe(context: Context): Flow<WidgetData> {
             val deps = context.widgetDependencies()
-            return deps.pin().hasPin.flatMapLatest { locked ->
+            return deps.pin().hasPin.flatMapLatest<Boolean, WidgetData> { locked ->
                 if (locked) {
                     flowOf(Locked)
                 } else {
