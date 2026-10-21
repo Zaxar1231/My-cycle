@@ -13,6 +13,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +52,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import io.github.zaxar1231.mycycle.core.domain.cycle.DayKind
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
+import io.github.zaxar1231.mycycle.core.domain.repository.DataAccessStatus
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
 import io.github.zaxar1231.mycycle.core.domain.pet.PetShop
 import io.github.zaxar1231.mycycle.core.ui.component.emoji
@@ -57,44 +60,67 @@ import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import io.github.zaxar1231.mycycle.core.ui.pet.PetLook
 import io.github.zaxar1231.mycycle.core.ui.pet.renderPetBitmap
 import io.github.zaxar1231.mycycle.core.ui.theme.toCycleColors
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import java.time.temporal.ChronoUnit
 
 /** Small: today's cycle day and phase. */
 class CycleDayWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val data = WidgetData.load(context)
-        provideContent { GlanceTheme { WidgetFrame(data) { ready -> CycleDayContent(ready) } } }
+        val initial = WidgetData.load(context)
+        provideContent {
+            val data = rememberWidgetData(context, initial)
+            GlanceTheme { WidgetFrame(data) { ready -> CycleDayContent(ready) } }
+        }
     }
 }
 
 /** Medium: days to the period and ovulation, with the cycle as a strip. */
 class CycleOverviewWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val data = WidgetData.load(context)
-        val strip = (data as? WidgetData.Ready)?.let { cycleStrip(context, it) }
-        provideContent { GlanceTheme { WidgetFrame(data) { ready -> CycleOverviewContent(ready, strip) } } }
+        val initial = WidgetData.load(context)
+        provideContent {
+            val data = rememberWidgetData(context, initial)
+            val strip = remember(data) { (data as? WidgetData.Ready)?.let { cycleStrip(context, it) } }
+            GlanceTheme { WidgetFrame(data) { ready -> CycleOverviewContent(ready, strip) } }
+        }
     }
 }
 
 /** The pet in its current mood. */
 class PetWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val data = WidgetData.load(context)
-        val picture = (data as? WidgetData.Ready)?.pet?.let { pet ->
-            val worn = PetShop.worn(pet)
-            renderPetBitmap(PetLook(pet.type, data.petMood, worn), PET_PX, context.resources.displayMetrics.density)
+        val initial = WidgetData.load(context)
+        provideContent {
+            val data = rememberWidgetData(context, initial)
+            val picture = remember(data) {
+                val ready = data as? WidgetData.Ready
+                ready?.pet?.let { pet ->
+                    val density = context.resources.displayMetrics.density
+                    renderPetBitmap(PetLook(pet.type, ready.petMood, PetShop.worn(pet)), (PET_DP * density).toInt(), density)
+                }
+            }
+            GlanceTheme { WidgetFrame(data) { ready -> PetContent(ready, picture) } }
         }
-        provideContent { GlanceTheme { WidgetFrame(data) { ready -> PetContent(ready, picture) } } }
     }
 }
 
 /** Today's mood in one tap. */
 class MoodWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val data = WidgetData.load(context)
-        provideContent { GlanceTheme { WidgetFrame(data) { ready -> MoodContent(ready) } } }
+        val initial = WidgetData.load(context)
+        provideContent {
+            val data = rememberWidgetData(context, initial)
+            GlanceTheme { WidgetFrame(data) { ready -> MoodContent(ready) } }
+        }
     }
+}
+
+/** Follows [WidgetData.observe] for as long as the widget session lives. */
+@Composable
+private fun rememberWidgetData(context: Context, initial: WidgetData): WidgetData {
+    val flow = remember { WidgetData.observe(context) }
+    return flow.collectAsState(initial).value
 }
 
 class CycleDayWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -233,11 +259,23 @@ class ToggleMoodAction : ActionCallback {
         val mood = parameters[MOOD_KEY]?.let { name -> Mood.entries.firstOrNull { it.name == name } } ?: return
         val deps = context.widgetDependencies()
         if (deps.pin().hasPin.value) return
-        val today = deps.dates().today()
-        val log = deps.dayLogs().get(today) ?: DayLog(date = today)
-        val moods = if (mood in log.moods) log.moods - mood else log.moods + mood
-        deps.saveDayLog()(log.copy(moods = moods), deps.settings().settings.first().usualPeriodLength)
-        if (moods.isNotEmpty()) deps.rewardPet().dayLogged(today)
+        try {
+            if (deps.dataAccess().check() != DataAccessStatus.READY) return
+            val today = deps.dates().today()
+            val periodLength = deps.settings().settings.first().usualPeriodLength
+            // Read and write together, so an edit in the app at the same moment is not lost.
+            val moods = deps.transactions().inTransaction {
+                val log = deps.dayLogs().get(today) ?: DayLog(date = today)
+                val moods = if (mood in log.moods) log.moods - mood else log.moods + mood
+                deps.saveDayLog()(log.copy(moods = moods), periodLength)
+                moods
+            }
+            if (moods.isNotEmpty()) deps.rewardPet().dayLogged(today)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Not saved; the widget keeps showing the stored moods.
+        }
         deps.refresher().refreshNow()
     }
 }
@@ -274,6 +312,6 @@ private fun cycleStrip(context: Context, data: WidgetData.Ready): Bitmap? {
 
 internal val MOOD_KEY = ActionParameters.Key<String>("mood")
 private val WIDGET_MOODS = listOf(Mood.HAPPY, Mood.CALM, Mood.TIRED, Mood.SAD, Mood.ANXIOUS)
-private const val PET_PX = 288
+private const val PET_DP = 96
 private const val STRIP_WIDTH_PX = 560
 private const val STRIP_HEIGHT_PX = 40

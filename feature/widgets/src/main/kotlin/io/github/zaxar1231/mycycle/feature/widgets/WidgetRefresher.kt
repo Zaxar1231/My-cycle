@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -58,6 +59,8 @@ class WidgetRefresher @Inject constructor(
                 combine(observePrediction.get()(today), dayLogs.get().observe(today), pets.get().observePet(), pin.hasPin) { a, b, c, d -> listOf(a, b, c, d) }
             }.distinctUntilChanged().debounce(SETTLE_MILLIS).collect { refreshNow() }
         }
+        // A new or removed PIN changes what widgets may show: at once, without the settle delay.
+        scope.launch { pin.hasPin.drop(1).collect { refreshNow() } }
     }
 
     suspend fun refreshNow() {
