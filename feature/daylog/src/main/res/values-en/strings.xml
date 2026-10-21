@@ -49,6 +49,7 @@
     <string name="daylog_error_weight">Weight must be between 20 and 300 kg.</string>
     <string name="daylog_error_date">Future days cannot be logged.</string>
     <string name="daylog_error_save">Could not save. Please try again.</string>
+    <string name="daylog_error_load">Could not open this entry. Please try again.</string>
     <string name="medications_title">Medications</string>
     <string name="medications_add">Add medication</string>
     <string name="medications_edit">Edit</string>

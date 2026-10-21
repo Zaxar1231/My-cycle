@@ -17,10 +17,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -52,7 +54,10 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val content by viewModel.content.collectAsStateWithLifecycle()
+    val todayContent by viewModel.todayContent.collectAsStateWithLifecycle()
+    val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
+    val language = LocalConfiguration.current.locales[0].language
+    LaunchedEffect(language) { viewModel.setLanguage(language) }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshToday()
         onPauseOrDispose {}
@@ -77,7 +82,7 @@ fun CalendarScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         TodayCard(prediction, onPeriodStarted = viewModel::markPeriodStartedToday)
-        if (state.selectedDay == null) content?.let { PhaseContentCard(it, state.today) }
+        todayContent?.let { PhaseContentCard(it, state.today) }
         MonthCalendar(
             month = state.month,
             today = state.today,
@@ -95,7 +100,8 @@ fun CalendarScreen(
             day = day,
             today = state.today,
             prediction = prediction,
-            content = content,
+            // Shown only once it belongs to this day, never the previous selection's text.
+            content = selectedContent?.takeIf { it.day == day }?.content,
             onDismiss = { viewModel.select(null) },
             onLog = {
                 viewModel.select(null)

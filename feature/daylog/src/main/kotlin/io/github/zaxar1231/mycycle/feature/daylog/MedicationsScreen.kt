@@ -57,7 +57,9 @@ fun NavGraphBuilder.medicationsScreen(onBack: () -> Unit) {
 @Composable
 fun MedicationsScreen(onBack: () -> Unit, viewModel: MedicationsViewModel = hiltViewModel()) {
     val medications by viewModel.medications.collectAsStateWithLifecycle()
-    var editing by remember { mutableStateOf<Medication?>(null) }
+    // Only the id survives rotation; the medication itself is looked up in the list.
+    var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
+    val editing = editingId?.let { id -> if (id == NEW_MEDICATION) Medication(name = "") else medications.find { it.id == id } }
     val timeFormatter = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
 
     Scaffold(
@@ -72,7 +74,7 @@ fun MedicationsScreen(onBack: () -> Unit, viewModel: MedicationsViewModel = hilt
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { editing = Medication(name = "") }) {
+            ExtendedFloatingActionButton(onClick = { editingId = NEW_MEDICATION }) {
                 Text(stringResource(R.string.medications_add))
             }
         },
@@ -101,7 +103,7 @@ fun MedicationsScreen(onBack: () -> Unit, viewModel: MedicationsViewModel = hilt
                                 Text(stringResource(R.string.medications_archived), style = MaterialTheme.typography.labelSmall)
                             }
                         }
-                        TextButton(onClick = { editing = medication }) { Text(stringResource(R.string.medications_edit)) }
+                        TextButton(onClick = { editingId = medication.id }) { Text(stringResource(R.string.medications_edit)) }
                         if (medication.isActive) {
                             TextButton(onClick = { viewModel.archive(medication) }) { Text(stringResource(R.string.medications_archive)) }
                         } else {
@@ -116,10 +118,10 @@ fun MedicationsScreen(onBack: () -> Unit, viewModel: MedicationsViewModel = hilt
     editing?.let { medication ->
         MedicationDialog(
             initial = medication,
-            onDismiss = { editing = null },
+            onDismiss = { editingId = null },
             onSave = { name, dosage, time ->
-                viewModel.save(medication.id, name, dosage, time)
-                editing = null
+                viewModel.save(medication, name, dosage, time)
+                editingId = null
             },
         )
     }
@@ -158,3 +160,6 @@ private fun MedicationDialog(initial: Medication, onDismiss: () -> Unit, onSave:
 }
 
 private val DEFAULT_REMINDER: LocalTime = LocalTime.of(9, 0)
+
+/** Room ids start at 1, so 0 marks a medication that is not saved yet. */
+private const val NEW_MEDICATION = 0L

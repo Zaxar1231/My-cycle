@@ -6,6 +6,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.Flow
 import io.github.zaxar1231.mycycle.core.domain.model.PeriodEvent
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.TransactionRunner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
@@ -22,7 +23,11 @@ class SaveDayLogUseCaseTest {
     private val useCase = SaveDayLogUseCase(
         logs,
         RecordPeriodStartUseCase(cycles) { today },
+        RemovePeriodStartUseCase(cycles),
         RecordPeriodEndUseCase(cycles),
+        object : TransactionRunner {
+            override suspend fun <T> inTransaction(block: suspend () -> T): T = block()
+        },
     ) { today }
 
     @Test
@@ -66,6 +71,64 @@ class SaveDayLogUseCaseTest {
         logs.items[today] = DayLog(date = today, flow = Flow.HEAVY)
         useCase(DayLog(date = today, note = "   "), 5)
         assertNull(logs.items[today])
+    }
+
+    @Test
+    fun `removing a period start deletes the cycle and reopens the previous one`() = runTest {
+        cycles.items.value = listOf(Cycle(id = 1, startDate = today.minusDays(28), periodLength = 5))
+        useCase(DayLog(date = today, periodEvent = PeriodEvent.STARTED), 5)
+        assertEquals(today.minusDays(1), cycles.items.value.single { it.id == 1L }.endDate)
+
+        useCase(DayLog(date = today, flow = Flow.LIGHT), 5)
+
+        val previous = cycles.items.value.single()
+        assertEquals(1L, previous.id)
+        assertNull(previous.endDate)
+        assertNull(previous.cycleLength)
+    }
+
+    @Test
+    fun `clearing a log with a period start removes the cycle`() = runTest {
+        useCase(DayLog(date = today, periodEvent = PeriodEvent.STARTED), 5)
+        useCase(DayLog(date = today), 5)
+        assertTrue(cycles.items.value.isEmpty())
+        assertNull(logs.items[today])
+    }
+
+    @Test
+    fun `switching a start to an end on the same day is rejected`() = runTest {
+        cycles.items.value = listOf(Cycle(id = 1, startDate = today.minusDays(28), periodLength = 5))
+        useCase(DayLog(date = today, periodEvent = PeriodEvent.STARTED), 5)
+        val error = runCatching { useCase(DayLog(date = today, periodEvent = PeriodEvent.ENDED), 5) }.exceptionOrNull()
+        assertEquals(InvalidDayLogException.Field.PERIOD_END, (error as InvalidDayLogException).field)
+    }
+
+    @Test
+    fun `removing a period end restores the usual period length`() = runTest {
+        cycles.items.value = listOf(Cycle(id = 1, startDate = today.minusDays(2), periodLength = 5))
+        useCase(DayLog(date = today, periodEvent = PeriodEvent.ENDED), 5)
+        assertEquals(3, cycles.items.value.single().periodLength)
+
+        useCase(DayLog(date = today), usualPeriodLength = 6)
+
+        assertEquals(6, cycles.items.value.single().periodLength)
+    }
+
+    @Test
+    fun `a start inside the current period moves that cycle and clears the old mark`() = runTest {
+        val previous = Cycle(id = 1, startDate = today.minusDays(32), endDate = today.minusDays(3), periodLength = 5, cycleLength = 30)
+        val guessed = Cycle(id = 2, startDate = today.minusDays(2), periodLength = 5)
+        cycles.items.value = listOf(previous, guessed)
+        logs.items[guessed.startDate] = DayLog(date = guessed.startDate, periodEvent = PeriodEvent.STARTED)
+
+        useCase(DayLog(date = today, periodEvent = PeriodEvent.STARTED), 5)
+
+        val (first, current) = cycles.items.value.sortedBy { it.startDate }
+        assertEquals(2, cycles.items.value.size)
+        assertEquals(today, current.startDate)
+        assertEquals(32, first.cycleLength)
+        assertEquals(today.minusDays(1), first.endDate)
+        assertNull(logs.items[guessed.startDate])
     }
 
     private class FakeLogs : DayLogRepository {

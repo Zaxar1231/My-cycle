@@ -9,10 +9,19 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
+
+/** Runs several repository writes as one database transaction: all of them apply, or none. */
+interface TransactionRunner {
+    suspend fun <T> inTransaction(block: suspend () -> T): T
+}
 
 interface CycleRepository {
     fun observeCycles(): Flow<List<Cycle>>
+
+    /** One-shot read, ordered by start date. Safe inside [TransactionRunner.inTransaction]. */
+    suspend fun cycles(): List<Cycle> = observeCycles().first()
     /** Inserts or updates the cycle with the same start date and returns its id. */
     suspend fun upsert(cycle: Cycle): Long
     suspend fun delete(cycle: Cycle)
@@ -20,6 +29,9 @@ interface CycleRepository {
 
 interface DayLogRepository {
     fun observe(date: LocalDate): Flow<DayLog?>
+
+    /** One-shot read. Safe inside [TransactionRunner.inTransaction]. */
+    suspend fun get(date: LocalDate): DayLog? = observe(date).first()
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLog>>
     suspend fun save(log: DayLog)
     suspend fun delete(date: LocalDate)

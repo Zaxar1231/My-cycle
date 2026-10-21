@@ -62,13 +62,22 @@ class DayLogViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val existing = dayLogs.observe(date).first() ?: DayLog(date = date)
-            _state.update { it.copy(form = DayLogForm(existing)) }
+            try {
+                val existing = dayLogs.get(date) ?: DayLog(date = date)
+                _state.update { it.copy(form = DayLogForm(existing)) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(failed = true) }
+            }
         }
     }
 
-    private fun edit(transform: (DayLog) -> DayLog) = _state.update { s ->
-        s.copy(form = s.form?.let { it.copy(log = transform(it.log)) }, error = null)
+    private fun edit(transform: (DayLog) -> DayLog) = editForm { it.copy(log = transform(it.log)) }
+
+    /** Ignored while saving: the saved snapshot is already taken and the screen closes after it. */
+    private fun editForm(transform: (DayLogForm) -> DayLogForm) = _state.update { s ->
+        if (s.saving) s else s.copy(form = s.form?.let(transform), error = null)
     }
 
     fun setPeriodEvent(event: PeriodEvent?) = edit { it.copy(periodEvent = event) }
@@ -85,9 +94,9 @@ class DayLogViewModel @Inject constructor(
 
     fun setNote(note: String) = edit { it.copy(note = note) }
 
-    fun setTemperatureText(text: String) = _state.update { s -> s.copy(form = s.form?.copy(temperatureText = text), error = null) }
+    fun setTemperatureText(text: String) = editForm { it.copy(temperatureText = text) }
 
-    fun setWeightText(text: String) = _state.update { s -> s.copy(form = s.form?.copy(weightText = text), error = null) }
+    fun setWeightText(text: String) = editForm { it.copy(weightText = text) }
 
     fun save() {
         val form = _state.value.form ?: return

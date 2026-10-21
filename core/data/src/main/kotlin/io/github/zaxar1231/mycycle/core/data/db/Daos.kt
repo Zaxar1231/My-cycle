@@ -16,6 +16,9 @@ interface CycleDao {
     @Query("SELECT * FROM cycles ORDER BY start_date")
     fun observeAll(): Flow<List<CycleEntity>>
 
+    @Query("SELECT * FROM cycles ORDER BY start_date")
+    suspend fun all(): List<CycleEntity>
+
     @Query("SELECT id FROM cycles WHERE start_date = :startDate")
     suspend fun idForStartDate(startDate: LocalDate): Long?
 
@@ -40,6 +43,9 @@ interface CycleDao {
 interface DayLogDao {
     @Query("SELECT * FROM day_logs WHERE date = :date")
     fun observe(date: LocalDate): Flow<DayLogEntity?>
+
+    @Query("SELECT * FROM day_logs WHERE date = :date")
+    suspend fun get(date: LocalDate): DayLogEntity?
 
     @Query("SELECT * FROM day_logs WHERE date BETWEEN :from AND :to ORDER BY date")
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DayLogEntity>>

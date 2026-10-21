@@ -21,6 +21,7 @@ import io.github.zaxar1231.mycycle.core.data.repository.RoomCycleRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomDayLogRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomMedicationRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomPetRepository
+import io.github.zaxar1231.mycycle.core.data.repository.RoomTransactionRunner
 import io.github.zaxar1231.mycycle.core.data.security.DatabaseKeyProvider
 import io.github.zaxar1231.mycycle.core.data.security.EncryptedDataAccess
 import io.github.zaxar1231.mycycle.core.data.settings.DataStoreSettingsRepository
@@ -31,6 +32,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.TransactionRunner
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
@@ -81,6 +83,8 @@ interface RepositoryModule {
     @Binds fun pets(impl: RoomPetRepository): PetRepository
 
     @Binds fun settings(impl: DataStoreSettingsRepository): SettingsRepository
+
+    @Binds fun transactions(impl: RoomTransactionRunner): TransactionRunner
 
     @Binds fun dataAccess(impl: EncryptedDataAccess): DataAccess
 

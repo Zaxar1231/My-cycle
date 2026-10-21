@@ -17,11 +17,12 @@ class MedicationsViewModel @Inject constructor(private val repository: Medicatio
     val medications: StateFlow<List<Medication>> = repository.observeMedications()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
 
-    fun save(id: Long, name: String, dosage: String, reminder: LocalTime?) {
+    /** Edits keep the rest of [original] as is: an archived medication stays archived. */
+    fun save(original: Medication, name: String, dosage: String, reminder: LocalTime?) {
         val cleanName = name.trim()
         if (cleanName.isEmpty()) return
         viewModelScope.launch {
-            repository.upsert(Medication(id = id, name = cleanName, dosage = dosage.trim().ifEmpty { null }, reminderTime = reminder))
+            repository.upsert(original.copy(name = cleanName, dosage = dosage.trim().ifEmpty { null }, reminderTime = reminder))
         }
     }
 

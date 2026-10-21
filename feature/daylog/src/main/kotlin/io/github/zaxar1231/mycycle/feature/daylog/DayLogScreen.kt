@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -97,7 +98,9 @@ fun DayLogScreen(
     ) { padding ->
         val form = state.form
         if (form == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                if (state.failed) ErrorText(R.string.daylog_error_load) else CircularProgressIndicator()
+            }
             return@Scaffold
         }
         val log = form.log
@@ -105,6 +108,7 @@ fun DayLogScreen(
             Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .consumeWindowInsets(padding)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -165,13 +169,21 @@ fun DayLogScreen(
                     placeholder = { Text(stringResource(R.string.daylog_note_hint)) },
                 )
             }
-            if (state.error == InvalidDayLogException.Field.DATE) ErrorText(R.string.daylog_error_date)
+            // Repeated next to the button: the field with the problem may be scrolled out of view.
+            state.error?.let { ErrorText(it.messageRes()) }
             if (state.failed) ErrorText(R.string.daylog_error_save)
             Button(onClick = viewModel::save, enabled = !state.saving, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.daylog_save))
             }
         }
     }
+}
+
+private fun InvalidDayLogException.Field.messageRes(): Int = when (this) {
+    InvalidDayLogException.Field.DATE -> R.string.daylog_error_date
+    InvalidDayLogException.Field.TEMPERATURE -> R.string.daylog_error_temperature
+    InvalidDayLogException.Field.WEIGHT -> R.string.daylog_error_weight
+    InvalidDayLogException.Field.PERIOD_END -> R.string.daylog_error_period_end
 }
 
 @Composable

@@ -49,6 +49,7 @@
     <string name="daylog_error_weight">Вес должен быть от 20 до 300 кг.</string>
     <string name="daylog_error_date">Нельзя заполнить день из будущего.</string>
     <string name="daylog_error_save">Не удалось сохранить. Попробуйте ещё раз.</string>
+    <string name="daylog_error_load">Не удалось открыть запись. Попробуйте ещё раз.</string>
     <string name="medications_title">Препараты</string>
     <string name="medications_add">Добавить препарат</string>
     <string name="medications_edit">Изменить</string>

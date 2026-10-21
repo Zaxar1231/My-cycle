@@ -3,10 +3,12 @@ package io.github.zaxar1231.mycycle.feature.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
+import io.github.zaxar1231.mycycle.core.domain.model.PeriodEvent
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
@@ -14,7 +16,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
-import io.github.zaxar1231.mycycle.core.domain.usecase.RecordPeriodStartUseCase
+import io.github.zaxar1231.mycycle.core.domain.usecase.SaveDayLogUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +35,8 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
+
+data class DayContent(val day: LocalDate, val content: PhaseContent)
 
 data class CalendarUiState(
     val today: LocalDate,
@@ -48,10 +53,10 @@ data class CalendarUiState(
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     cycles: CycleRepository,
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
     private val dayLogs: DayLogRepository,
     private val predictor: CyclePredictor,
-    private val recordPeriodStart: RecordPeriodStartUseCase,
+    private val saveDayLog: SaveDayLogUseCase,
     private val dateProvider: DateProvider,
     private val phaseContent: PhaseContentRepository,
 ) : ViewModel() {
@@ -99,17 +104,41 @@ class CalendarViewModel @Inject constructor(
             CalendarUiState(today.value, YearMonth.from(today.value)),
         )
 
-    /** Content for today's phase, or for the selected day's phase while the day sheet is open. */
-    val content: StateFlow<PhaseContent?> = state
-        .map { s ->
-            val day = s.selectedDay ?: s.today
-            s.prediction?.segmentFor(day)?.let { segment ->
-                CyclePredictor.phaseOf(ChronoUnit.DAYS.between(segment.start, day).toInt() + 1, segment)
-            }
-        }
+    private val language = MutableStateFlow(Locale.getDefault().language)
+
+    /** Content for today's phase. */
+    val todayContent: StateFlow<PhaseContent?> = combine(state, language) { s, lang -> phaseOn(s, s.today)?.let { it to lang } }
         .distinctUntilChanged()
-        .map { phase -> phase?.let { phaseContent.content(it, Locale.getDefault().language) } }
+        .map { key -> key?.let { (phase, lang) -> loadContent(phase, lang) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    /** Content for the selected day's phase, tagged with the day so the sheet never shows a stale one. */
+    val selectedContent: StateFlow<DayContent?> = combine(state, language) { s, lang ->
+        s.selectedDay?.let { day -> phaseOn(s, day)?.let { Triple(day, it, lang) } }
+    }
+        .distinctUntilChanged()
+        .map { key -> key?.let { (day, phase, lang) -> loadContent(phase, lang)?.let { DayContent(day, it) } } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    private fun phaseOn(s: CalendarUiState, day: LocalDate): CyclePhase? =
+        s.prediction?.segmentFor(day)?.let { segment ->
+            CyclePredictor.phaseOf(ChronoUnit.DAYS.between(segment.start, day).toInt() + 1, segment)
+        }
+
+    /** A broken content file hides the card instead of crashing the calendar. */
+    private suspend fun loadContent(phase: CyclePhase, lang: String): PhaseContent? =
+        try {
+            phaseContent.content(phase, lang)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+
+    /** Follows the UI language: the ViewModel survives a per-app or system language change. */
+    fun setLanguage(lang: String) {
+        language.value = lang
+    }
 
     fun refreshToday() {
         val now = dateProvider.today()
@@ -127,12 +156,14 @@ class CalendarViewModel @Inject constructor(
 
     fun select(day: LocalDate?) = selected.update { day }
 
+    /** Goes through the day log, like the FAB form, so the mark can be undone there. */
     fun markPeriodStartedToday() {
-        val periodLength = state.value.prediction?.averagePeriodLength ?: return
         viewModelScope.launch {
             try {
                 // Asked at tap time, not taken from state: the screen may show yesterday after midnight.
-                recordPeriodStart(dateProvider.today(), periodLength)
+                val day = dateProvider.today()
+                val log = dayLogs.get(day) ?: DayLog(date = day)
+                saveDayLog(log.copy(periodEvent = PeriodEvent.STARTED), settings.settings.first().usualPeriodLength)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
