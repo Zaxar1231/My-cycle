@@ -44,6 +44,7 @@ import io.github.zaxar1231.mycycle.core.ui.component.FlowerBackdrop
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import io.github.zaxar1231.mycycle.core.ui.theme.LocalDarkTheme
 import io.github.zaxar1231.mycycle.core.ui.theme.LocalShowFlowers
+import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
@@ -82,7 +83,7 @@ internal fun RingHero(
                 .align(Alignment.Center)
                 .size(ring)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.background)
+                .background(TwilightThemeExtras.solidBackground)
                 .border(RING_WIDTH, MaterialTheme.colorScheme.primary, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
@@ -126,7 +127,7 @@ internal fun PaletteButton(onOpenTheme: () -> Unit, modifier: Modifier = Modifie
     Surface(
         onClick = onOpenTheme,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.background.copy(alpha = PALETTE_ALPHA),
+        color = TwilightThemeExtras.solidBackground.copy(alpha = PALETTE_ALPHA),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier.size(PALETTE_SIZE),
     ) {

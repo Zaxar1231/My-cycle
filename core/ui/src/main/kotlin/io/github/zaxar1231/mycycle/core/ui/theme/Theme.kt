@@ -58,12 +58,9 @@ fun TwilightTheme(
         LocalDarkTheme provides dark,
     ) {
         MaterialTheme(colorScheme = colorScheme) {
-            if (glass) {
-                Box {
-                    GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
-                    content()
-                }
-            } else {
+            // The same tree in every style: switching to glass must not recreate the app below.
+            Box {
+                if (glass) GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
                 content()
             }
         }

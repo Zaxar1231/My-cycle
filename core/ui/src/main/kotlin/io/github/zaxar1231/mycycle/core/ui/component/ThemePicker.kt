@@ -72,7 +72,8 @@ fun ThemePicker(
             ThemeMode.entries.forEachIndexed { index, option ->
                 SegmentedButton(
                     enabled = !settings.style.alwaysDark,
-                    selected = option == settings.mode,
+                    // Always-dark styles show "Dark"; the saved mode returns with another style.
+                    selected = if (settings.style.alwaysDark) option == ThemeMode.DARK else option == settings.mode,
                     onClick = { onChange(settings.copy(mode = option)) },
                     shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size),
                 ) { Text(stringResource(option.labelRes())) }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -59,13 +60,10 @@ internal fun PinScreen(
     onBiometric: (() -> Unit)? = null,
     bottom: @Composable () -> Unit = {},
 ) {
-    val style = TwilightThemeExtras.style
-    Box(Modifier.fillMaxSize()) {
-        // Opaque in every style: nothing of the app may show through the lock screen.
-        if (style == ThemeStyle.LIQUID_GLASS) {
+    // Opaque in every style: nothing of the app may show through the lock screen.
+    Surface(Modifier.fillMaxSize(), color = TwilightThemeExtras.solidBackground, contentColor = MaterialTheme.colorScheme.onBackground) {
+        if (TwilightThemeExtras.style == ThemeStyle.LIQUID_GLASS) {
             GlassBackdrop(MaterialTheme.colorScheme, TwilightThemeExtras.solidBackground)
-        } else {
-            Box(Modifier.fillMaxSize().background(TwilightThemeExtras.solidBackground))
         }
         Column(
             Modifier
@@ -135,12 +133,14 @@ private fun DigitKey(digit: Char, enabled: Boolean, onDigit: (Char) -> Unit) {
     val label: @Composable () -> Unit = { Text(digit.toString(), style = MaterialTheme.typography.headlineSmall) }
     val onClick = { onDigit(digit) }
     val scheme = MaterialTheme.colorScheme
+    // Rings dim with the digits while input is frozen.
+    fun edge(color: Color) = if (enabled) color else color.copy(alpha = color.alpha * DISABLED_ALPHA)
     when (TwilightThemeExtras.style) {
         ThemeStyle.LIQUID_GLASS -> OutlinedButton(
             onClick = onClick,
             enabled = enabled,
             shape = CircleShape,
-            border = BorderStroke(1.dp, Color.White.copy(alpha = GLASS_EDGE_ALPHA)),
+            border = BorderStroke(1.dp, edge(Color.White.copy(alpha = GLASS_EDGE_ALPHA))),
             colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White.copy(alpha = GLASS_PANE_ALPHA), contentColor = scheme.onSurface),
             modifier = Modifier.size(KEY_SIZE),
             content = { label() },
@@ -149,12 +149,13 @@ private fun DigitKey(digit: Char, enabled: Boolean, onDigit: (Char) -> Unit) {
             onClick = onClick,
             enabled = enabled,
             shape = CircleShape,
-            border = BorderStroke(NEON_RING, scheme.primary),
+            border = BorderStroke(NEON_RING, edge(scheme.primary)),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.primary),
             modifier = Modifier
                 .size(KEY_SIZE)
                 .drawBehind {
-                    drawCircle(Brush.radialGradient(listOf(scheme.primary.copy(alpha = NEON_GLOW_ALPHA), Color.Transparent)), size.minDimension * NEON_GLOW_SCALE)
+                    val r = size.minDimension * NEON_GLOW_SCALE
+                    drawCircle(Brush.radialGradient(listOf(scheme.primary.copy(alpha = NEON_GLOW_ALPHA), Color.Transparent), center, r), r, center)
                 },
             content = { label() },
         )
@@ -162,7 +163,7 @@ private fun DigitKey(digit: Char, enabled: Boolean, onDigit: (Char) -> Unit) {
             onClick = onClick,
             enabled = enabled,
             shape = RoundedCornerShape(PAPER_CORNER),
-            border = BorderStroke(1.dp, scheme.onSurface.copy(alpha = PAPER_INK_ALPHA)),
+            border = BorderStroke(1.dp, edge(scheme.onSurface.copy(alpha = PAPER_INK_ALPHA))),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.onSurface),
             modifier = Modifier.size(KEY_SIZE),
             content = { label() },
@@ -171,7 +172,7 @@ private fun DigitKey(digit: Char, enabled: Boolean, onDigit: (Char) -> Unit) {
             onClick = onClick,
             enabled = enabled,
             shape = CircleShape,
-            border = BorderStroke(1.dp, scheme.primary.copy(alpha = AMOLED_RING_ALPHA)),
+            border = BorderStroke(1.dp, edge(scheme.primary.copy(alpha = AMOLED_RING_ALPHA))),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = scheme.onSurface),
             modifier = Modifier.size(KEY_SIZE),
             content = { label() },
@@ -213,6 +214,7 @@ private const val NEON_GLOW_SCALE = 0.7f
 private val PAPER_CORNER = 14.dp
 private const val PAPER_INK_ALPHA = 0.55f
 private const val AMOLED_RING_ALPHA = 0.6f
+private const val DISABLED_ALPHA = 0.38f
 private const val TICK_MILLIS = 250L
 private const val MILLIS_PER_SECOND = 1_000L
 private const val SECONDS_PER_MINUTE = 60L

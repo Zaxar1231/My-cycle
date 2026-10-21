@@ -35,7 +35,8 @@ internal fun amoledScheme(): ColorScheme = seedColorScheme(AMOLED_SEED, dark = t
     surfaceContainer = Color(0xFF0E0E0E),
     surfaceContainerHigh = Color(0xFF151515),
     surfaceContainerHighest = Color(0xFF1C1C1C),
-    surfaceVariant = Color(0xFF1C1C1C),
+    // Not equal to the card colour, so cards keep onSurface text.
+    surfaceVariant = Color(0xFF202020),
 )
 
 internal fun neonScheme(): ColorScheme = seedColorScheme(NEON_CYAN.toArgb(), dark = true).copy(
@@ -113,7 +114,6 @@ internal fun paperScheme(dark: Boolean): ColorScheme = if (dark) {
  */
 internal fun glassScheme(dark: Boolean): ColorScheme {
     val base = seedColorScheme(GLASS_SEED, dark)
-    val pane = Color.White
     val tint = if (dark) Color(0xFF15182A) else Color(0xFFF4F6FF)
     return base.copy(
         background = Color.Transparent,
@@ -122,8 +122,11 @@ internal fun glassScheme(dark: Boolean): ColorScheme {
         surfaceContainerLow = tint.copy(alpha = SHEET_ALPHA),
         surfaceContainer = tint.copy(alpha = BAR_ALPHA),
         surfaceContainerHigh = tint.copy(alpha = SHEET_ALPHA),
-        surfaceContainerHighest = pane.copy(alpha = if (dark) CARD_ALPHA_DARK else CARD_ALPHA_LIGHT),
-        surfaceVariant = pane.copy(alpha = if (dark) CARD_ALPHA_DARK else CARD_ALPHA_LIGHT),
+        // Tinted panes dense enough for body text over the blobs.
+        surfaceContainerHighest = tint.copy(alpha = if (dark) CARD_ALPHA_DARK else CARD_ALPHA_LIGHT),
+        // Kept different from the card colour, so cards keep onSurface text (contentColorFor
+        // checks surfaceVariant first), and opaque for tracks and phase bars.
+        surfaceVariant = base.surfaceVariant,
     )
 }
 
@@ -140,13 +143,14 @@ fun GlassBackdrop(scheme: ColorScheme, base: Color, modifier: Modifier = Modifie
         val blurred = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Modifier.blur(BLUR) else Modifier
         Canvas(Modifier.fillMaxSize().then(blurred)) {
             val blobs = listOf(
-                Triple(Offset(0.15f, 0.12f), scheme.primary, 0.55f),
-                Triple(Offset(0.9f, 0.35f), scheme.tertiary, 0.5f),
-                Triple(Offset(0.3f, 0.8f), scheme.secondary, 0.6f),
+                Triple(Offset(0.15f, 0.12f), scheme.primaryContainer, 0.55f),
+                Triple(Offset(0.9f, 0.35f), scheme.tertiaryContainer, 0.5f),
+                Triple(Offset(0.3f, 0.8f), scheme.secondaryContainer, 0.6f),
             )
             blobs.forEach { (at, color, share) ->
                 val c = Offset(at.x * size.width, at.y * size.height)
                 val r = size.minDimension * share
+                // Container tones (dark in the dark theme, pale in the light one) keep text contrast.
                 drawCircle(Brush.radialGradient(listOf(color.copy(alpha = BLOB_ALPHA), color.copy(alpha = 0f)), c, r), r, c)
             }
         }
@@ -163,7 +167,7 @@ private val NEON_LIME = Color(0xFFC6FF3D)
 private val NEON_NIGHT = Color(0xFF07060F)
 private const val SHEET_ALPHA = 0.94f
 private const val BAR_ALPHA = 0.72f
-private const val CARD_ALPHA_DARK = 0.12f
-private const val CARD_ALPHA_LIGHT = 0.55f
+private const val CARD_ALPHA_DARK = 0.6f
+private const val CARD_ALPHA_LIGHT = 0.65f
 private const val BLOB_ALPHA = 0.7f
 private val BLUR = 60.dp

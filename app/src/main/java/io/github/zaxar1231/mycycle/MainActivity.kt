@@ -62,6 +62,8 @@ class MainActivity : ComponentActivity() {
                         SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
                     }
                     enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+                    // Explicit styles turn the three-button bar's contrast scrim off; keep it.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = true
                 }
                 Surface(Modifier.fillMaxSize()) {
                     if (appState is AppState.DataLost) DataLostScreen(onStartOver = main::startOver)
