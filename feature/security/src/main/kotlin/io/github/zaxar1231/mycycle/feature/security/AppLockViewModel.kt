@@ -8,6 +8,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.PinRepository
 import io.github.zaxar1231.mycycle.core.domain.security.AutoLock
 import io.github.zaxar1231.mycycle.core.domain.security.PinCheck
 import io.github.zaxar1231.mycycle.core.domain.security.PinPolicy
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,19 +61,20 @@ class AppLockViewModel @Inject constructor(private val pins: PinRepository) : Vi
         refreshFreeze()
     }
 
-    fun onBackground(changingConfigurations: Boolean) {
+    /** With "lock immediately" the lock goes up while leaving, so nothing shows on the way back. */
+    fun onBackground(changingConfigurations: Boolean, lockAfterMinutes: Int) {
         if (changingConfigurations || biometricInProgress) return
         backgroundAt = SystemClock.elapsedRealtime()
+        if (lockAfterMinutes == 0) lock()
     }
 
     fun onForeground(lockAfterMinutes: Int) {
         val since = backgroundAt ?: return
         backgroundAt = null
-        if (!lockedFlag.value && AutoLock.shouldLock(since, SystemClock.elapsedRealtime(), lockAfterMinutes)) {
-            lockedFlag.value = true
-            _lockCount.update { it + 1 }
-            _entry.value = PinEntryState()
-            refreshFreeze()
+        when {
+            // Still locked from before: offer the biometric prompt again.
+            lockedFlag.value -> _lockCount.update { it + 1 }
+            AutoLock.shouldLock(since, SystemClock.elapsedRealtime(), lockAfterMinutes) -> lock()
         }
     }
 
@@ -86,19 +88,41 @@ class AppLockViewModel @Inject constructor(private val pins: PinRepository) : Vi
 
     fun backspace() = _entry.update { if (it.checking) it else it.copy(entered = it.entered.dropLast(1)) }
 
-    fun unlockedByBiometrics() = unlock()
+    fun unlockedByBiometrics() {
+        unlock()
+        viewModelScope.launch { runCatching { pins.resetFailures() } }
+    }
 
-    fun freezeEnded() = _entry.update { it.copy(frozenUntil = null) }
+    /** One attempt is allowed after a freeze, so "0 attempts left" would be wrong now. */
+    fun freezeEnded() = _entry.update { it.copy(frozenUntil = null, attemptsLeft = null) }
 
     private fun check(pin: String) {
         _entry.update { it.copy(checking = true) }
         viewModelScope.launch {
-            when (val result = pins.check(pin)) {
+            // A storage error must not crash the lock screen or leave it stuck; the entry starts again.
+            val result = try {
+                pins.check(pin)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+            when (result) {
                 PinCheck.Correct -> unlock()
                 is PinCheck.Wrong -> _entry.value = PinEntryState(attemptsLeft = result.attemptsLeft, frozenUntil = result.lockedUntilMillis)
                 is PinCheck.LockedOut -> _entry.value = PinEntryState(frozenUntil = result.untilMillis)
+                null -> _entry.value = PinEntryState()
             }
         }
+    }
+
+    private fun lock() {
+        // No PIN, nothing to lock: a PIN set later must not lock the session that set it.
+        if (!pins.hasPin.value || lockedFlag.value) return
+        lockedFlag.value = true
+        _lockCount.update { it + 1 }
+        _entry.value = PinEntryState()
+        refreshFreeze()
     }
 
     private fun unlock() {
@@ -108,7 +132,7 @@ class AppLockViewModel @Inject constructor(private val pins: PinRepository) : Vi
 
     private fun refreshFreeze() {
         viewModelScope.launch {
-            val until = pins.lockedUntil()
+            val until = runCatching { pins.lockedUntil() }.getOrNull()
             _entry.update { it.copy(frozenUntil = until) }
         }
     }

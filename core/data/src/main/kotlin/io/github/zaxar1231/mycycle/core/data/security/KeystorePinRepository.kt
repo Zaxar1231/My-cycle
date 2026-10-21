@@ -56,8 +56,11 @@ class KeystorePinRepository @Inject constructor(
     override suspend fun setPin(pin: String) = lock.withLock {
         require(PinPolicy.isValid(pin)) { "PIN must be ${PinPolicy.LENGTH} digits" }
         withContext(Dispatchers.IO) {
+            // The new key goes into the other slot and the old one is deleted only after the new
+            // file is written, so a crash in between leaves the old PIN working.
+            val slot = ((currentSlot() ?: 1) + 1) % SLOTS
             val salt = ByteArray(SALT_BYTES).also(SecureRandom()::nextBytes)
-            val stored = byteArrayOf(FORMAT_VERSION) + salt + mac(createKey(), salt, pin)
+            val stored = byteArrayOf(FORMAT_VERSION, slot.toByte()) + salt + mac(createKey(slot), salt, pin)
             val out = file.startWrite()
             try {
                 out.write(stored)
@@ -66,15 +69,16 @@ class KeystorePinRepository @Inject constructor(
                 file.failWrite(out)
                 throw e
             }
+            runCatching { keyStore().deleteEntry(alias((slot + 1) % SLOTS)) }
         }
-        resetFailures()
+        clearFailures()
         present.value = true
     }
 
     override suspend fun check(pin: String): PinCheck = lock.withLock {
         frozenFor()?.let { return PinCheck.LockedOut(System.currentTimeMillis() + it) }
         if (matches(pin)) {
-            resetFailures()
+            clearFailures()
             return PinCheck.Correct
         }
         var failures = 0
@@ -96,9 +100,9 @@ class KeystorePinRepository @Inject constructor(
     override suspend fun clear() = lock.withLock {
         withContext(Dispatchers.IO) {
             file.delete()
-            runCatching { keyStore().deleteEntry(KEY_ALIAS) }
+            repeat(SLOTS) { slot -> runCatching { keyStore().deleteEntry(alias(slot)) } }
         }
-        resetFailures()
+        clearFailures()
         present.value = false
     }
 
@@ -135,14 +139,16 @@ class KeystorePinRepository @Inject constructor(
         if (!PinPolicy.isValid(pin) || !file.baseFile.exists()) return@withContext false
         runCatching {
             val stored = file.readFully()
-            if (stored.size != 1 + SALT_BYTES + MAC_BYTES || stored[0] != FORMAT_VERSION) return@runCatching false
-            val salt = stored.copyOfRange(1, 1 + SALT_BYTES)
-            val key = keyStore().getKey(KEY_ALIAS, null) as? SecretKey ?: return@runCatching false
-            MessageDigest.isEqual(mac(key, salt, pin), stored.copyOfRange(1 + SALT_BYTES, stored.size))
+            if (stored.size != HEADER_BYTES + SALT_BYTES + MAC_BYTES || stored[0] != FORMAT_VERSION) return@runCatching false
+            val salt = stored.copyOfRange(HEADER_BYTES, HEADER_BYTES + SALT_BYTES)
+            val key = keyStore().getKey(alias(stored[1].toInt()), null) as? SecretKey ?: return@runCatching false
+            MessageDigest.isEqual(mac(key, salt, pin), stored.copyOfRange(HEADER_BYTES + SALT_BYTES, stored.size))
         }.getOrDefault(false)
     }
 
-    private suspend fun resetFailures() {
+    override suspend fun resetFailures() = lock.withLock { clearFailures() }
+
+    private suspend fun clearFailures() {
         store.edit { prefs ->
             prefs.remove(FAILURES)
             prefs.remove(FROZEN_UNTIL_ELAPSED)
@@ -157,9 +163,16 @@ class KeystorePinRepository @Inject constructor(
             doFinal(pin.toByteArray(Charsets.US_ASCII))
         }
 
-    private fun createKey(): SecretKey {
-        keyStore().deleteEntry(KEY_ALIAS)
-        val spec = KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN).build()
+    /** Slot of the key the stored PIN was made with, or null without a valid file. */
+    private fun currentSlot(): Int? = runCatching {
+        file.readFully().takeIf { it.size > 1 && it[0] == FORMAT_VERSION }?.get(1)?.toInt()?.takeIf { it in 0 until SLOTS }
+    }.getOrNull()
+
+    private fun alias(slot: Int) = "$KEY_ALIAS_PREFIX$slot"
+
+    private fun createKey(slot: Int): SecretKey {
+        keyStore().deleteEntry(alias(slot))
+        val spec = KeyGenParameterSpec.Builder(alias(slot), KeyProperties.PURPOSE_SIGN).build()
         return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_HMAC_SHA256, ANDROID_KEYSTORE)
             .apply { init(spec) }
             .generateKey()
@@ -169,7 +182,9 @@ class KeystorePinRepository @Inject constructor(
 
     private companion object {
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        const val KEY_ALIAS = "twilight_pin_key"
+        const val KEY_ALIAS_PREFIX = "twilight_pin_key_"
+        const val SLOTS = 2
+        const val HEADER_BYTES = 2
         const val PIN_FILE = "pin.hash"
         const val FORMAT_VERSION: Byte = 1
         const val SALT_BYTES = 16

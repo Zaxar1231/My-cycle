@@ -70,19 +70,21 @@ class MainActivity : ComponentActivity() {
                         }
                         val updateState = updates.state.collectAsStateWithLifecycle().value
                         val autoCheck = updates.autoCheck.collectAsStateWithLifecycle().value
-                        TwilightAppRoot(
-                            startWithOnboarding = !settings.onboardingCompleted,
-                            appearanceSection = { ThemePicker(settings.theme, main::setTheme) },
-                            updatesSection = {
-                                UpdatesCard(
-                                    state = updateState,
-                                    currentVersion = updates.currentVersion,
-                                    autoCheck = autoCheck,
-                                    onCheck = { updates.check() },
-                                    onAutoCheckChange = updates::setAutoCheck,
-                                )
-                            },
-                        )
+                        AppLockGate(lock, biometricUnlock = settings.security.biometricUnlock) {
+                            TwilightAppRoot(
+                                startWithOnboarding = !settings.onboardingCompleted,
+                                appearanceSection = { ThemePicker(settings.theme, main::setTheme) },
+                                updatesSection = {
+                                    UpdatesCard(
+                                        state = updateState,
+                                        currentVersion = updates.currentVersion,
+                                        autoCheck = autoCheck,
+                                        onCheck = { updates.check() },
+                                        onAutoCheckChange = updates::setAutoCheck,
+                                    )
+                                },
+                            )
+                        }
                         // The update dialog would open above the lock screen, so it waits for the unlock.
                         if (!locked) {
                             UpdateDialog(
@@ -92,7 +94,6 @@ class MainActivity : ComponentActivity() {
                                 onDismiss = updates::dismiss,
                             )
                         }
-                        AppLockGate(lock, biometricUnlock = settings.security.biometricUnlock)
                     }
                 }
             }
@@ -107,14 +108,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        val lockAfter = (main.state.value as? AppState.Ready)?.settings?.security?.lockAfterMinutes ?: AutoLock.DEFAULT_MINUTES
-        lock.onForeground(lockAfter)
+        lock.onForeground(lockAfterMinutes())
     }
 
     override fun onStop() {
         super.onStop()
-        lock.onBackground(isChangingConfigurations)
+        lock.onBackground(isChangingConfigurations, lockAfterMinutes())
     }
+
+    private fun lockAfterMinutes() =
+        (main.state.value as? AppState.Ready)?.settings?.security?.lockAfterMinutes ?: AutoLock.DEFAULT_MINUTES
 
     override fun onResume() {
         super.onResume()

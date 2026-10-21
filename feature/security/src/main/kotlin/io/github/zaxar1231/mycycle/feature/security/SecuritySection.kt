@@ -34,21 +34,23 @@ private enum class PinAction { SET, CHANGE_VERIFY, CHANGE_SET, REMOVE }
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
-    val hasPin by viewModel.hasPin.collectAsStateWithLifecycle()
+    val pin by viewModel.hasPin.collectAsStateWithLifecycle()
     val security by viewModel.security.collectAsStateWithLifecycle()
-    val pin = hasPin ?: return
     val options = security ?: return
     val context = LocalContext.current
-    val biometricsAvailable = Biometrics.isAvailable(context)
+    val biometricsAvailable = remember { Biometrics.isAvailable(context) }
     // Re-read when the setting changes; a new fingerprint on the phone invalidates the key.
     val biometricsEnrolled = remember(options.biometricUnlock) { Biometrics.isEnrolled() }
     var biometricError by rememberSaveable { mutableStateOf(false) }
+    val canUseBiometrics = options.biometricUnlock && biometricsAvailable && biometricsEnrolled
+    val pinSaveFailed by viewModel.pinSaveFailed.collectAsStateWithLifecycle()
     var action by rememberSaveable { mutableStateOf<PinAction?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SwitchRow(R.string.security_pin, R.string.security_pin_hint, checked = pin) { on ->
             action = if (on) PinAction.SET else PinAction.REMOVE
         }
+        if (pinSaveFailed) Text(stringResource(R.string.security_pin_save_failed), color = MaterialTheme.colorScheme.error)
         if (pin) {
             TextButton(onClick = { action = PinAction.CHANGE_VERIFY }) { Text(stringResource(R.string.security_change_pin)) }
             SwitchRow(
@@ -59,7 +61,7 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
                     options.biometricUnlock && !biometricsEnrolled -> R.string.security_biometric_invalidated
                     else -> R.string.security_biometric_hint
                 },
-                checked = options.biometricUnlock && biometricsAvailable && biometricsEnrolled,
+                checked = canUseBiometrics,
                 enabled = biometricsAvailable,
             ) { on ->
                 biometricError = false
@@ -100,9 +102,15 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
             },
             onDismiss = { action = null },
         )
-        PinAction.CHANGE_VERIFY -> PinVerifyDialog(viewModel::check, onVerified = { action = PinAction.CHANGE_SET }, onDismiss = { action = null })
+        PinAction.CHANGE_VERIFY -> PinVerifyDialog(
+            viewModel::check,
+            biometrics = canUseBiometrics,
+            onVerified = { action = PinAction.CHANGE_SET },
+            onDismiss = { action = null },
+        )
         PinAction.REMOVE -> PinVerifyDialog(
             viewModel::check,
+            biometrics = canUseBiometrics,
             onVerified = {
                 Biometrics.disable()
                 viewModel.removePin()
@@ -118,11 +126,13 @@ fun SecuritySection(viewModel: SecurityViewModel = hiltViewModel()) {
 @Composable
 fun PinOffer(viewModel: SecurityViewModel = hiltViewModel()) {
     val hasPin by viewModel.hasPin.collectAsStateWithLifecycle()
+    val pinSaveFailed by viewModel.pinSaveFailed.collectAsStateWithLifecycle()
     var setting by rememberSaveable { mutableStateOf(false) }
-    when (hasPin) {
-        null -> Unit
-        true -> Text(stringResource(R.string.security_pin_set), style = MaterialTheme.typography.bodyLarge)
-        false -> Button(onClick = { setting = true }) { Text(stringResource(R.string.security_set_pin)) }
+    if (pinSaveFailed) Text(stringResource(R.string.security_pin_save_failed), color = MaterialTheme.colorScheme.error)
+    if (hasPin) {
+        Text(stringResource(R.string.security_pin_set), style = MaterialTheme.typography.bodyLarge)
+    } else {
+        Button(onClick = { setting = true }) { Text(stringResource(R.string.security_set_pin)) }
     }
     if (setting) {
         PinSetupDialog(

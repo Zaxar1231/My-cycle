@@ -50,4 +50,5 @@
     <string name="security_biometric_invalidated">На телефоне изменились отпечатки или лица. Включите вход по биометрии заново</string>
     <string name="security_biometric_failed">Не удалось включить: нужна блокировка экрана телефона и надёжная биометрия</string>
     <string name="lock_erase_failed">Система не дала удалить данные. Удалите их в настройках Android: Приложения → Twilight Cycle → Хранилище → Очистить данные</string>
+    <string name="security_pin_save_failed">Не удалось сохранить PIN-код на этом устройстве. Попробуйте ещё раз</string>
 </resources>

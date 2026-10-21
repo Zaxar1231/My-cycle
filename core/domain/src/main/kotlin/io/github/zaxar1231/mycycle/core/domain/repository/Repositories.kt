@@ -89,6 +89,9 @@ interface PinRepository {
 
     /** Wrong-attempt freeze still in force, if any. */
     suspend fun lockedUntil(): Long?
+
+    /** After another proof of identity, such as biometrics. */
+    suspend fun resetFailures()
     suspend fun clear()
 }
 

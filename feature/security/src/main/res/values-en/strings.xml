@@ -46,4 +46,5 @@
     <string name="security_biometric_invalidated">Fingerprints or faces on the phone changed. Turn biometric unlock on again</string>
     <string name="security_biometric_failed">Could not turn on: the phone needs a screen lock and strong biometrics</string>
     <string name="lock_erase_failed">The system did not allow erasing the data. Clear it in Android settings: Apps → Twilight Cycle → Storage → Clear data</string>
+    <string name="security_pin_save_failed">Could not save the PIN on this device. Please try again</string>
 </resources>
