@@ -9,6 +9,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.PinRepository
 import io.github.zaxar1231.mycycle.core.domain.time.DateProvider
 import io.github.zaxar1231.mycycle.core.domain.usecase.ObserveCyclePredictionUseCase
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,13 +33,14 @@ import javax.inject.Singleton
 @Singleton
 class WidgetRefresher @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val observePrediction: ObserveCyclePredictionUseCase,
-    private val dayLogs: DayLogRepository,
-    private val pets: PetRepository,
+    // Lazy: these open the database, which must wait for the key check.
+    private val observePrediction: dagger.Lazy<ObserveCyclePredictionUseCase>,
+    private val dayLogs: dagger.Lazy<DayLogRepository>,
+    private val pets: dagger.Lazy<PetRepository>,
     private val pin: PinRepository,
     private val dates: DateProvider,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> })
     private val started = AtomicBoolean(false)
 
     /** Called once the database may be opened (after the key check). */
@@ -53,7 +55,7 @@ class WidgetRefresher @Inject constructor(
                 }
             }.distinctUntilChanged()
             todays.flatMapLatest { today ->
-                combine(observePrediction(today), dayLogs.observe(today), pets.observePet(), pin.hasPin) { a, b, c, d -> listOf(a, b, c, d) }
+                combine(observePrediction.get()(today), dayLogs.get().observe(today), pets.get().observePet(), pin.hasPin) { a, b, c, d -> listOf(a, b, c, d) }
             }.distinctUntilChanged().debounce(SETTLE_MILLIS).collect { refreshNow() }
         }
     }
