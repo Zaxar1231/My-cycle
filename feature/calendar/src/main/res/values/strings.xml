@@ -29,6 +29,7 @@
     <string name="ok">OK</string>
     <string name="content_tip">Совет дня</string>
     <string name="content_symptoms">Симптомы</string>
+    <string name="content_symptoms_heading">У многих в этой фазе бывает</string>
     <string name="content_pros">Плюсы</string>
     <string name="content_cons">Минусы</string>
     <string name="content_bullet">• %1$s</string>

@@ -28,10 +28,10 @@ import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import java.time.LocalDate
 
-/** Groups of phase content, each behind its own pill. */
-private enum class ContentGroup(val title: Int) {
+/** Groups of phase content: a short pill [title] and an optional softer [heading] above the details. */
+private enum class ContentGroup(val title: Int, val heading: Int? = null) {
     TIP(R.string.content_tip),
-    SYMPTOMS(R.string.content_symptoms),
+    SYMPTOMS(R.string.content_symptoms, heading = R.string.content_symptoms_heading),
     PROS(R.string.content_pros),
     CONS(R.string.content_cons),
 }
@@ -57,9 +57,10 @@ fun PhaseContentCard(content: PhaseContent, day: LocalDate, modifier: Modifier =
     val open = openName?.let { name -> groups.keys.firstOrNull { it.name == name } }
 
     Card(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // No spacedBy: closed details take no room, so their gap lives inside Details.
+        Column(Modifier.padding(20.dp)) {
             Text(stringResource(content.phase.labelRes()), style = MaterialTheme.typography.titleMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 groups.forEach { (group, items) ->
                     FilterChip(
                         selected = group == open,
@@ -84,7 +85,8 @@ fun PhaseContentCard(content: PhaseContent, day: LocalDate, modifier: Modifier =
 
 @Composable
 private fun Details(group: ContentGroup, items: List<String>) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(Modifier.fillMaxWidth().padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        group.heading?.let { Text(stringResource(it), style = MaterialTheme.typography.labelLarge) }
         if (group == ContentGroup.TIP) {
             Text(items.first(), style = MaterialTheme.typography.bodyMedium)
         } else {

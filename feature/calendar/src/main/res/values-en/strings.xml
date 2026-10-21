@@ -29,6 +29,7 @@
     <string name="ok">OK</string>
     <string name="content_tip">Tip of the day</string>
     <string name="content_symptoms">Symptoms</string>
+    <string name="content_symptoms_heading">Many people notice in this phase</string>
     <string name="content_pros">Upsides</string>
     <string name="content_cons">Downsides</string>
     <string name="content_bullet">• %1$s</string>
