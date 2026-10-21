@@ -56,6 +56,14 @@ class EditCycleUseCasesTest {
     }
 
     @Test
+    fun `moving only the start adds no end mark the user never set`() = runTest {
+        cycles.items.value = listOf(a, b, c)
+        edit(b, b.startDate.plusDays(1), periodLength = 5)
+        assertEquals(PeriodEvent.STARTED, logs.items[b.startDate.plusDays(1)]?.periodEvent)
+        assertEquals(1, logs.items.size)
+    }
+
+    @Test
     fun `a running period gets no end mark`() = runTest {
         cycles.items.value = listOf(b, c)
         edit(c, c.startDate, periodLength = 6)

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
-import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.stats.ChronologyEntry
 import io.github.zaxar1231.mycycle.core.domain.stats.CycleHistoryItem
@@ -46,7 +45,6 @@ data class CycleEditState(val cycleId: Long, val error: InvalidCycleEditExceptio
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class StatsViewModel @Inject constructor(
-    cycles: CycleRepository,
     dayLogs: DayLogRepository,
     observePrediction: ObserveCyclePredictionUseCase,
     calculator: CycleStatisticsCalculator,
@@ -59,14 +57,15 @@ class StatsViewModel @Inject constructor(
 
     /** Null while loading. */
     val state: StateFlow<StatsUiState?> = today.flatMapLatest { day ->
-        combine(observePrediction(day), cycles.observeCycles(), dayLogs.observeAll()) { prediction, cycleList, logs ->
+        // One subscription to the cycles: the prediction and the list always describe the same data.
+        combine(observePrediction.withCycles(day), dayLogs.observeAll()) { (prediction, cycleList), logs ->
             val history = calculator.history(prediction, cycleList, day)
             StatsUiState(
                 today = day,
                 history = history,
                 summary = calculator.summary(history),
                 logs = calculator.logs(prediction, history, logs),
-                chronology = calculator.chronology(prediction, logs),
+                chronology = calculator.chronology(prediction, history, logs),
             )
         }
     }

@@ -50,12 +50,13 @@ class EditCycleUseCase @Inject constructor(
                 (next != null && !newPeriodEnd.isBefore(next.startDate))
             if (overlaps) throw InvalidCycleEditException(InvalidCycleEditException.Reason.OVERLAP)
 
-            dayLogs.clearPeriodMarks(original.startDate, next?.startDate)
+            val hadEndMark = dayLogs.clearPeriodMarks(original.startDate, next?.startDate)
             cycles.upsert(original.copy(startDate = newStart, periodLength = periodLength).closedBy(next?.startDate))
             previous?.let { cycles.upsert(it.closedBy(newStart)) }
             dayLogs.setPeriodEvent(newStart, PeriodEvent.STARTED)
-            // A period that is still running has no end mark yet.
-            if (periodLength > 1 && !newPeriodEnd.isAfter(today)) {
+            // An end mark only where the user set one or changed the length; a running period has none yet.
+            val endKnown = hadEndMark || periodLength != original.periodLength
+            if (endKnown && periodLength > 1 && !newPeriodEnd.isAfter(today)) {
                 dayLogs.setPeriodEvent(newPeriodEnd, PeriodEvent.ENDED)
             }
         }
@@ -78,13 +79,19 @@ class DeleteCycleUseCase @Inject constructor(
 
 private fun Cycle.periodEnd(): LocalDate = startDate.plusDays(periodLength - 1L)
 
-/** Removes the start mark on [start] and end marks up to the next cycle (or a maximal period). */
-private suspend fun DayLogRepository.clearPeriodMarks(start: LocalDate, nextStart: LocalDate?) {
+/**
+ * Removes the start mark on [start] and end marks up to the next cycle (or a maximal period).
+ * Returns whether an end mark was there.
+ */
+private suspend fun DayLogRepository.clearPeriodMarks(start: LocalDate, nextStart: LocalDate?): Boolean {
     val until = nextStart?.minusDays(1) ?: start.plusDays(CycleConstants.MAX_PERIOD_LENGTH - 1L)
+    var hadEndMark = false
     range(start, until).forEach { log ->
+        if (log.periodEvent == PeriodEvent.ENDED) hadEndMark = true
         val isOwnMark = (log.date == start && log.periodEvent == PeriodEvent.STARTED) || log.periodEvent == PeriodEvent.ENDED
         if (isOwnMark) setPeriodEvent(log.date, null)
     }
+    return hadEndMark
 }
 
 /** Sets or clears the period mark of a day, creating or deleting its log as needed. */

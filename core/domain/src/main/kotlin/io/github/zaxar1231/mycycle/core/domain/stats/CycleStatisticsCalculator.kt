@@ -9,6 +9,7 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CycleConstants.REGULARITY_M
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.cycle.DayKind
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import java.time.LocalDate
@@ -25,12 +26,16 @@ class CycleStatisticsCalculator @Inject constructor() {
         return segments.mapIndexedNotNull { index, segment ->
             val cycle = logged[segment.start] ?: return@mapIndexedNotNull null
             val isCurrent = index == segments.lastIndex
+            // A late period: the prediction ends the current segment yesterday, but the cycle goes on until a new start.
+            val elapsed = if (isCurrent) (days(segment.start, today) + 1).coerceAtLeast(1) else segment.length
             CycleHistoryItem(
                 cycle = cycle,
                 segment = segment,
                 isCurrent = isCurrent,
-                elapsedDays = if (isCurrent) (days(segment.start, today) + 1).coerceIn(1, segment.length) else segment.length,
-                days = List(segment.length) { prediction.dayKind(segment.start.plusDays(it.toLong())) },
+                elapsedDays = elapsed,
+                days = List(maxOf(segment.length, elapsed)) { day ->
+                    if (day < segment.length) prediction.dayKind(segment.start.plusDays(day.toLong())) else DayKind.OTHER
+                },
             )
         }.reversed()
     }
@@ -59,7 +64,7 @@ class CycleStatisticsCalculator @Inject constructor() {
     }
 
     fun logs(prediction: CyclePrediction, history: List<CycleHistoryItem>, logs: List<DayLog>): LogStatistics {
-        val placed = logs.map { it to place(prediction, it.date) }
+        val placed = logs.map { it to place(prediction, history, it.date) }
         val symptomDays = placed.flatMap { (log, place) -> log.symptoms.map { it to place?.first } }
         val moodsByPhase = placed
             .flatMap { (log, place) -> place?.second?.let { phase -> log.moods.map { phase to it } }.orEmpty() }
@@ -79,15 +84,21 @@ class CycleStatisticsCalculator @Inject constructor() {
         )
     }
 
-    fun chronology(prediction: CyclePrediction, logs: List<DayLog>): List<ChronologyEntry> =
+    fun chronology(prediction: CyclePrediction, history: List<CycleHistoryItem>, logs: List<DayLog>): List<ChronologyEntry> =
         logs.sortedByDescending { it.date }.map { log ->
-            val place = place(prediction, log.date)
+            val place = place(prediction, history, log.date)
             ChronologyEntry(log, place?.first, place?.second)
         }
 
-    /** Cycle day and phase of [date], or null when it falls outside the logged cycles. */
-    private fun place(prediction: CyclePrediction, date: LocalDate): Pair<Int, CyclePhase>? {
-        val segment = prediction.segmentFor(date)?.takeUnless { it.isPredicted } ?: return null
+    /**
+     * Cycle day and phase of [date], or null before the first cycle. Days after the current segment
+     * (a late period) still belong to the current cycle: logs are never in the future.
+     */
+    private fun place(prediction: CyclePrediction, history: List<CycleHistoryItem>, date: LocalDate): Pair<Int, CyclePhase>? {
+        val current = history.firstOrNull { it.isCurrent }?.segment
+        val segment = prediction.segmentFor(date)?.takeUnless { it.isPredicted }
+            ?: current?.takeIf { !date.isBefore(it.start) }
+            ?: return null
         val cycleDay = days(segment.start, date) + 1
         return cycleDay to CyclePredictor.phaseOf(cycleDay, segment)
     }

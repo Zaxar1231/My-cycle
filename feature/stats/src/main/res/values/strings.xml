@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stats_title">Статистика</string>
     <string name="stats_tab_cycles">Циклы</string>
     <string name="stats_tab_records">Записи</string>
     <string name="stats_tab_chronology">Хронология</string>

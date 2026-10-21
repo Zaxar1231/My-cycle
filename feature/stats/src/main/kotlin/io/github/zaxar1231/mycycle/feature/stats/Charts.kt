@@ -46,8 +46,9 @@ fun CycleStrip(days: List<DayKind>, elapsedDays: Int, description: String, modif
             .semantics { contentDescription = description },
     ) {
         if (days.isEmpty()) return@Canvas
-        val gap = STRIP_GAP.toPx()
-        val width = (size.width - gap * (days.size - 1)) / days.size
+        // Long cycles (a forgotten start) shrink the gaps, so the pills never get a negative width.
+        val gap = minOf(STRIP_GAP.toPx(), size.width / days.size * MAX_GAP_SHARE)
+        val width = ((size.width - gap * (days.size - 1)) / days.size).coerceAtLeast(MIN_PILL_WIDTH)
         days.forEachIndexed { index, kind ->
             val base = when (kind) {
                 DayKind.PERIOD -> colors.period
@@ -192,6 +193,8 @@ fun HorizontalBar(label: String, value: Int, max: Int, modifier: Modifier = Modi
 private val STRIP_HEIGHT = 18.dp
 private val STRIP_GAP = 2.dp
 private const val FUTURE_ALPHA = 0.35f
+private const val MAX_GAP_SHARE = 0.3f
+private const val MIN_PILL_WIDTH = 1f
 private val CHART_HEIGHT = 160.dp
 private val LABEL_PADDING = 4.dp
 private const val BAR_FILL = 0.6f

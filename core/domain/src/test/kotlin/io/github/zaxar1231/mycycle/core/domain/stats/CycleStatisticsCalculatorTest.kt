@@ -121,12 +121,27 @@ class CycleStatisticsCalculatorTest {
         val today = list.last().startDate.plusDays(1)
         val p = prediction(list, today)
         val before = DayLog(date = first.minusDays(3), note = "x")
-        val entries = calculator.chronology(p, listOf(before, DayLog(date = first.plusDays(2), note = "y")))
+        val entries = calculator.chronology(p, calculator.history(p, list, today), listOf(before, DayLog(date = first.plusDays(2), note = "y")))
 
         assertEquals(first.plusDays(2), entries.first().log.date)
         assertEquals(3, entries.first().cycleDay)
         assertEquals(CyclePhase.MENSTRUAL, entries.first().phase)
         assertNull(entries.last().cycleDay)
         assertNull(entries.last().phase)
+    }
+
+    @Test
+    fun `a late period keeps today in the current cycle`() {
+        val list = cycles(28)
+        val today = list.last().startDate.plusDays(28)
+        val p = prediction(list, today)
+        val history = calculator.history(p, list, today)
+
+        assertEquals(29, history.first().elapsedDays)
+        assertEquals(29, history.first().days.size)
+        assertEquals(DayKind.OTHER, history.first().days.last())
+        val entry = calculator.chronology(p, history, listOf(DayLog(date = today, note = "late"))).single()
+        assertEquals(29, entry.cycleDay)
+        assertEquals(CyclePhase.LUTEAL, entry.phase)
     }
 }
