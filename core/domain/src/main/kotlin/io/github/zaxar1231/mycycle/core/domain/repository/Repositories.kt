@@ -3,6 +3,7 @@ package io.github.zaxar1231.mycycle.core.domain.repository
 import io.github.zaxar1231.mycycle.core.domain.model.Affirmation
 import io.github.zaxar1231.mycycle.core.domain.model.Cycle
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
+import io.github.zaxar1231.mycycle.core.domain.model.HomeLayout
 import io.github.zaxar1231.mycycle.core.domain.model.Medication
 import io.github.zaxar1231.mycycle.core.domain.model.Pet
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
@@ -68,6 +69,8 @@ interface SettingsRepository {
 
     /** Only the seed, on top of the latest saved theme, so a change made meanwhile is kept. */
     suspend fun setSeedColor(seed: Int) = update { it.copy(theme = it.theme.copy(seedColor = seed)) }
+
+    suspend fun setHomeLayout(layout: HomeLayout) = update { it.copy(homeLayout = layout) }
 }
 
 enum class DataAccessStatus { READY, KEY_LOST }

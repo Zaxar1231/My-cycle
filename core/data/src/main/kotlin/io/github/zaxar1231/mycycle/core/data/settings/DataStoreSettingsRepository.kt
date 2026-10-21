@@ -13,6 +13,7 @@ import io.github.zaxar1231.mycycle.core.data.db.Converters.Companion.enumOrNull
 import io.github.zaxar1231.mycycle.core.data.db.ProfileDao
 import io.github.zaxar1231.mycycle.core.data.db.ProfileEntity
 import io.github.zaxar1231.mycycle.core.domain.model.AppFont
+import io.github.zaxar1231.mycycle.core.domain.model.HomeLayoutCodec
 import io.github.zaxar1231.mycycle.core.domain.model.HomeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.SecuritySettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
@@ -93,6 +94,7 @@ class DataStoreSettingsRepository @Inject constructor(
                 customFontFile = prefs[THEME_CUSTOM_FONT],
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
+            homeLayout = HomeLayoutCodec.decode(prefs[HOME_LAYOUT]),
             security = SecuritySettings(
                 biometricUnlock = prefs[BIOMETRIC_UNLOCK] ?: defaults.security.biometricUnlock,
                 lockAfterMinutes = prefs[LOCK_AFTER_MINUTES]?.takeIf { it in AutoLock.OPTIONS_MINUTES }
@@ -116,6 +118,7 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[BIOMETRIC_UNLOCK] = security.biometricUnlock
         prefs[LOCK_AFTER_MINUTES] = security.lockAfterMinutes
         prefs[HIDE_IN_RECENTS] = security.hideInRecents
+        prefs[HOME_LAYOUT] = HomeLayoutCodec.encode(homeLayout)
     }
 
     private companion object {
@@ -132,5 +135,6 @@ class DataStoreSettingsRepository @Inject constructor(
         val BIOMETRIC_UNLOCK = booleanPreferencesKey("biometric_unlock")
         val LOCK_AFTER_MINUTES = intPreferencesKey("lock_after_minutes")
         val HIDE_IN_RECENTS = booleanPreferencesKey("hide_in_recents")
+        val HOME_LAYOUT = stringPreferencesKey("home_layout")
     }
 }

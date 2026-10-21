@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.model.HomeLayout
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
@@ -105,6 +106,11 @@ class CalendarViewModel @Inject constructor(
     /** Null until the saved theme is read, so the picker never starts from defaults and overwrites it. */
     val theme: StateFlow<ThemeSettings?> = settings.settings
         .map { it.theme }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    /** Null until read, so the home screen never flashes the default layout. */
+    val layout: StateFlow<HomeLayout?> = settings.settings
+        .map { it.homeLayout }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
     fun setSeedColor(seed: Int) = saveTheme { settings.setSeedColor(seed) }

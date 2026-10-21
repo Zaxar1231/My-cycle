@@ -9,6 +9,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
+import io.github.zaxar1231.mycycle.core.ui.component.LocalBlockStyle
 import io.github.zaxar1231.mycycle.core.domain.insights.Hormone
 import io.github.zaxar1231.mycycle.core.domain.insights.HormoneModel
 import java.time.format.DateTimeFormatter
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -135,10 +138,6 @@ fun CycleHero(
             style == HomeStyle.MOON -> MoonHero(shape, pages)
             style == HomeStyle.ORBIT -> OrbitHero(shape, pages)
             else -> WaveHero(shape, pages)
-        }
-        if (shape != null) {
-            Spacer(Modifier.height(AIR))
-            KeyDates(shape)
         }
         Spacer(Modifier.height(AIR))
         HeroAction(prediction, onEditPeriod, onPeriodStarted)
@@ -427,10 +426,19 @@ private fun Legend(withHormone: Boolean) {
     }
 }
 
+/** The "key dates" home block; empty without a current cycle. */
+@Composable
+fun KeyDatesCard(prediction: CyclePrediction, today: LocalDate) {
+    prediction.shapeOn(today)?.let { KeyDates(it) }
+}
+
 /** The dates that matter in this cycle, in a card: period, fertile window, ovulation, next period. */
 @Composable
 private fun KeyDates(shape: CycleShape) {
     val colors = TwilightThemeExtras.cycleColors
+    // On a custom-coloured card the accent could clash, so values follow the card's text colour.
+    val valueColor = if (LocalBlockStyle.current.color == null) MaterialTheme.colorScheme.primary else LocalContentColor.current
+    val noteColor = LocalContentColor.current.copy(alpha = NOTE_ALPHA)
     val format = remember { DateTimeFormatter.ofPattern(DAY_MONTH) }
     val rangeFormat = stringResource(R.string.key_range)
     fun range(from: Int, to: Int) =
@@ -441,18 +449,18 @@ private fun KeyDates(shape: CycleShape) {
         Triple(colors.ovulation, R.string.key_ovulation, shape.dateOf(shape.ovulation).format(format)),
         Triple(MaterialTheme.colorScheme.primary, R.string.key_next_period, shape.nextPeriod.format(format)),
     )
-    Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(TILE_CORNER), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    BlockCard {
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(stringResource(R.string.key_dates_title), style = MaterialTheme.typography.titleMedium)
             rows.forEach { (color, label, value) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(LEGEND_DOT).clip(CircleShape).background(color))
                     Spacer(Modifier.size(12.dp))
                     Text(stringResource(label), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                    Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(value, style = MaterialTheme.typography.bodyLarge, color = valueColor)
                 }
             }
-            Text(stringResource(R.string.key_dates_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.key_dates_note), style = MaterialTheme.typography.bodySmall, color = noteColor)
         }
     }
 }
@@ -505,6 +513,7 @@ private const val GLOW_ALPHA = 0.18f
 private const val GLOW_SCALE = 1.35f
 private const val MIN_LIT = 0.01f
 private const val RIM_ALPHA = 0.4f
+private const val NOTE_ALPHA = 0.75f
 private val ORBIT_MAX = 320.dp
 private val ORBIT_INSET = 20.dp
 private val ORBIT_STROKE = 6.dp

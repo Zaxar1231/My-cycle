@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,9 +27,15 @@ fun NavGraphBuilder.settingsScreen(
     appearanceSection: @Composable () -> Unit,
     securitySection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
+    onCustomizeHome: () -> Unit,
 ) {
     composable<SettingsRoute> {
-        SettingsScreen(appearanceSection = appearanceSection, securitySection = securitySection, updatesSection = updatesSection)
+        SettingsScreen(
+            appearanceSection = appearanceSection,
+            securitySection = securitySection,
+            updatesSection = updatesSection,
+            onCustomizeHome = onCustomizeHome,
+        )
     }
 }
 
@@ -37,6 +44,7 @@ fun SettingsScreen(
     appearanceSection: @Composable () -> Unit,
     securitySection: @Composable () -> Unit,
     updatesSection: @Composable () -> Unit,
+    onCustomizeHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -55,6 +63,7 @@ fun SettingsScreen(
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
+                OutlinedButton(onClick = onCustomizeHome, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_customize_home)) }
                 appearanceSection()
             }
         }

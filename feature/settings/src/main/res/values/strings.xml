@@ -4,4 +4,5 @@
     <string name="settings_placeholder">Уведомления, стили Liquid Glass и партнёрский режим появятся на следующих этапах.</string>
     <string name="settings_appearance">Оформление</string>
     <string name="settings_security">Безопасность</string>
+    <string name="settings_customize_home">Настроить главный экран</string>
 </resources>
