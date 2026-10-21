@@ -73,4 +73,14 @@
     <string name="theme_style_neon">Неон</string>
     <string name="theme_always_dark">Этот стиль всегда тёмный.</string>
     <string name="theme_glass_no_blur">Размытие доступно на Android 12 и новее, здесь стекло будет без него.</string>
+    <string name="theme_font">Шрифт</string>
+    <string name="font_system">Системный</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_nunito">Nunito</string>
+    <string name="font_comfortaa">Comfortaa</string>
+    <string name="font_lora">Lora</string>
+    <string name="font_caveat">Caveat</string>
+    <string name="font_custom">Свой файл…</string>
+    <string name="font_custom_hint">Шрифт из файла. Он хранится только внутри приложения; чтобы сменить, нажмите «Свой файл…» ещё раз.</string>
+    <string name="font_custom_failed">Не удалось открыть шрифт. Подойдут файлы .ttf и .otf размером до 15 МБ.</string>
 </resources>

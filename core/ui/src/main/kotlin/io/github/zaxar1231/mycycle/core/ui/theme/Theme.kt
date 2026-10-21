@@ -14,6 +14,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import io.github.zaxar1231.mycycle.core.domain.model.AppFont
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
@@ -29,8 +30,12 @@ fun TwilightTheme(
     style: ThemeStyle = ThemeStyle.ROSE,
     showFlowers: Boolean = true,
     seedColor: Int = ThemeSettings.DEFAULT_SEED_COLOR,
+    font: AppFont = AppFont.SYSTEM,
+    customFontFile: String? = null,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
+    val typography = remember(font, customFontFile) { typographyWith(font.family(context, customFontFile)) }
     val dark = darkTheme || style.alwaysDark
     val colorScheme = when {
         style == ThemeStyle.ROSE -> if (dark) RoseDark else RoseLight
@@ -41,7 +46,6 @@ fun TwilightTheme(
         style == ThemeStyle.PASTEL -> remember(dark) { pastelScheme(dark) }
         style == ThemeStyle.PAPER -> remember(dark) { paperScheme(dark) }
         style == ThemeStyle.MATERIAL_YOU && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
             if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         dark -> TwilightDark
@@ -57,7 +61,7 @@ fun TwilightTheme(
         LocalSolidBackground provides solid,
         LocalDarkTheme provides dark,
     ) {
-        MaterialTheme(colorScheme = colorScheme) {
+        MaterialTheme(colorScheme = colorScheme, typography = typography) {
             // The same tree in every style: switching to glass must not recreate the app below.
             Box {
                 if (glass) GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
@@ -75,7 +79,15 @@ fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    TwilightTheme(darkTheme = dark, style = settings.style, showFlowers = settings.flowers, seedColor = settings.seedColor, content = content)
+    TwilightTheme(
+        darkTheme = dark,
+        style = settings.style,
+        showFlowers = settings.flowers,
+        seedColor = settings.seedColor,
+        font = settings.font,
+        customFontFile = settings.customFontFile,
+        content = content,
+    )
 }
 
 /** Whether decorative flowers are drawn (the user can turn them off). */

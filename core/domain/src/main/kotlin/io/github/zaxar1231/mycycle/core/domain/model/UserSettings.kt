@@ -35,6 +35,9 @@ data class ThemeSettings(
     val home: HomeStyle = HomeStyle.MOON,
     /** ARGB seed of the [ThemeStyle.CUSTOM] scheme, picked on the colour wheel. */
     val seedColor: Int = DEFAULT_SEED_COLOR,
+    val font: AppFont = AppFont.SYSTEM,
+    /** File name of the user's own font in app storage, for [AppFont.CUSTOM]. */
+    val customFontFile: String? = null,
 ) {
     companion object {
         const val DEFAULT_SEED_COLOR: Int = 0xFF8E6BBF.toInt()
@@ -50,6 +53,9 @@ enum class ThemeStyle {
 
     val alwaysDark: Boolean get() = this == AMOLED || this == NEON
 }
+
+/** Typeface of the whole interface. The named ones ship in the app (OFL); [CUSTOM] is a file the user picked. */
+enum class AppFont { SYSTEM, INTER, NUNITO, COMFORTAA, LORA, CAVEAT, CUSTOM }
 
 /** The picture at the top of the home screen. */
 enum class HomeStyle { MOON, ORBIT, WAVE, MOSAIC, RING }
