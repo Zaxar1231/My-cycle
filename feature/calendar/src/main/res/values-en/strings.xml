@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="calendar_title">Calendar</string>
-    <string name="calendar_placeholder">Today is %1$s. The cycle calendar with phases and predictions arrives in stage 3.</string>
+    <string name="today_no_data_title">Mark the start of your period</string>
+    <string name="today_no_data_text">Predictions appear once the app knows when your last period started.</string>
+    <string name="today_period_started">My period started today</string>
+    <string name="today_cycle_day">Cycle day %1$d</string>
+    <string name="today_period_expected_today">Period expected today</string>
+    <string name="today_ovulation_today">Ovulation expected today</string>
+    <string name="today_fertile_window">Fertile window: %1$s – %2$s</string>
+    <string name="today_ovulation_confirmed">Ovulation by temperature</string>
+    <string name="confidence_low">Low accuracy</string>
+    <string name="confidence_medium">Medium accuracy</string>
+    <string name="confidence_high">High accuracy</string>
+    <string name="source_onboarding">Based on your onboarding values, it gets more precise after two logged cycles.</string>
+    <string name="source_defaults">Based on standard values (28-day cycle, 5-day period), so accuracy is low. It gets more precise after two logged cycles.</string>
+    <string name="calendar_previous_month">Previous month</string>
+    <string name="calendar_next_month">Next month</string>
+    <string name="calendar_back_to_today">Back to today</string>
+    <string name="kind_period">Period</string>
+    <string name="kind_predicted_period">Predicted period</string>
+    <string name="kind_fertile">Fertile window</string>
+    <string name="kind_ovulation">Ovulation</string>
+    <string name="kind_luteal">Luteal phase</string>
+    <string name="kind_other">Regular day</string>
+    <string name="day_predicted_note">This is a prediction and may shift.</string>
+    <string name="day_log_button">Log this day</string>
+    <plurals name="today_until_period">
+        <item quantity="one">Period in %1$d day</item>
+        <item quantity="other">Period in %1$d days</item>
+    </plurals>
+    <plurals name="today_period_late">
+        <item quantity="one">%1$d day late</item>
+        <item quantity="other">%1$d days late</item>
+    </plurals>
+    <plurals name="today_until_ovulation">
+        <item quantity="one">Ovulation in %1$d day</item>
+        <item quantity="other">Ovulation in %1$d days</item>
+    </plurals>
 </resources>

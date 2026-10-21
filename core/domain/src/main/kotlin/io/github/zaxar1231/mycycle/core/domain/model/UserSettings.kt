@@ -9,6 +9,8 @@ data class UserSettings(
     val accountId: String? = null,
     val usualCycleLength: Int = CycleConstants.DEFAULT_CYCLE_LENGTH,
     val usualPeriodLength: Int = CycleConstants.DEFAULT_PERIOD_LENGTH,
+    /** The user answered "I don't know" in onboarding, so the usual lengths are standard values. */
+    val usualLengthsEstimated: Boolean = false,
     val theme: ThemeSettings = ThemeSettings(),
     val pinSuggestionDismissed: Boolean = false,
 )

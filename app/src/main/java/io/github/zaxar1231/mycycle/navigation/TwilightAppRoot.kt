@@ -25,6 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.zaxar1231.mycycle.R
+import java.time.LocalDate
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
 import io.github.zaxar1231.mycycle.feature.calendar.calendarScreen
 import io.github.zaxar1231.mycycle.feature.daylog.DayLogRoute
@@ -55,7 +56,7 @@ fun TwilightAppRoot(
         bottomBar = {
             if (showBars) {
                 BottomBar(navController, destination, onAddLog = {
-                    navController.navigate(DayLogRoute) { launchSingleTop = true }
+                    navController.navigate(DayLogRoute(LocalDate.now())) { launchSingleTop = true }
                 })
             }
         },
@@ -70,7 +71,7 @@ fun TwilightAppRoot(
             onboardingScreen(onFinished = {
                 navController.navigate(CalendarRoute) { popUpTo(OnboardingRoute) { inclusive = true } }
             })
-            calendarScreen()
+            calendarScreen(onOpenDayLog = { date -> navController.navigate(DayLogRoute(date)) { launchSingleTop = true } })
             statsScreen()
             petScreen()
             settingsScreen(appearanceSection = appearanceSection, updatesSection = updatesSection)

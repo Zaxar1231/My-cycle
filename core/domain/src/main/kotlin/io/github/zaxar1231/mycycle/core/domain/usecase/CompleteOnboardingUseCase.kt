@@ -44,6 +44,7 @@ class CompleteOnboardingUseCase @Inject constructor(
                 role = input.role,
                 usualCycleLength = cycleLength,
                 usualPeriodLength = periodLength,
+                usualLengthsEstimated = input.cycleLength == null,
                 theme = input.theme,
             )
         }
