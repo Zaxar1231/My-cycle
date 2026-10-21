@@ -66,4 +66,11 @@
     <string name="color_wheel_hue_previous">Previous hue</string>
     <string name="color_wheel_more_saturated">More saturated</string>
     <string name="color_wheel_less_saturated">Less saturated</string>
+    <string name="theme_style_glass">Liquid Glass</string>
+    <string name="theme_style_amoled">AMOLED</string>
+    <string name="theme_style_pastel">Pastel</string>
+    <string name="theme_style_paper">Paper</string>
+    <string name="theme_style_neon">Neon</string>
+    <string name="theme_always_dark">This style is always dark.</string>
+    <string name="theme_glass_no_blur">Blur needs Android 12 or newer; here the glass is drawn without it.</string>
 </resources>

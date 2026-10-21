@@ -41,8 +41,15 @@ data class ThemeSettings(
     }
 }
 
-/** [ROSE] is the default look: dark background, rose accents. [CUSTOM] is built from [ThemeSettings.seedColor]. */
-enum class ThemeStyle { ROSE, MATERIAL_YOU, TWILIGHT, CUSTOM }
+/**
+ * [ROSE] is the default look: dark background, rose accents. [CUSTOM] is built from
+ * [ThemeSettings.seedColor]. [AMOLED] and [NEON] are always dark.
+ */
+enum class ThemeStyle {
+    ROSE, MATERIAL_YOU, TWILIGHT, CUSTOM, LIQUID_GLASS, AMOLED, PASTEL, PAPER, NEON;
+
+    val alwaysDark: Boolean get() = this == AMOLED || this == NEON
+}
 
 /** The picture at the top of the home screen. */
 enum class HomeStyle { MOON, ORBIT, WAVE, MOSAIC, RING }

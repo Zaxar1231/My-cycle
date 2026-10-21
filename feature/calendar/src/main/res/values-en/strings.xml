@@ -63,4 +63,18 @@
     <string name="hero_day_title">Day %1$s</string>
     <string name="hero_moon_description">Cycle day %1$d of %2$d</string>
     <string name="hero_cycle_day_phase">%1$s · %2$s</string>
+    <string name="hero_moon_caption">New moon is the first day of the period, full moon the predicted ovulation day</string>
+    <string name="legend_period">Period</string>
+    <string name="legend_fertile">Fertile window</string>
+    <string name="legend_ovulation">Ovulation</string>
+    <string name="legend_today">Today</string>
+    <string name="legend_estrogen">Estrogen</string>
+    <string name="legend_estrogen_note">The curve is an approximate estrogen level from a typical model, not a test result.</string>
+    <string name="key_dates_title">Key dates of this cycle</string>
+    <string name="key_period">Period</string>
+    <string name="key_fertile">Fertile window</string>
+    <string name="key_ovulation">Ovulation</string>
+    <string name="key_next_period">Next period</string>
+    <string name="key_range">%1$s – %2$s</string>
+    <string name="key_dates_note">Dates are approximate: a forecast from past cycles, not medical advice and not a method of contraception.</string>
 </resources>

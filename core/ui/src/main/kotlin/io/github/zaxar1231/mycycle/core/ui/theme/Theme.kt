@@ -2,6 +2,7 @@ package io.github.zaxar1231.mycycle.core.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -10,6 +11,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
@@ -28,22 +31,39 @@ fun TwilightTheme(
     seedColor: Int = ThemeSettings.DEFAULT_SEED_COLOR,
     content: @Composable () -> Unit,
 ) {
+    val dark = darkTheme || style.alwaysDark
     val colorScheme = when {
-        style == ThemeStyle.ROSE -> if (darkTheme) RoseDark else RoseLight
-        style == ThemeStyle.CUSTOM -> remember(seedColor, darkTheme) { seedColorScheme(seedColor, darkTheme) }
+        style == ThemeStyle.ROSE -> if (dark) RoseDark else RoseLight
+        style == ThemeStyle.CUSTOM -> remember(seedColor, dark) { seedColorScheme(seedColor, dark) }
+        style == ThemeStyle.LIQUID_GLASS -> remember(dark) { glassScheme(dark) }
+        style == ThemeStyle.AMOLED -> remember { amoledScheme() }
+        style == ThemeStyle.NEON -> remember { neonScheme() }
+        style == ThemeStyle.PASTEL -> remember(dark) { pastelScheme(dark) }
+        style == ThemeStyle.PAPER -> remember(dark) { paperScheme(dark) }
         style == ThemeStyle.MATERIAL_YOU && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> TwilightDark
+        dark -> TwilightDark
         else -> TwilightLight
     }
-    val cycleColors = if (style == ThemeStyle.ROSE) roseCycleColors(colorScheme, darkTheme) else colorScheme.toCycleColors()
+    val cycleColors = if (style == ThemeStyle.ROSE) roseCycleColors(colorScheme, dark) else colorScheme.toCycleColors()
+    val glass = style == ThemeStyle.LIQUID_GLASS
+    val solid = if (glass) glassBase(dark) else colorScheme.background
     CompositionLocalProvider(
         LocalCycleColors provides cycleColors,
         LocalShowFlowers provides showFlowers,
+        LocalThemeStyle provides style,
+        LocalSolidBackground provides solid,
+        LocalDarkTheme provides dark,
     ) {
-        MaterialTheme(colorScheme = colorScheme, content = content)
+        MaterialTheme(colorScheme = colorScheme) {
+            // The same tree in every style: switching to glass must not recreate the app below.
+            Box {
+                if (glass) GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
+                content()
+            }
+        }
     }
 }
 
@@ -61,7 +81,25 @@ fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
 /** Whether decorative flowers are drawn (the user can turn them off). */
 val LocalShowFlowers = staticCompositionLocalOf { true }
 
+/** The active style, for components that look different per style, such as the PIN pad. */
+val LocalThemeStyle = staticCompositionLocalOf { ThemeStyle.ROSE }
+
+/**
+ * An opaque background colour. Under Liquid Glass the scheme's background is transparent, so
+ * screens that must hide what is behind them, like the lock screen, paint this instead.
+ */
+val LocalSolidBackground = staticCompositionLocalOf { Color.Black }
+
+/** Whether the effective theme is dark, including styles that are always dark. */
+val LocalDarkTheme = staticCompositionLocalOf { false }
+
 object TwilightThemeExtras {
     val cycleColors: CycleColors
         @Composable @ReadOnlyComposable get() = LocalCycleColors.current
+
+    val solidBackground: Color
+        @Composable @ReadOnlyComposable get() = LocalSolidBackground.current
+
+    val style: ThemeStyle
+        @Composable @ReadOnlyComposable get() = LocalThemeStyle.current
 }

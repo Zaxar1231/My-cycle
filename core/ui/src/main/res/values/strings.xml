@@ -66,4 +66,11 @@
     <string name="color_wheel_hue_previous">Предыдущий оттенок</string>
     <string name="color_wheel_more_saturated">Насыщеннее</string>
     <string name="color_wheel_less_saturated">Бледнее</string>
+    <string name="theme_style_glass">Liquid Glass</string>
+    <string name="theme_style_amoled">AMOLED</string>
+    <string name="theme_style_pastel">Пастель</string>
+    <string name="theme_style_paper">Бумага</string>
+    <string name="theme_style_neon">Неон</string>
+    <string name="theme_always_dark">Этот стиль всегда тёмный.</string>
+    <string name="theme_glass_no_blur">Размытие доступно на Android 12 и новее, здесь стекло будет без него.</string>
 </resources>

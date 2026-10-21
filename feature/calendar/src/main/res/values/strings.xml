@@ -72,4 +72,18 @@
     <string name="hero_day_title">День %1$s</string>
     <string name="hero_moon_description">День цикла %1$d из %2$d</string>
     <string name="hero_cycle_day_phase">%1$s · %2$s</string>
+    <string name="hero_moon_caption">Новолуние — первый день месячных, полнолуние — день овуляции по прогнозу</string>
+    <string name="legend_period">Месячные</string>
+    <string name="legend_fertile">Фертильное окно</string>
+    <string name="legend_ovulation">Овуляция</string>
+    <string name="legend_today">Сегодня</string>
+    <string name="legend_estrogen">Эстроген</string>
+    <string name="legend_estrogen_note">Кривая — примерный уровень эстрогена по типичной модели, а не результат анализа.</string>
+    <string name="key_dates_title">Ключевые даты цикла</string>
+    <string name="key_period">Месячные</string>
+    <string name="key_fertile">Фертильное окно</string>
+    <string name="key_ovulation">Овуляция</string>
+    <string name="key_next_period">Следующие месячные</string>
+    <string name="key_range">%1$s – %2$s</string>
+    <string name="key_dates_note">Даты примерные: это прогноз по прошлым циклам, а не медицинская консультация и не метод контрацепции.</string>
 </resources>

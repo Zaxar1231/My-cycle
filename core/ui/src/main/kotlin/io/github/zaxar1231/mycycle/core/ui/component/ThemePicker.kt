@@ -58,6 +58,10 @@ fun ThemePicker(
         if (settings.style == ThemeStyle.MATERIAL_YOU && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             Hint(R.string.theme_material_you_unsupported)
         }
+        if (settings.style.alwaysDark) Hint(R.string.theme_always_dark)
+        if (settings.style == ThemeStyle.LIQUID_GLASS && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            Hint(R.string.theme_glass_no_blur)
+        }
         if (settings.style == ThemeStyle.CUSTOM) {
             Hint(R.string.theme_custom_hint)
             SeedPicker(settings.seedColor, onSeedChange)
@@ -67,7 +71,9 @@ fun ThemePicker(
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             ThemeMode.entries.forEachIndexed { index, option ->
                 SegmentedButton(
-                    selected = option == settings.mode,
+                    enabled = !settings.style.alwaysDark,
+                    // Always-dark styles show "Dark"; the saved mode returns with another style.
+                    selected = if (settings.style.alwaysDark) option == ThemeMode.DARK else option == settings.mode,
                     onClick = { onChange(settings.copy(mode = option)) },
                     shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size),
                 ) { Text(stringResource(option.labelRes())) }
@@ -125,6 +131,11 @@ private fun ThemeStyle.labelRes() = when (this) {
     ThemeStyle.MATERIAL_YOU -> R.string.theme_style_material_you
     ThemeStyle.TWILIGHT -> R.string.theme_style_twilight
     ThemeStyle.CUSTOM -> R.string.theme_style_custom
+    ThemeStyle.LIQUID_GLASS -> R.string.theme_style_glass
+    ThemeStyle.AMOLED -> R.string.theme_style_amoled
+    ThemeStyle.PASTEL -> R.string.theme_style_pastel
+    ThemeStyle.PAPER -> R.string.theme_style_paper
+    ThemeStyle.NEON -> R.string.theme_style_neon
 }
 
 private fun ThemeMode.labelRes() = when (this) {
