@@ -26,6 +26,7 @@ import io.github.zaxar1231.mycycle.core.data.repository.RoomPetRepository
 import io.github.zaxar1231.mycycle.core.data.repository.RoomTransactionRunner
 import io.github.zaxar1231.mycycle.core.data.security.DatabaseKeyProvider
 import io.github.zaxar1231.mycycle.core.data.security.EncryptedDataAccess
+import io.github.zaxar1231.mycycle.core.data.security.KeystorePinRepository
 import io.github.zaxar1231.mycycle.core.data.settings.DataStoreSettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.AffirmationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.CycleRepository
@@ -34,6 +35,7 @@ import io.github.zaxar1231.mycycle.core.domain.repository.DayLogRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.MedicationRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PetRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
+import io.github.zaxar1231.mycycle.core.domain.repository.PinRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
 import io.github.zaxar1231.mycycle.core.domain.repository.TransactionRunner
 import io.github.zaxar1231.mycycle.core.domain.wellness.AffirmationGenerator
@@ -99,4 +101,6 @@ interface RepositoryModule {
     @Binds fun affirmations(impl: RoomAffirmationRepository): AffirmationRepository
 
     @Binds fun affirmationGenerator(impl: TemplateAffirmationGenerator): AffirmationGenerator
+
+    @Binds fun pin(impl: KeystorePinRepository): PinRepository
 }

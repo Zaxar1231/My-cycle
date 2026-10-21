@@ -6,17 +6,20 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.Lazy
 import io.github.zaxar1231.mycycle.core.data.db.Converters.Companion.enumOrNull
 import io.github.zaxar1231.mycycle.core.data.db.ProfileDao
 import io.github.zaxar1231.mycycle.core.data.db.ProfileEntity
+import io.github.zaxar1231.mycycle.core.domain.model.SecuritySettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeMode
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 import io.github.zaxar1231.mycycle.core.domain.model.UserRole
 import io.github.zaxar1231.mycycle.core.domain.model.UserSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.SettingsRepository
+import io.github.zaxar1231.mycycle.core.domain.security.AutoLock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -65,6 +68,7 @@ class DataStoreSettingsRepository @Inject constructor(
         store.edit { prefs ->
             prefs[ONBOARDING_COMPLETED] = false
             prefs.remove(PIN_SUGGESTION_DISMISSED)
+            prefs.remove(BIOMETRIC_UNLOCK)
         }
     }
 
@@ -83,6 +87,12 @@ class DataStoreSettingsRepository @Inject constructor(
                 flowers = prefs[THEME_FLOWERS] ?: defaults.theme.flowers,
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
+            security = SecuritySettings(
+                biometricUnlock = prefs[BIOMETRIC_UNLOCK] ?: defaults.security.biometricUnlock,
+                lockAfterMinutes = prefs[LOCK_AFTER_MINUTES]?.takeIf { it in AutoLock.OPTIONS_MINUTES }
+                    ?: defaults.security.lockAfterMinutes,
+                hideInRecents = prefs[HIDE_IN_RECENTS] ?: defaults.security.hideInRecents,
+            ),
         )
     }
 
@@ -93,6 +103,9 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[THEME_FLOWERS] = theme.flowers
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
         prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
+        prefs[BIOMETRIC_UNLOCK] = security.biometricUnlock
+        prefs[LOCK_AFTER_MINUTES] = security.lockAfterMinutes
+        prefs[HIDE_IN_RECENTS] = security.hideInRecents
     }
 
     private companion object {
@@ -102,5 +115,8 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME_FLOWERS = booleanPreferencesKey("theme_flowers")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
         val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
+        val BIOMETRIC_UNLOCK = booleanPreferencesKey("biometric_unlock")
+        val LOCK_AFTER_MINUTES = intPreferencesKey("lock_after_minutes")
+        val HIDE_IN_RECENTS = booleanPreferencesKey("hide_in_recents")
     }
 }
