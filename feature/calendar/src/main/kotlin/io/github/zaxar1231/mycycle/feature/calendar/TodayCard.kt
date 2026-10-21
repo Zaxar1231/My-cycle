@@ -2,10 +2,8 @@ package io.github.zaxar1231.mycycle.feature.calendar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,12 +27,18 @@ import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
 @Composable
 fun TodayCard(prediction: CyclePrediction, onPeriodStarted: () -> Unit, modifier: Modifier = Modifier) {
+    val hasCycles = prediction.timeline.isNotEmpty()
     val status = prediction.today
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (status == null && hasCycles) {
+                // Logged cycles start after today, for example after the device clock moved back.
+                Text(stringResource(R.string.today_cycle_in_future), style = MaterialTheme.typography.bodyMedium)
+                return@Column
+            }
             if (status == null) {
                 Text(stringResource(R.string.today_no_data_title), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.today_no_data_text), style = MaterialTheme.typography.bodyMedium)
@@ -65,11 +69,9 @@ fun TodayCard(prediction: CyclePrediction, onPeriodStarted: () -> Unit, modifier
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip(onClick = {}, label = { Text(stringResource(prediction.confidence.labelRes())) })
-                if (status.ovulationConfirmed) {
-                    AssistChip(onClick = {}, label = { Text(stringResource(R.string.today_ovulation_confirmed)) })
-                }
+            Text(stringResource(prediction.confidence.labelRes()), style = MaterialTheme.typography.labelLarge)
+            if (status.currentOvulationConfirmed) {
+                Text(stringResource(R.string.today_ovulation_confirmed), style = MaterialTheme.typography.labelLarge)
             }
             prediction.source.noteRes()?.let {
                 Text(stringResource(it), style = MaterialTheme.typography.bodySmall)

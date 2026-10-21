@@ -31,6 +31,15 @@ class RecordPeriodStartUseCase @Inject constructor(
             )
         }
         val length = periodLength.coerceIn(CycleConstants.MIN_PERIOD_LENGTH, CycleConstants.MAX_PERIOD_LENGTH)
-        cycles.upsert(Cycle(startDate = date, periodLength = length))
+        // A back-dated start that lands before a later cycle ends where that cycle begins.
+        val next = existing.firstOrNull { it.startDate.isAfter(date) }
+        cycles.upsert(
+            Cycle(
+                startDate = date,
+                periodLength = length,
+                endDate = next?.startDate?.minusDays(1),
+                cycleLength = next?.let { ChronoUnit.DAYS.between(date, it.startDate).toInt() },
+            ),
+        )
     }
 }

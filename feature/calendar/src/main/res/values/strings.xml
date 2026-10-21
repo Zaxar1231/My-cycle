@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_title">Календарь</string>
     <string name="today_no_data_title">Отметьте начало месячных</string>
     <string name="today_no_data_text">Прогноз появится, когда приложение узнает, когда начались последние месячные.</string>
     <string name="today_period_started">Месячные начались сегодня</string>
@@ -8,7 +7,6 @@
     <string name="today_period_expected_today">Месячные ожидаются сегодня</string>
     <string name="today_ovulation_today">Овуляция ожидается сегодня</string>
     <string name="today_fertile_window">Фертильное окно: %1$s – %2$s</string>
-    <string name="today_ovulation_confirmed">Овуляция по температуре</string>
     <string name="confidence_low">Низкая точность</string>
     <string name="confidence_medium">Средняя точность</string>
     <string name="confidence_high">Высокая точность</string>
@@ -25,6 +23,10 @@
     <string name="kind_other">Обычный день</string>
     <string name="day_predicted_note">Это прогноз, он может сдвинуться.</string>
     <string name="day_log_button">Записать день</string>
+    <string name="today_cycle_in_future">Записанный цикл начинается позже сегодняшней даты. Проверьте дату и время на телефоне.</string>
+    <string name="today_ovulation_confirmed">Овуляция в этом цикле подтверждена по температуре</string>
+    <string name="save_failed">Не удалось сохранить. Попробуйте ещё раз.</string>
+    <string name="ok">OK</string>
     <plurals name="today_until_period">
         <item quantity="one">До месячных %1$d день</item>
         <item quantity="few">До месячных %1$d дня</item>

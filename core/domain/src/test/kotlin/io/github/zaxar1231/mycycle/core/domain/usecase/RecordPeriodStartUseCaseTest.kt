@@ -36,6 +36,22 @@ class RecordPeriodStartUseCaseTest {
     }
 
     @Test
+    fun `a back-dated start between cycles is closed by the next one`() = runTest {
+        repo.items.value = listOf(
+            Cycle(id = 1, startDate = today.minusDays(60), periodLength = 5),
+            Cycle(id = 2, startDate = today.minusDays(5), periodLength = 5),
+        )
+
+        useCase(today.minusDays(30), periodLength = 4)
+
+        val inserted = repo.items.value.single { it.startDate == today.minusDays(30) }
+        assertEquals(today.minusDays(6), inserted.endDate)
+        assertEquals(25, inserted.cycleLength)
+        val first = repo.items.value.single { it.id == 1L }
+        assertEquals(30, first.cycleLength)
+    }
+
+    @Test
     fun `future dates are rejected`() = runTest {
         assertTrue(runCatching { useCase(today.plusDays(1), 5) }.isFailure)
         assertTrue(repo.items.value.isEmpty())

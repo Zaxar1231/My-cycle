@@ -54,6 +54,13 @@ class CompleteOnboardingUseCaseTest {
 
         assertEquals(CycleConstants.DEFAULT_CYCLE_LENGTH, settings.current.value.usualCycleLength)
         assertEquals(CycleConstants.DEFAULT_PERIOD_LENGTH, cycles.saved.single().periodLength)
+        assertTrue(settings.current.value.usualLengthsEstimated)
+    }
+
+    @Test
+    fun `known lengths are not marked as estimated`() = runTest {
+        useCase(OnboardingInput(role = UserRole.TRACKER, cycleLength = 29, periodLength = 5))
+        assertTrue(!settings.current.value.usualLengthsEstimated)
     }
 
     @Test

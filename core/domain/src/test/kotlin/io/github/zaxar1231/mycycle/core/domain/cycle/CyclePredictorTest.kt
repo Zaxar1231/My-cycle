@@ -132,6 +132,26 @@ class CyclePredictorTest {
         }
 
         @Test
+        fun `a long delay keeps every prediction in the future`() {
+            val today = day0.plusDays(45)
+            val p = predictor.predict(input(cycles(), today = today, usualCycle = 28))
+            val status = p.today!!
+            assertEquals(17, status.daysLate)
+            assertEquals(today, status.nextPeriodStart)
+            assertTrue(status.daysUntilOvulation > 0)
+            assertTrue(!status.fertileWindow.start.isBefore(today))
+            assertEquals(DayKind.PREDICTED_PERIOD, p.dayKind(today))
+            assertEquals(DayKind.LUTEAL, p.dayKind(today.minusDays(1)))
+        }
+
+        @Test
+        fun `period expected today is not late`() {
+            val status = predictor.predict(input(cycles(), today = day0.plusDays(28), usualCycle = 28)).today!!
+            assertEquals(0, status.daysLate)
+            assertEquals(0, status.daysUntilNextPeriod)
+        }
+
+        @Test
         fun `today before the first logged period has no status`() {
             assertNull(predictor.predict(input(cycles(), today = day0.minusDays(1))).today)
         }
@@ -178,6 +198,19 @@ class CyclePredictorTest {
             assertEquals(day0.plusDays(15), current.ovulation)
             assertEquals(30, current.length) // ovulation on cycle day 16, plus the luteal phase
             assertEquals(day0.plusDays(30), p.today!!.nextPeriodStart)
+            assertTrue(p.today!!.currentOvulationConfirmed)
+        }
+
+        @Test
+        fun `a rise of exactly 0_2 and 0_5 degrees counts for any baseline`() {
+            listOf(36.1, 36.2, 36.4, 36.6, 36.7).forEach { baseline ->
+                listOf(0.2, 0.5).forEach { rise ->
+                    val readings = (0 until 20).associate { d ->
+                        day0.plusDays(d.toLong()) to if (d >= 16) baseline + rise else baseline
+                    }
+                    assertEquals(day0.plusDays(15), CyclePredictor.detectTemperatureShift(day0, readings), "baseline $baseline rise $rise")
+                }
+            }
         }
 
         @Test

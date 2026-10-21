@@ -47,6 +47,7 @@ data class CyclePrediction(
 ) {
     fun segmentFor(date: LocalDate): CycleSegment? = timeline.firstOrNull { it.contains(date) }
 
+    /** Logged period days win over an estimated ovulation: what the user recorded is a fact. */
     fun dayKind(date: LocalDate): DayKind {
         val segment = segmentFor(date) ?: return DayKind.OTHER
         return when {
@@ -62,13 +63,15 @@ data class CyclePrediction(
 data class TodayStatus(
     val cycleDay: Int,
     val phase: CyclePhase,
+    /** Never in the past: while the period is late it is expected from today on. */
     val nextPeriodStart: LocalDate,
-    /** Negative when the period is late. */
     val daysUntilNextPeriod: Int,
+    /** Days past the expected start of the period, 0 when not late. */
+    val daysLate: Int,
+    /** The next ovulation that is today or later. */
     val ovulation: LocalDate,
     val daysUntilOvulation: Int,
-    val ovulationConfirmed: Boolean,
     val fertileWindow: ClosedRange<LocalDate>,
-) {
-    val daysLate: Int get() = (-daysUntilNextPeriod).coerceAtLeast(0)
-}
+    /** Ovulation in the current cycle was confirmed by a basal temperature shift. */
+    val currentOvulationConfirmed: Boolean,
+)

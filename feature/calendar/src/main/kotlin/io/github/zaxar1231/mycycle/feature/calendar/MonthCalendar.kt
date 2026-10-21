@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -42,10 +43,8 @@ import io.github.zaxar1231.mycycle.core.ui.theme.CycleColors
 import io.github.zaxar1231.mycycle.core.ui.theme.TwilightThemeExtras
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
-import java.util.Locale
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
 @Composable
@@ -60,10 +59,11 @@ fun MonthCalendar(
     onDayClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val firstDayOfWeek = remember(locale) { WeekFields.of(locale).firstDayOfWeek }
     val title = remember(month, locale) {
-        month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)).replaceFirstChar { it.titlecase(locale) }
+        val name = month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
+        "$name ${month.year}"
     }
     val colors = TwilightThemeExtras.cycleColors
 

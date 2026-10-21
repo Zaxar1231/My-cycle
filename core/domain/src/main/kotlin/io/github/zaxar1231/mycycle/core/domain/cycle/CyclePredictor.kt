@@ -57,13 +57,13 @@ class CyclePredictor @Inject constructor() {
         val periodLengths = starts.takeLast(PREDICTION_CYCLE_COUNT).map { it.periodLength }
         val periodLength = if (source == PredictionSource.HISTORY) weightedAverage(periodLengths) else input.usualPeriodLength
 
-        val timeline = buildTimeline(starts, lengths, cycleLength, periodLength, input.temperatures)
+        val timeline = buildTimeline(starts, lengths, cycleLength, periodLength, input.temperatures, input.today)
         return CyclePrediction(
             source = source,
             confidence = confidence(source, regular),
             averageCycleLength = cycleLength,
             averagePeriodLength = periodLength,
-            today = todayStatus(timeline, input.today, cycleLength),
+            today = todayStatus(timeline, input.today),
             timeline = timeline,
         )
     }
@@ -74,17 +74,20 @@ class CyclePredictor @Inject constructor() {
         cycleLength: Int,
         periodLength: Int,
         temperatures: Map<LocalDate, Double>,
+        today: LocalDate,
     ): List<CycleSegment> {
         if (starts.isEmpty()) return emptyList()
         val logged = starts.mapIndexed { index, cycle ->
             val isCurrent = index == starts.lastIndex
             val shift = if (isCurrent) detectTemperatureShift(cycle.startDate, temperatures) else null
-            val length = when {
+            val expectedLength = when {
                 !isCurrent -> lengths[index]
                 shift != null -> days(cycle.startDate, shift) + 1 + LUTEAL_PHASE_LENGTH
                 else -> cycleLength
             }
-            val ovulation = shift ?: cycle.startDate.plusDays(length - LUTEAL_PHASE_LENGTH - 1L)
+            val ovulation = shift ?: cycle.startDate.plusDays(expectedLength - LUTEAL_PHASE_LENGTH - 1L)
+            // A late period stretches the current cycle up to today, so predictions never lie in the past.
+            val length = if (isCurrent) maxOf(expectedLength, days(cycle.startDate, today)) else expectedLength
             CycleSegment(cycle.startDate, length, cycle.periodLength, ovulation, shift != null, isPredicted = false)
         }
         val future = generateSequence(logged.last().let { it.start.plusDays(it.length.toLong()) }) {
@@ -102,26 +105,24 @@ class CyclePredictor @Inject constructor() {
         return logged + future
     }
 
-    private fun todayStatus(timeline: List<CycleSegment>, today: LocalDate, cycleLength: Int): TodayStatus? {
+    private fun todayStatus(timeline: List<CycleSegment>, today: LocalDate): TodayStatus? {
         val current = timeline.lastOrNull { !it.isPredicted } ?: return null
         if (today.isBefore(current.start)) return null
         val cycleDay = days(current.start, today) + 1
         val nextPeriod = current.start.plusDays(current.length.toLong())
-        // While the period is late, the next fertile window belongs to the cycle after it.
-        val upcomingOvulation = if (today.isAfter(current.ovulation)) {
-            nextPeriod.plusDays(cycleLength - LUTEAL_PHASE_LENGTH - 1L)
-        } else {
-            current.ovulation
-        }
+        val expectedPeriod = current.ovulation.plusDays(LUTEAL_PHASE_LENGTH + 1L)
+        // Predicted cycles never start before today, so a later ovulation always exists.
+        val upcomingOvulation = timeline.first { !it.ovulation.isBefore(today) }.ovulation
         return TodayStatus(
             cycleDay = cycleDay,
             phase = phaseOf(cycleDay, current),
             nextPeriodStart = nextPeriod,
             daysUntilNextPeriod = days(today, nextPeriod),
+            daysLate = days(expectedPeriod, today).coerceAtLeast(0),
             ovulation = upcomingOvulation,
             daysUntilOvulation = days(today, upcomingOvulation),
-            ovulationConfirmed = current.ovulationConfirmed && upcomingOvulation == current.ovulation,
             fertileWindow = upcomingOvulation.minusDays(FERTILE_DAYS_BEFORE_OVULATION.toLong())..upcomingOvulation,
+            currentOvulationConfirmed = current.ovulationConfirmed,
         )
     }
 
@@ -167,12 +168,17 @@ class CyclePredictor @Inject constructor() {
                 val shift = readings.subList(i, i + BBT_SHIFT_DAYS)
                 val consecutive = shift.zipWithNext().all { (a, b) -> days(a.first, b.first) == 1 } &&
                     days(readings[i - 1].first, shift.first().first) == 1
-                val risen = shift.all { it.second - baseline in BBT_MIN_RISE_CELSIUS..BBT_MAX_RISE_CELSIUS }
+                // Compared in hundredths of a degree: 36.4 − 36.2 is 0.19999… in floating point.
+                val risen = shift.all { hundredths(it.second - baseline) in hundredths(BBT_MIN_RISE_CELSIUS)..hundredths(BBT_MAX_RISE_CELSIUS) }
                 if (consecutive && risen) return readings[i - 1].first
             }
             return null
         }
 
         private fun days(from: LocalDate, to: LocalDate) = ChronoUnit.DAYS.between(from, to).toInt()
+
+        private fun hundredths(celsius: Double) = (celsius * HUNDREDTHS).roundToInt()
+
+        private const val HUNDREDTHS = 100
     }
 }

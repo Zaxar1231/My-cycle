@@ -25,7 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.zaxar1231.mycycle.R
-import java.time.LocalDate
 import io.github.zaxar1231.mycycle.feature.calendar.CalendarRoute
 import io.github.zaxar1231.mycycle.feature.calendar.calendarScreen
 import io.github.zaxar1231.mycycle.feature.daylog.DayLogRoute
@@ -35,6 +34,7 @@ import io.github.zaxar1231.mycycle.feature.onboarding.onboardingScreen
 import io.github.zaxar1231.mycycle.feature.pet.petScreen
 import io.github.zaxar1231.mycycle.feature.settings.settingsScreen
 import io.github.zaxar1231.mycycle.feature.stats.statsScreen
+import java.time.LocalDate
 import io.github.zaxar1231.mycycle.core.ui.R as UiR
 
 @Composable
