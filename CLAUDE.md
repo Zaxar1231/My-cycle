@@ -20,7 +20,9 @@
 - `:core:ui` — тема `TwilightTheme` (Material You по умолчанию), `CycleColors` (цвета фаз берутся из темы, не хардкодятся), общие компоненты и иконки
 - `:core:update` — самообновление из GitHub Releases (`UpdateChecker`, `UpdateInstaller`, `UpdateWorker`, `Version`, UI карточки и диалога)
 - `:core:data` — Room, зашифрованный SQLCipher (пароль БД случайный, сам зашифрован ключом из Android Keystore, лежит в no-backup), DataStore для настроек, реализации репозиториев. Любое изменение схемы — новая `version` и миграция в `Migrations`, без destructive fallback
-- `:feature:*` — экраны: `onboarding`, `calendar`, `stats`, `daylog` (FAB «+»), `pet`, `settings`. Каждый модуль отдаёт `@Serializable` маршрут и `NavGraphBuilder.xxxScreen()`
+- `:core:sync` — Supabase без SDK: аккаунты (`SupabaseAccountRepository`), партнёрский режим (`partner/`: шифрование `PartnerCrypto`, формат `PartnerCodec`, `SupabasePartnerRepository`, фоновая `PartnerSync`/`PartnerWorker`). SQL для сервера — `docs/supabase/`
+- `:feature:*` — экраны: `onboarding`, `calendar`, `stats`, `insights`, `wellness`, `daylog` (FAB «+»), `pet`, `partner`, `account`, `security`, `reminders` (уведомления), `widgets` (Glance), `backup` (PDF, CSV, зашифрованная копия), `settings`. Каждый экранный модуль отдаёт `@Serializable` маршрут и `NavGraphBuilder.xxxScreen()`; разделы настроек приходят в `settings` слотами из `:app`
+- База открывается только после проверки ключа в `MainViewModel`: всё, что создаётся раньше (Application, конструкторы ViewModel), получает репозитории через `dagger.Lazy`
 - Тексты по фазам (симптомы, плюсы, минусы, советы) — `core/data/src/main/assets/phase_content/{ru,en}.json`. Правятся без изменения кода; формулировки нейтральные («у многих», «возможно»), без диагнозов
 - Общая конфигурация Android-библиотек и JVM-модулей — в корневом `build.gradle.kts`, уровни SDK — в `gradle/libs.versions.toml`
 

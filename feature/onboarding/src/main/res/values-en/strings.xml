@@ -41,9 +41,4 @@
     <string name="onb_theme_title">Appearance</string>
     <string name="onb_pin_title">PIN protection</string>
     <string name="onb_pin_text">A 4-digit PIN keeps the app private, and you can unlock it with your fingerprint or face too. You can also do this later in Settings.</string>
-    <string name="pet_cat">Kitty</string>
-    <string name="pet_fox">Fox cub</string>
-    <string name="pet_bunny">Bunny</string>
-    <string name="pet_panda">Panda</string>
-    <string name="pet_penguin">Penguin</string>
 </resources>

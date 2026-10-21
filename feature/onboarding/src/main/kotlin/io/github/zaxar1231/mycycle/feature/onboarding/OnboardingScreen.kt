@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -51,6 +52,10 @@ import io.github.zaxar1231.mycycle.core.domain.cycle.CycleConstants
 import io.github.zaxar1231.mycycle.core.domain.model.PetType
 import io.github.zaxar1231.mycycle.core.domain.model.UserRole
 import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
+import io.github.zaxar1231.mycycle.core.ui.pet.PetLook
+import io.github.zaxar1231.mycycle.core.ui.pet.PetPicture
+import io.github.zaxar1231.mycycle.core.ui.pet.nameRes
+import io.github.zaxar1231.mycycle.core.domain.pet.PetMood
 import kotlinx.serialization.Serializable
 import java.time.Instant
 import java.time.LocalDate
@@ -297,7 +302,7 @@ private fun PetStep(selected: PetType?, onPick: (PetType) -> Unit) {
             },
         ) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(pet.emoji(), style = MaterialTheme.typography.headlineMedium)
+                PetPicture(PetLook(pet, PetMood.HAPPY), stringResource(pet.nameRes()), Modifier.size(PET_PREVIEW))
                 Spacer(Modifier.width(16.dp))
                 Text(stringResource(pet.nameRes()), style = MaterialTheme.typography.titleMedium)
             }
@@ -308,22 +313,7 @@ private fun PetStep(selected: PetType?, onPick: (PetType) -> Unit) {
     }
 }
 
-private fun PetType.nameRes() = when (this) {
-    PetType.CAT -> R.string.pet_cat
-    PetType.FOX -> R.string.pet_fox
-    PetType.BUNNY -> R.string.pet_bunny
-    PetType.PANDA -> R.string.pet_panda
-    PetType.PENGUIN -> R.string.pet_penguin
-}
-
-/** Placeholder art until the real pet animations arrive in stage 10. */
-private fun PetType.emoji() = when (this) {
-    PetType.CAT -> "🐱"
-    PetType.FOX -> "🦊"
-    PetType.BUNNY -> "🐰"
-    PetType.PANDA -> "🐼"
-    PetType.PENGUIN -> "🐧"
-}
+private val PET_PREVIEW = 64.dp
 
 private fun LocalDate.toUtcMillis(): Long = atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
 
