@@ -22,8 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -55,6 +53,9 @@ import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
 import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
+import io.github.zaxar1231.mycycle.core.ui.component.TwAction
+import io.github.zaxar1231.mycycle.core.ui.component.TwPanel
+import io.github.zaxar1231.mycycle.core.ui.component.TwPill
 import io.github.zaxar1231.mycycle.core.ui.component.emoji
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import kotlinx.serialization.Serializable
@@ -263,8 +264,8 @@ private fun HomeHeader(
             )
         }
         Row(Modifier.padding(top = 8.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AssistChip(onClick = onPeriodStarted, label = { Text(stringResource(R.string.today_period_started)) })
-            AssistChip(onClick = onOpenToday, label = { Text(stringResource(R.string.day_log_button)) })
+            TwAction(stringResource(R.string.today_period_started), onPeriodStarted)
+            TwPill(stringResource(R.string.day_log_button), selected = false, onClick = onOpenToday)
         }
         Text(
             stringResource(R.string.checkin_mood_title),
@@ -274,10 +275,10 @@ private fun HomeHeader(
         )
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Mood.entries.forEach { mood ->
-                FilterChip(
+                TwPill(
+                    label = "${mood.emoji()} ${stringResource(mood.labelRes())}",
                     selected = mood in moods,
                     onClick = { onToggleMood(mood) },
-                    label = { Text("${mood.emoji()} ${stringResource(mood.labelRes())}") },
                 )
             }
         }
@@ -289,15 +290,17 @@ private fun HomeHeader(
 @Composable
 private fun WeekReview(week: WeeklyReview) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.review_title), style = MaterialTheme.typography.labelLarge, color = muted)
-        if (week.loggedDays == 0) {
-            Text(stringResource(R.string.review_empty), style = MaterialTheme.typography.bodyMedium, color = muted)
-            return
+    TwPanel(Modifier.padding(top = 8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(R.string.review_title), style = MaterialTheme.typography.labelLarge, color = muted)
+            if (week.loggedDays == 0) {
+                Text(stringResource(R.string.review_empty), style = MaterialTheme.typography.bodyMedium, color = muted)
+            } else {
+                Text(stringResource(R.string.review_logged, week.loggedDays), style = MaterialTheme.typography.bodyMedium)
+                week.topSymptom?.let { Text(stringResource(R.string.review_symptom, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
+                week.topMood?.let { Text(stringResource(R.string.review_mood, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
+            }
         }
-        Text(stringResource(R.string.review_logged, week.loggedDays), style = MaterialTheme.typography.bodyMedium)
-        week.topSymptom?.let { Text(stringResource(R.string.review_symptom, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
-        week.topMood?.let { Text(stringResource(R.string.review_mood, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
     }
 }
 
