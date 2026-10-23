@@ -6,7 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.HomeLayout
+import io.github.zaxar1231.mycycle.core.domain.model.Mood
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.repository.PhaseContentRepository
@@ -155,6 +157,26 @@ class CalendarViewModel @Inject constructor(
     fun showToday() = month.update { YearMonth.from(today.value) }
 
     fun select(day: LocalDate?) = selected.update { day }
+
+    /** Today's log, for the mood check-in in the header. */
+    val todayLog: StateFlow<DayLog?> = today.flatMapLatest { dayLogs.observe(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    /** One tap adds or removes a mood on today's log; the rest of the log stays as it is. */
+    fun toggleMood(mood: Mood) {
+        viewModelScope.launch {
+            try {
+                val day = dateProvider.today()
+                val log = dayLogs.get(day) ?: DayLog(day)
+                val moods = if (mood in log.moods) log.moods - mood else log.moods + mood
+                saveDayLog(log.copy(moods = moods), settings.settings.first().usualPeriodLength)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                saveFailed.value = true
+            }
+        }
+    }
 
     /** Goes through the day log, like the FAB form, so the mark can be undone there. */
     fun markPeriodStartedToday() {

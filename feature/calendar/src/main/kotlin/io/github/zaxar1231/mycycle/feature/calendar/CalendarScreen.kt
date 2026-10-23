@@ -3,12 +3,15 @@ package io.github.zaxar1231.mycycle.feature.calendar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.CompositionLocalProvider
 import io.github.zaxar1231.mycycle.core.domain.model.HomeBlock
+import io.github.zaxar1231.mycycle.core.domain.model.Mood
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
 import io.github.zaxar1231.mycycle.core.ui.component.LocalBlockStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +21,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -49,6 +53,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.ui.component.PhaseContentCard
 import io.github.zaxar1231.mycycle.core.ui.component.ThemePicker
+import io.github.zaxar1231.mycycle.core.ui.component.emoji
 import io.github.zaxar1231.mycycle.core.ui.component.labelRes
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -94,6 +99,7 @@ fun CalendarScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val hasPet by viewModel.hasPet.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
+    val todayLog by viewModel.todayLog.collectAsStateWithLifecycle()
     val language = LocalConfiguration.current.locales[0].language
     LaunchedEffect(language) { viewModel.setLanguage(language) }
     LifecycleResumeEffect(Unit) {
@@ -129,7 +135,7 @@ fun CalendarScreen(
             .padding(bottom = AIR),
         verticalArrangement = Arrangement.spacedBy(AIR),
     ) {
-        HomeHeader(state.today, prediction.today?.phase)
+        HomeHeader(state.today, prediction.today?.phase, todayLog?.moods.orEmpty(), viewModel::toggleMood)
         // Blocks with nothing to show yet (no current cycle) leave no empty gap.
         val hasShape = prediction.shapeOn(state.today) != null
         val visible = blocks.order.filter { block ->
@@ -221,9 +227,9 @@ fun CalendarScreen(
 
 private const val HOME_GLOW_ALPHA = 0.3f
 
-/** Today's date and phase above the cards: the first thing the home screen says. */
+/** Today's date, phase and mood check-in above the cards: the first thing the home screen says. */
 @Composable
-private fun HomeHeader(today: LocalDate, phase: CyclePhase?) {
+private fun HomeHeader(today: LocalDate, phase: CyclePhase?, moods: Set<Mood>, onToggleMood: (Mood) -> Unit) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL) }
     Column(Modifier.padding(horizontal = SIDE, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(today.format(formatter), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -233,6 +239,21 @@ private fun HomeHeader(today: LocalDate, phase: CyclePhase?) {
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Light),
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+        Text(
+            stringResource(R.string.checkin_mood_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Mood.entries.forEach { mood ->
+                FilterChip(
+                    selected = mood in moods,
+                    onClick = { onToggleMood(mood) },
+                    label = { Text("${mood.emoji()} ${stringResource(mood.labelRes())}") },
+                )
+            }
         }
     }
 }
