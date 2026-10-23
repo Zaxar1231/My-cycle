@@ -94,6 +94,7 @@ class DataStoreSettingsRepository @Inject constructor(
                 seedColor = prefs[THEME_SEED] ?: defaults.theme.seedColor,
                 font = enumOrNull<AppFont>(prefs[THEME_FONT]) ?: defaults.theme.font,
                 customFontFile = prefs[THEME_CUSTOM_FONT],
+                wallpaperFile = prefs[THEME_WALLPAPER],
             ),
             pinSuggestionDismissed = prefs[PIN_SUGGESTION_DISMISSED] ?: defaults.pinSuggestionDismissed,
             homeLayout = HomeLayoutCodec.decode(prefs[HOME_LAYOUT]),
@@ -126,6 +127,7 @@ class DataStoreSettingsRepository @Inject constructor(
         prefs[THEME_SEED] = theme.seedColor
         prefs[THEME_FONT] = theme.font.name
         theme.customFontFile?.let { prefs[THEME_CUSTOM_FONT] = it } ?: prefs.remove(THEME_CUSTOM_FONT)
+        theme.wallpaperFile?.let { prefs[THEME_WALLPAPER] = it } ?: prefs.remove(THEME_WALLPAPER)
         prefs[PIN_SUGGESTION_DISMISSED] = pinSuggestionDismissed
         prefs[USUAL_LENGTHS_ESTIMATED] = usualLengthsEstimated
         prefs[BIOMETRIC_UNLOCK] = security.biometricUnlock
@@ -150,6 +152,7 @@ class DataStoreSettingsRepository @Inject constructor(
         val THEME_SEED = intPreferencesKey("theme_seed")
         val THEME_FONT = stringPreferencesKey("theme_font")
         val THEME_CUSTOM_FONT = stringPreferencesKey("theme_custom_font")
+        val THEME_WALLPAPER = stringPreferencesKey("theme_wallpaper")
         val PIN_SUGGESTION_DISMISSED = booleanPreferencesKey("pin_suggestion_dismissed")
         val USUAL_LENGTHS_ESTIMATED = booleanPreferencesKey("usual_lengths_estimated")
         val BIOMETRIC_UNLOCK = booleanPreferencesKey("biometric_unlock")

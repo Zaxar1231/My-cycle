@@ -85,6 +85,11 @@
     <string name="font_custom_hint">A font from a file. It stays inside the app; tap “Own file…” again to change it.</string>
     <string name="font_custom_failed">Could not open the font. .ttf and .otf files up to 15 MB work.</string>
     <string name="font_custom_missing">The font file is missing, the system font is used for now. Pick the file again.</string>
+    <string name="wallpaper_title">Wallpaper</string>
+    <string name="wallpaper_pick">Pick a picture…</string>
+    <string name="wallpaper_remove">Remove wallpaper</string>
+    <string name="wallpaper_hint">A picture from your gallery behind every screen. It is copied into the app and never sent anywhere.</string>
+    <string name="wallpaper_failed">Could not open the picture. Images up to 20 MB work.</string>
     <string name="pet_name_cat">Kitty</string>
     <string name="pet_name_fox">Fox cub</string>
     <string name="pet_name_bunny">Bunny</string>

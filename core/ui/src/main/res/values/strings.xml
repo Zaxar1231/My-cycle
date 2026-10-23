@@ -85,6 +85,11 @@
     <string name="font_custom_hint">Шрифт из файла. Он хранится только внутри приложения; чтобы сменить, нажмите «Свой файл…» ещё раз.</string>
     <string name="font_custom_failed">Не удалось открыть шрифт. Подойдут файлы .ttf и .otf размером до 15 МБ.</string>
     <string name="font_custom_missing">Файл шрифта не найден, сейчас используется системный шрифт. Выберите файл заново.</string>
+    <string name="wallpaper_title">Обои</string>
+    <string name="wallpaper_pick">Выбрать картинку…</string>
+    <string name="wallpaper_remove">Убрать обои</string>
+    <string name="wallpaper_hint">Картинка из галереи за всеми экранами. Она копируется внутрь приложения и никуда не отправляется.</string>
+    <string name="wallpaper_failed">Не удалось открыть картинку. Подойдут изображения размером до 20 МБ.</string>
     <string name="pet_name_cat">Котик</string>
     <string name="pet_name_fox">Лисёнок</string>
     <string name="pet_name_bunny">Зайка</string>
