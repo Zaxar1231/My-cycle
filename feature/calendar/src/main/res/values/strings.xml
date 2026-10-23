@@ -88,6 +88,7 @@
     <string name="key_dates_note">Даты примерные: это прогноз по прошлым циклам, а не медицинская консультация и не метод контрацепции.</string>
     <string name="home_customize">Настроить главный экран</string>
     <string name="home_all_hidden">Все блоки главного экрана скрыты.</string>
+    <string name="checkin_mood_title">Как настроение сегодня?</string>
     <string name="customize_back">Назад</string>
     <string name="customize_reset">Сбросить</string>
     <string name="customize_hint">Перетащите блок за ручку (долгое нажатие) или стрелками. Нажмите на название, чтобы настроить вид, размер, углы и цвет. Переключатель скрывает блок.</string>
