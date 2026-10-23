@@ -2,6 +2,7 @@ package io.github.zaxar1231.mycycle.feature.calendar
 
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.CompositionLocalProvider
+import io.github.zaxar1231.mycycle.core.domain.insights.WeeklyReview
 import io.github.zaxar1231.mycycle.core.domain.model.HomeBlock
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
@@ -21,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -100,6 +102,7 @@ fun CalendarScreen(
     val hasPet by viewModel.hasPet.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
     val todayLog by viewModel.todayLog.collectAsStateWithLifecycle()
+    val week by viewModel.weekReview.collectAsStateWithLifecycle()
     val language = LocalConfiguration.current.locales[0].language
     LaunchedEffect(language) { viewModel.setLanguage(language) }
     LifecycleResumeEffect(Unit) {
@@ -135,7 +138,15 @@ fun CalendarScreen(
             .padding(bottom = AIR),
         verticalArrangement = Arrangement.spacedBy(AIR),
     ) {
-        HomeHeader(state.today, prediction.today?.phase, todayLog?.moods.orEmpty(), viewModel::toggleMood)
+        HomeHeader(
+            today = state.today,
+            phase = prediction.today?.phase,
+            moods = todayLog?.moods.orEmpty(),
+            week = week,
+            onToggleMood = viewModel::toggleMood,
+            onPeriodStarted = viewModel::markPeriodStartedToday,
+            onOpenToday = { onOpenDayLog(state.today) },
+        )
         // Blocks with nothing to show yet (no current cycle) leave no empty gap.
         val hasShape = prediction.shapeOn(state.today) != null
         val visible = blocks.order.filter { block ->
@@ -227,9 +238,20 @@ fun CalendarScreen(
 
 private const val HOME_GLOW_ALPHA = 0.3f
 
-/** Today's date, phase and mood check-in above the cards: the first thing the home screen says. */
+/**
+ * Today's date, phase, quick actions, mood check-in and the week so far, above the cards:
+ * the first thing the home screen says.
+ */
 @Composable
-private fun HomeHeader(today: LocalDate, phase: CyclePhase?, moods: Set<Mood>, onToggleMood: (Mood) -> Unit) {
+private fun HomeHeader(
+    today: LocalDate,
+    phase: CyclePhase?,
+    moods: Set<Mood>,
+    week: WeeklyReview,
+    onToggleMood: (Mood) -> Unit,
+    onPeriodStarted: () -> Unit,
+    onOpenToday: () -> Unit,
+) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL) }
     Column(Modifier.padding(horizontal = SIDE, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(today.format(formatter), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -239,6 +261,10 @@ private fun HomeHeader(today: LocalDate, phase: CyclePhase?, moods: Set<Mood>, o
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Light),
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+        Row(Modifier.padding(top = 8.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            AssistChip(onClick = onPeriodStarted, label = { Text(stringResource(R.string.today_period_started)) })
+            AssistChip(onClick = onOpenToday, label = { Text(stringResource(R.string.day_log_button)) })
         }
         Text(
             stringResource(R.string.checkin_mood_title),
@@ -255,6 +281,23 @@ private fun HomeHeader(today: LocalDate, phase: CyclePhase?, moods: Set<Mood>, o
                 )
             }
         }
+        WeekReview(week)
+    }
+}
+
+/** The last seven days in a line or two: how many were logged and what came up most. */
+@Composable
+private fun WeekReview(week: WeeklyReview) {
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(stringResource(R.string.review_title), style = MaterialTheme.typography.labelLarge, color = muted)
+        if (week.loggedDays == 0) {
+            Text(stringResource(R.string.review_empty), style = MaterialTheme.typography.bodyMedium, color = muted)
+            return
+        }
+        Text(stringResource(R.string.review_logged, week.loggedDays), style = MaterialTheme.typography.bodyMedium)
+        week.topSymptom?.let { Text(stringResource(R.string.review_symptom, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
+        week.topMood?.let { Text(stringResource(R.string.review_mood, stringResource(it.labelRes())), style = MaterialTheme.typography.bodyMedium) }
     }
 }
 
