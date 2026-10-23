@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import io.github.zaxar1231.mycycle.core.domain.model.HomeBlock
 import io.github.zaxar1231.mycycle.core.ui.component.BlockCard
 import io.github.zaxar1231.mycycle.core.ui.component.LocalBlockStyle
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,6 +42,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
 import io.github.zaxar1231.mycycle.core.domain.model.PhaseContent
@@ -114,13 +119,17 @@ fun CalendarScreen(
     val saved = theme
     val blocks = layout
     if (saved == null || blocks == null) return
+    // A soft glow of the primary colour from the top, so the screen has depth without a picture.
+    val glow = Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer.copy(alpha = HOME_GLOW_ALPHA), Color.Transparent))
     Column(
         modifier
             .fillMaxSize()
+            .background(glow)
             .verticalScroll(rememberScrollState())
             .padding(bottom = AIR),
         verticalArrangement = Arrangement.spacedBy(AIR),
     ) {
+        HomeHeader(state.today, prediction.today?.phase)
         // Blocks with nothing to show yet (no current cycle) leave no empty gap.
         val hasShape = prediction.shapeOn(state.today) != null
         val visible = blocks.order.filter { block ->
@@ -207,6 +216,24 @@ fun CalendarScreen(
                 onOpenDayLog(day)
             },
         )
+    }
+}
+
+private const val HOME_GLOW_ALPHA = 0.3f
+
+/** Today's date and phase above the cards: the first thing the home screen says. */
+@Composable
+private fun HomeHeader(today: LocalDate, phase: CyclePhase?) {
+    val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL) }
+    Column(Modifier.padding(horizontal = SIDE, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(today.format(formatter), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (phase != null) {
+            Text(
+                stringResource(phase.labelRes()),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Light),
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
 }
 
