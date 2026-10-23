@@ -41,6 +41,8 @@ data class ThemeSettings(
     val font: AppFont = AppFont.SYSTEM,
     /** File name of the user's own font in app storage, for [AppFont.CUSTOM]. */
     val customFontFile: String? = null,
+    /** File name of the user's picture in app storage, drawn behind every screen. Null when there is none. */
+    val wallpaperFile: String? = null,
 ) {
     companion object {
         const val DEFAULT_SEED_COLOR: Int = 0xFF8E6BBF.toInt()

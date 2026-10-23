@@ -32,6 +32,7 @@ fun TwilightTheme(
     seedColor: Int = ThemeSettings.DEFAULT_SEED_COLOR,
     font: AppFont = AppFont.SYSTEM,
     customFontFile: String? = null,
+    wallpaperFile: String? = null,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -61,10 +62,16 @@ fun TwilightTheme(
         LocalSolidBackground provides solid,
         LocalDarkTheme provides dark,
     ) {
-        MaterialTheme(colorScheme = colorScheme, typography = typography) {
+        // With a picture behind, the backgrounds turn transparent so it shows through the screens.
+        val shown = if (wallpaperFile != null) colorScheme.copy(background = Color.Transparent, surface = Color.Transparent) else colorScheme
+        MaterialTheme(colorScheme = shown, typography = typography) {
             // The same tree in every style: switching to glass must not recreate the app below.
             Box {
-                if (glass) GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
+                if (wallpaperFile != null) {
+                    WallpaperBackdrop(wallpaperFile, Modifier.matchParentSize())
+                } else if (glass) {
+                    GlassBackdrop(colorScheme, solid, Modifier.matchParentSize())
+                }
                 content()
             }
         }
@@ -86,6 +93,7 @@ fun TwilightTheme(settings: ThemeSettings, content: @Composable () -> Unit) {
         seedColor = settings.seedColor,
         font = settings.font,
         customFontFile = settings.customFontFile,
+        wallpaperFile = settings.wallpaperFile,
         content = content,
     )
 }

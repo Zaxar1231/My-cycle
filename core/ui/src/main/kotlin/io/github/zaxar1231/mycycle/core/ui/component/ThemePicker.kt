@@ -2,6 +2,7 @@ package io.github.zaxar1231.mycycle.core.ui.component
 
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import io.github.zaxar1231.mycycle.core.domain.model.ThemeSettings
 import io.github.zaxar1231.mycycle.core.domain.model.ThemeStyle
 import io.github.zaxar1231.mycycle.core.ui.R
 import io.github.zaxar1231.mycycle.core.ui.theme.CustomFonts
+import io.github.zaxar1231.mycycle.core.ui.theme.Wallpapers
 import io.github.zaxar1231.mycycle.core.ui.theme.family
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -93,6 +95,58 @@ fun ThemePicker(
 
         Text(stringResource(R.string.theme_font), style = MaterialTheme.typography.titleSmall)
         FontChips(settings, onChange)
+
+        Text(stringResource(R.string.wallpaper_title), style = MaterialTheme.typography.titleSmall)
+        WallpaperChips(settings, onChange)
+    }
+}
+
+/** Your own picture behind every screen. The photo library is opened without any permission. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WallpaperChips(settings: ThemeSettings, onChange: (ThemeSettings) -> Unit) {
+    val context = LocalContext.current
+    val appContext = context.applicationContext
+    val scope = rememberCoroutineScope()
+    var failed by rememberSaveable { mutableStateOf(false) }
+    val latestSettings by rememberUpdatedState(settings)
+    val latestOnChange by rememberUpdatedState(onChange)
+    val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            // Finishes even if the sheet closes meanwhile, so the copied picture is always saved.
+            scope.launch(NonCancellable) {
+                val name = Wallpapers.import(appContext, uri, keep = latestSettings.wallpaperFile)
+                failed = name == null
+                if (name != null) latestOnChange(latestSettings.copy(wallpaperFile = name))
+            }
+        }
+    }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(
+            selected = settings.wallpaperFile != null,
+            onClick = {
+                failed = false
+                pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            label = { Text(stringResource(R.string.wallpaper_pick)) },
+        )
+        if (settings.wallpaperFile != null) {
+            FilterChip(
+                selected = false,
+                onClick = {
+                    failed = false
+                    val old = latestSettings.wallpaperFile
+                    latestOnChange(latestSettings.copy(wallpaperFile = null))
+                    scope.launch(NonCancellable) { old?.let { Wallpapers.remove(appContext, it) } }
+                },
+                label = { Text(stringResource(R.string.wallpaper_remove)) },
+            )
+        }
+    }
+    if (failed) {
+        Text(stringResource(R.string.wallpaper_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+    } else {
+        Hint(R.string.wallpaper_hint)
     }
 }
 
