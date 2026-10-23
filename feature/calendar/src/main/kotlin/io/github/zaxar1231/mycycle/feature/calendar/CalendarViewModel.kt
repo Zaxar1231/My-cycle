@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePhase
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePrediction
 import io.github.zaxar1231.mycycle.core.domain.cycle.CyclePredictor
+import io.github.zaxar1231.mycycle.core.domain.insights.WeeklyReview
+import io.github.zaxar1231.mycycle.core.domain.insights.weeklyReview
 import io.github.zaxar1231.mycycle.core.domain.model.DayLog
 import io.github.zaxar1231.mycycle.core.domain.model.HomeLayout
 import io.github.zaxar1231.mycycle.core.domain.model.Mood
@@ -162,6 +164,11 @@ class CalendarViewModel @Inject constructor(
     val todayLog: StateFlow<DayLog?> = today.flatMapLatest { dayLogs.observe(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
+    /** The last seven days, for the review under the mood check-in. */
+    val weekReview: StateFlow<WeeklyReview> = today.flatMapLatest { day ->
+        dayLogs.observeRange(day.minusDays(WEEK_DAYS - 1), day).map { weeklyReview(it) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), WeeklyReview(0, null, null))
+
     /** One tap adds or removes a mood on today's log; the rest of the log stays as it is. */
     fun toggleMood(mood: Mood) {
         viewModelScope.launch {
@@ -198,5 +205,6 @@ class CalendarViewModel @Inject constructor(
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
+        const val WEEK_DAYS = 7L
     }
 }

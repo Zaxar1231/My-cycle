@@ -80,6 +80,11 @@
     <string name="home_customize">Customize home screen</string>
     <string name="home_all_hidden">All home screen blocks are hidden.</string>
     <string name="checkin_mood_title">How do you feel today?</string>
+    <string name="review_title">Last 7 days</string>
+    <string name="review_empty">Nothing logged this week yet</string>
+    <string name="review_logged">Logged: %1$d</string>
+    <string name="review_symptom">Most often a symptom: %1$s</string>
+    <string name="review_mood">Most often a mood: %1$s</string>
     <string name="customize_back">Back</string>
     <string name="customize_reset">Reset</string>
     <string name="customize_hint">Drag a block by its handle (long press) or use the arrows. Tap a name to set its look, size, corners and colour. The switch hides the block.</string>
